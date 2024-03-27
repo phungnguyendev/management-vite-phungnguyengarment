@@ -1,0 +1,35 @@
+[
+  {
+    "productID": 0,
+    "productCode": "GAC021254",
+    "group": "G1-4",
+    "quantityPO": 4000,
+    "dateInputNPL": "15/05/2023",
+    "dateOutputFCR": "07/07/2023",
+    "placePrintIn": "T THINH",
+    "createdAt": "15/05/2023",
+    "updatedAt": "15/05/2023"
+  },
+  {
+    "productID": 1,
+    "productCode": "GAC021255",
+    "group": "G1-4",
+    "quantityPO": 4000,
+    "dateInputNPL": "15/05/2023",
+    "dateOutputFCR": "07/07/2023",
+    "placePrintIn": "T THINH",
+    "createdAt": "15/05/2023",
+    "updatedAt": "15/05/2023"
+  },
+  {
+    "productID": 2,
+    "productCode": "GAC021255",
+    "group": "G1-4",
+    "quantityPO": 4000,
+    "dateInputNPL": "15/05/2023",
+    "dateOutputFCR": "07/07/2023",
+    "placePrintIn": "T THINH",
+    "createdAt": "15/05/2023",
+    "updatedAt": "15/05/2023"
+  }
+]
