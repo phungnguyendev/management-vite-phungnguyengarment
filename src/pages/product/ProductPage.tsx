@@ -45,6 +45,7 @@ const ProductPage: React.FC = () => {
     handleSaveClick,
     handleAddNewItem,
     handleConfirmDelete,
+    handleConfirmDeleteForever,
     handleConfirmRestore,
     handlePageChange,
     productService,
@@ -309,9 +310,13 @@ const ProductPage: React.FC = () => {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!),
               isShow: !table.showDeleted
             },
+            onDeleteForever: {
+              onClick: (_e, record) => handleConfirmDeleteForever(record!.id!),
+              isShow: table.showDeleted
+            },
             onRestore: {
               onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: false
+              isShow: table.showDeleted
             },
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),

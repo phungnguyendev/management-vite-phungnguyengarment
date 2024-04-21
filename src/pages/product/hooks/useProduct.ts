@@ -378,6 +378,31 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     }
   }
 
+  const handleConfirmDeleteForever = async (
+    id: number,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
+  ) => {
+    try {
+      setLoading(true)
+      await productService.deleteItemByPk(id, setLoading, (meta, msg) => {
+        if (meta) {
+          if (meta.success) {
+            handleConfirmDeleting(id)
+            message.success('Deleted!')
+          }
+        } else {
+          message.error(msg)
+        }
+        onDataSuccess?.(meta)
+      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleConfirmRestore = async (
     item: TableItemWithKey<ProductTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
@@ -500,6 +525,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     productColorService,
     productGroupService,
     handleConfirmDelete,
+    handleConfirmDeleteForever,
     handleConfirmRestore,
     printablePlaceService,
     selfConvertDataSource,

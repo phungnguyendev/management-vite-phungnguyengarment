@@ -21,10 +21,12 @@ export interface UseTableProps<T extends { key?: React.Key }> {
   isDelete: (key?: React.Key) => boolean
   handleStartEditing: (key: React.Key) => void
   handleStartDeleting: (key: React.Key) => void
+  handleStartDeleteForever: (key: React.Key) => void
   handleStartRestore: (key: React.Key) => void
   handleStartSaveEditing: (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
   handleStartAddNew: (item: TableItemWithKey<T>) => void
   handleConfirmDeleting: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
+  handleConfirmDeleteForever: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
   handleConfirmRestore: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
   handleConfirmCancelEditing: () => void
   handleConfirmCancelDeleting: () => void
@@ -64,11 +66,26 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setDeletingKey(key)
   }
 
+  const handleStartDeleteForever = (key: React.Key) => {
+    setDeletingKey(key)
+  }
+
   const handleStartRestore = (key: React.Key) => {
     setDeletingKey(key)
   }
 
   const handleConfirmDeleting = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
+    setLoading(true)
+    const itemFound = dataSource.find((item) => item.key === key)
+    if (itemFound) {
+      const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
+      setDataSource(dataSourceRemovedItem)
+      onDataSuccess?.(itemFound)
+    }
+    setLoading(false)
+  }
+
+  const handleConfirmDeleteForever = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -160,10 +177,12 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     handleStartDeleting,
     handleStartRestore,
     handleStartSaveEditing,
+    handleStartDeleteForever,
     handleConfirmCancelEditing,
     handleConfirmCancelDeleting,
     handleConfirmCancelRestore,
     handleConfirmDeleting,
+    handleConfirmDeleteForever,
     handleConfirmRestore,
     handleConvertDataSource
   }

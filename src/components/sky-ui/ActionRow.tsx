@@ -19,6 +19,7 @@ export interface ActionProps<T extends { key?: React.Key }> extends BaseButtonPr
   onSave?: ActionButtonProps<T>
   onEdit?: ActionButtonProps<T>
   onDelete?: ActionButtonProps<T>
+  onDeleteForever?: ActionButtonProps<T>
   onRestore?: ActionButtonProps<T>
   onConfirmDelete?: (record: T) => void
   onConfirmRestore?: (record: T) => void
@@ -34,6 +35,7 @@ export interface ActionRowProps<T extends { key?: React.Key }> extends HTMLAttri
   onSave: ActionButtonProps<T>
   onEdit: ActionButtonProps<T>
   onDelete?: ActionButtonProps<T>
+  onDeleteForever?: ActionButtonProps<T>
   onRestore?: ActionButtonProps<T>
   onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
@@ -73,7 +75,7 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
                 disabled={props.onAdd.disabled}
                 onClick={(e) => props.onAdd?.onClick?.(e)}
               >
-                {props.onAdd.title ? props.onAdd.title : 'Add'}
+                {props.onAdd.title ?? 'Add'}
               </Button>
             )}
             {props.onEdit.isShow && (
@@ -82,7 +84,7 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
                 disabled={props.onEdit.disabled}
                 onClick={props.onEdit.onClick}
               >
-                {props.onEdit.title ? props.onEdit.title : 'Edit'}
+                {props.onEdit.title ?? 'Edit'}
               </Button>
             )}
             {props.onDelete?.isShow && (
@@ -96,7 +98,7 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
                   disabled={props.onDelete.disabled}
                   onClick={props.onDelete.onClick}
                 >
-                  {props.onDelete.title ? props.onDelete.title : 'Delete'}
+                  {props.onDelete.title ?? 'Delete'}
                 </Button>
               </PopConfirm>
             )}
@@ -111,7 +113,22 @@ const ActionRow = <T extends { key?: React.Key }>({ ...props }: ActionRowProps<T
                   disabled={props.onRestore.disabled}
                   onClick={props.onRestore.onClick}
                 >
-                  {props.onRestore.title ? props.onRestore.title : 'Restore'}
+                  {props.onRestore.title ?? 'Restore'}
+                </Button>
+              </PopConfirm>
+            )}
+            {props.onDeleteForever?.isShow && (
+              <PopConfirm
+                title={`Sure to ${props.onDeleteForever.title ? props.onDeleteForever.title : 'delete forever'}?`}
+                onCancel={props.onConfirmCancelDeleting}
+                onConfirm={props.onConfirmDelete}
+              >
+                <Button
+                  type={props.onDeleteForever.type ? props.onDeleteForever.type : 'dashed'}
+                  disabled={props.onDeleteForever.disabled}
+                  onClick={props.onDeleteForever.onClick}
+                >
+                  {props.onDeleteForever.title ?? 'Delete'}
                 </Button>
               </PopConfirm>
             )}
