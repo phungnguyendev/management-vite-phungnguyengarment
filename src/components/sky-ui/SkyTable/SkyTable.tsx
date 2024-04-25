@@ -50,13 +50,13 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
             ...props.actions?.onAdd,
             onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
             disabled: props.actions?.onAdd?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onAdd ? props.actions.onAdd.isShow : false
+            isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
           }}
           onSave={{
             ...props.actions?.onSave,
             onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
             disabled: props.actions?.onSave?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onSave ? props.actions.onSave.isShow : false
+            isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
           }}
           onEdit={{
             ...props.actions?.onEdit,
@@ -65,7 +65,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               props.actions?.onEdit?.onClick?.(e, record)
             },
             disabled: props.actions?.onEdit?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onEdit ? props.actions.onEdit.isShow : false
+            isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
           }}
           onDelete={{
             ...props.actions?.onDelete,
@@ -74,7 +74,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               props.actions?.onDelete?.onClick?.(e, record)
             },
             disabled: props.actions?.onDelete?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onDelete ? props.actions.onDelete.isShow : false
+            isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
           }}
           onDeleteForever={{
             ...props.actions?.onDeleteForever,
@@ -83,7 +83,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               props.actions?.onDeleteForever?.onClick?.(e, record)
             },
             disabled: props.actions?.onDeleteForever?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onDeleteForever ? props.actions.onDeleteForever.isShow : false
+            isShow: props.actions?.onDeleteForever ? props.actions.onDeleteForever.isShow ?? true : false
           }}
           onRestore={{
             ...props.actions?.onRestore,
@@ -92,7 +92,7 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
               props.actions?.onRestore?.onClick?.(e, record)
             },
             disabled: props.actions?.onRestore?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onRestore ? props.actions.onRestore.isShow : false
+            isShow: props.actions?.onRestore ? props.actions.onRestore.isShow ?? true : false
           }}
           onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}
           onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}

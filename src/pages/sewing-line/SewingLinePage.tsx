@@ -99,7 +99,8 @@ const SewingLinePage: React.FC<Props> = () => {
               isShow: !table.showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord)
+              onClick: (_e, record) => handleSaveClick(record!, newRecord),
+              isShow: true
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!),

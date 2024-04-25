@@ -307,13 +307,16 @@ const UserPage = () => {
               onClick: (_e, record) => {
                 setNewRecord({ ...record })
                 table.handleStartEditing(record!.key!)
-              }
+              },
+              isShow: true
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              onClick: (_e, record) => handleSaveClick(record!),
+              isShow: true
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
+              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
+              isShow: true
             },
             onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
             onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),

@@ -515,7 +515,8 @@ const FinishPage: React.FC<Props> = () => {
               isShow: !table.showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              onClick: (_e, record) => handleSaveClick(record!),
+              isShow: true
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!),
