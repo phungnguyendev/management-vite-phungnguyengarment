@@ -4,34 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'colors'
 
 export default {
-  createNewItem: async (item: Color, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: Color, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          name: item.name,
-          hexColor: item.hexColor,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -60,12 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -77,19 +53,17 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: Color, accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (
+    id: number,
+    itemToUpdate: Color,
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -97,26 +71,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: Color,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: Color[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}`, itemsToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })

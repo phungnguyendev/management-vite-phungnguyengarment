@@ -1,73 +1,46 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
-import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
-import React, { HTMLAttributes, useEffect, useState } from 'react'
+import { App as AntApp, Button, Flex, Form, Input } from 'antd'
+import React, { HTMLAttributes, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ResponseDataType } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
-import logo from '~/assets/logo.svg'
 import useTitle from '~/components/hooks/useTitle'
-import useLocalStorage from '~/hooks/useLocalStorage'
-import { User } from '~/typing'
+import AuthLayout from '~/components/layout/AuthLayout'
+import useAuthService from '~/hooks/useAuthService'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
 type LayoutType = Parameters<typeof Form>[0]['layout']
 
-const LoginPage: React.FC<Props> = ({ ...props }) => {
+const LoginPage: React.FC<Props> = () => {
   const [form] = Form.useForm()
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
-  const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
-  const [emailStored, setEmailStored] = useLocalStorage('email-stored', '')
-  const [otpStored, setOtpStored] = useLocalStorage('otp-stored', '')
   const [loading, setLoading] = useState<boolean>(false)
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
+  const authService = useAuthService(AuthAPI)
+  const [user, setUser] = useState<{ email?: string; password?: string }>({})
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
-  useTitle('Đăng nhập')
-
-  useEffect(() => {
-    if (emailStored || otpStored) {
-      setEmailStored(null)
-      setOtpStored(null)
-    }
-  }, [emailStored, otpStored])
-
-  useEffect(() => {
-    if (accessTokenStored && accessTokenStored.length !== 0) {
-      navigate('/')
-    }
-  }, [accessTokenStored])
+  useTitle('Login')
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
     setFormLayout(layout)
   }
 
-  const onFinish = async (user: { email: string; password: string }) => {
+  const handleFinish = async (user: { email: string; password: string }) => {
     try {
       setLoading(true)
       // Create a new request to login user
-      await AuthAPI.login(user).then((meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
-        const userLogged = meta.data as User
-        if (userLogged) {
-          // Save to local storage
-          setAccessTokenStored(userLogged.accessToken)
-        }
-        // Send message app
+      await authService.login(user.email, user.password, setLoading).then(() => {
         message.success('Success!')
-        // Navigation to '/' (Dashboard page) if login success
         navigate('/')
       })
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error}`)
     } finally {
       setLoading(false)
     }
   }
 
-  const onFinishFailed = (errorInfo: any) => {
+  const handleFinishFailure = (errorInfo: any) => {
     console.log('Failed:', errorInfo)
   }
 
@@ -87,27 +60,12 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
       : null
 
   const forgerPasswordHandler = () => {
-    navigate('/verify-email')
+    navigate('/reset-password')
   }
 
   return (
-    <Flex {...props} className='relative bg-background' align='center' justify='center'>
-      <Flex
-        vertical
-        gap={30}
-        align='center'
-        className='fixed top-1/2 h-fit w-fit -translate-y-1/2 rounded-lg bg-white p-10 shadow-lg sm:w-[400px]'
-      >
-        <Flex vertical align='center' className='relative h-fit w-full' justify='center'>
-          <img src={logo} alt='logo' className='h-24 w-24 object-contain' />
-          <Flex vertical align='center'>
-            <Typography.Title className='text-center' level={3}>
-              Welcome to PHUNG NGUYEN
-            </Typography.Title>
-            <Typography.Text type='secondary'>Please login to your account</Typography.Text>
-          </Flex>
-        </Flex>
-
+    <>
+      <AuthLayout title='Welcome to PHUNG NGUYEN' subTitle='Please login to your account!'>
         <Form
           form={form}
           {...formItemLayout}
@@ -117,12 +75,12 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
           labelAlign='left'
           initialValues={{ layout: formLayout }}
           onValuesChange={onFormLayoutChange}
-          onFinish={onFinish}
+          onFinish={handleFinish}
           className='w-full'
-          onFinishFailed={onFinishFailed}
+          onFinishFailed={handleFinishFailure}
           autoComplete='off'
         >
-          <Flex className='w-full' vertical gap={20}>
+          <Flex className='w-full' vertical gap={40}>
             <Flex className='w-full' vertical gap={16}>
               <Form.Item
                 label='Email'
@@ -136,8 +94,8 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                   placeholder='Email'
                   className='w-full'
                   type='email'
-                  onChange={(e) => setEmail(e.target.value)}
-                  value={email}
+                  onChange={(e) => setUser({ ...user, email: e.target.value })}
+                  value={user.email}
                   allowClear
                 />
               </Form.Item>
@@ -152,8 +110,8 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                   placeholder='Password'
                   className='w-full'
                   type='password'
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
+                  onChange={(e) => setUser({ ...user, password: e.target.value })}
+                  value={user.password}
                   allowClear
                   iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 />
@@ -167,14 +125,14 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
             </Form.Item>
 
             <Flex className='w-full' justify='center' align='end'>
-              <Button className='w-fit' onClick={forgerPasswordHandler} type='link' loading={loading}>
+              <Button className='w-fit' onClick={forgerPasswordHandler} type='link'>
                 Forget password?
               </Button>
             </Flex>
           </Flex>
         </Form>
-      </Flex>
-    </Flex>
+      </AuthLayout>
+    </>
   )
 }
 

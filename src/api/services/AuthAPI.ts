@@ -1,13 +1,12 @@
 import client, { ResponseDataType } from '~/api/client'
-import { User } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
-const NAMESPACE = 'users'
+const NAMESPACE = 'auth'
 
 export default {
-  login: async (user: User): Promise<ResponseDataType | undefined> => {
+  login: async (email: string, password: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}/auth/login`, user)
+      .post(`${NAMESPACE}/login`, { email, password })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -15,9 +14,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  sendEmail: async (emailToSend: string): Promise<ResponseDataType | undefined> => {
+  userInfoFromAccessToken: async (accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}/auth/send-email/${emailToSend}`)
+      .get(`${NAMESPACE}/user-info`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -25,13 +28,37 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  verifyOTP: async (user: { email: string; otp: string }): Promise<ResponseDataType | undefined> => {
+  verifyEmailAndSendOTP: async (emailToVerify: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}/auth/verify-otp/${user.email}`, { otp: user.otp })
+      .post(`${NAMESPACE}/verify-email/${emailToVerify}`)
       .then((res) => {
         return responseFormatter(res)
       })
       .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  verifyOTPCode: async (emailToVerify: string, otp: string): Promise<ResponseDataType> => {
+    return await client
+      .post(`${NAMESPACE}/verify-otp/${emailToVerify}`, otp)
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  logout: async (refreshToken: string): Promise<ResponseDataType> => {
+    return await client
+      .post(`${NAMESPACE}/logout`, {
+        refreshToken: refreshToken
+      })
+      .then((res) => {
+        console.log(res)
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        console.log(error)
         throwErrorFormatter(error)
       })
   }

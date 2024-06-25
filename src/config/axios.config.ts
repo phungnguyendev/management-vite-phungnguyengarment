@@ -3,7 +3,7 @@ import appConfig from './app.config'
 
 const axiosConfig: CreateAxiosDefaults = {
   baseURL: appConfig.baseURL,
-  timeout: 10000
+  timeout: 100000
 }
 
 export default axiosConfig

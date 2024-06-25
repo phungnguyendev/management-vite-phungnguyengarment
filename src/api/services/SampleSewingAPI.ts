@@ -4,13 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'sample-sewings'
 
 export default {
-  createNewItem: async (item: SampleSewing, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: SampleSewing, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -39,36 +39,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
       })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
       .then((res) => {
         return responseFormatter(res)
       })
@@ -94,16 +71,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    itemToUpdate: SampleSewing,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: SampleSewing[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, itemToUpdate, {
+      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

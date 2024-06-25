@@ -1,6 +1,5 @@
 import { Col, ColProps, Flex, Row, Statistic, Typography } from 'antd'
 import React, { HTMLAttributes, useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
 import UserAPI from '~/api/services/UserAPI'
 import useAPIService from '~/hooks/useAPIService'
@@ -30,9 +29,8 @@ const StatisticSlide: React.FC<Props> = ({ ...props }) => {
 
   const loadData = async () => {
     try {
-      await productService.getListItems(
+      await productService.getItemsSync(
         {
-          ...defaultRequestBody,
           paginator: { page: 1, pageSize: -1 }
         },
         setLoading,
@@ -45,9 +43,8 @@ const StatisticSlide: React.FC<Props> = ({ ...props }) => {
         }
       )
 
-      await productService.getListItems(
+      await productService.getItemsSync(
         {
-          ...defaultRequestBody,
           filter: { status: 'deleted', items: [-1] },
           paginator: { page: 1, pageSize: -1 }
         },
@@ -61,9 +58,8 @@ const StatisticSlide: React.FC<Props> = ({ ...props }) => {
         }
       )
 
-      await userService.getListItems(
+      await userService.getItemsSync(
         {
-          ...defaultRequestBody,
           paginator: { page: 1, pageSize: -1 }
         },
         setLoading,

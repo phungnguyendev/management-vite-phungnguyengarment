@@ -1,7 +1,7 @@
 import { PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface ProductTableDataType extends Product {
-  key?: React.Key
+  key: string
   productColor?: ProductColor
   productGroup?: ProductGroup
   printablePlace?: PrintablePlace

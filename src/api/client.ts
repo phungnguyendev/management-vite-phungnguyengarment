@@ -39,23 +39,6 @@ export type RequestBodyType = {
   }
 }
 
-export const defaultRequestBody: RequestBodyType = {
-  filter: {
-    items: [-1],
-    field: '',
-    status: 'active'
-  },
-  paginator: { page: 1, pageSize: 5 },
-  search: {
-    field: 'id',
-    term: ''
-  },
-  sorting: {
-    column: 'id', // id
-    direction: 'desc' // direction: asc|desc sắp xếp trước sau
-  }
-}
-
 const client: AxiosInstance = axios.create(axiosConfig)
 
 export default client

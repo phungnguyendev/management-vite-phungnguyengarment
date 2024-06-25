@@ -4,13 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'product-groups'
 
 export default {
-  createNewItem: async (item: ProductGroup, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: ProductGroup, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -39,36 +39,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
       })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
       .then((res) => {
         return responseFormatter(res)
       })
@@ -78,11 +55,11 @@ export default {
   },
   updateItemByPk: async (
     id: number,
-    item: ProductGroup,
+    itemToUpdate: ProductGroup,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, item, {
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -94,84 +71,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: ProductGroup,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: ProductGroup[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}`, itemsToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
-      .then((res) => {
-        return responseFormatter(res)
       })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (
-    id: number,
-    item: ProductGroup,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${id}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: ProductGroup,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
-        query.field === 'productID'
-          ? {
-              groupID: item.groupID,
-              status: item.status ?? 'active'
-            }
-          : {
-              productID: item.productID,
-              status: item.status ?? 'active'
-            },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
       .then((res) => {
         return responseFormatter(res)
       })

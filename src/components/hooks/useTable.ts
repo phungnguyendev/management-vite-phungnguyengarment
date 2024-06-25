@@ -1,80 +1,65 @@
-import React, { useState } from 'react'
-import { ResponseDataType } from '~/api/client'
+import { DragEndEvent } from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
+import { useState } from 'react'
 
-export type TableItemWithKey<T> = T & { key?: React.Key }
-export type TableItemWithId<T> = T & { id?: number }
-
-export interface UseTableProps<T extends { key?: React.Key }> {
-  loading: boolean
-  setLoading: (state: boolean) => void
-  scrollIndex: number
-  setScrollIndex: (index: number) => void
-  editingKey: React.Key
-  setEditingKey: (key: React.Key) => void
-  setDeletingKey: (key: React.Key) => void
-  deletingKey: React.Key
-  showDeleted: boolean
-  setDeletedRecordState: (enable: boolean) => void
-  dataSource: TableItemWithKey<T>[]
-  setDataSource: (newDataSource: TableItemWithKey<T>[]) => void
-  isEditing: (key?: React.Key) => boolean
-  isDelete: (key?: React.Key) => boolean
-  handleStartEditing: (key: React.Key) => void
-  handleStartDeleting: (key: React.Key) => void
-  handleStartDeleteForever: (key: React.Key) => void
-  handleStartRestore: (key: React.Key) => void
-  handleStartSaveEditing: (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
-  handleStartAddNew: (item: TableItemWithKey<T>) => void
-  handleConfirmDeleting: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
-  handleConfirmDeleteForever: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
-  handleConfirmRestore: (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
-  handleConfirmCancelEditing: () => void
-  handleConfirmCancelDeleting: () => void
-  handleConfirmCancelRestore: () => void
-  handleConvertDataSource: (meta: ResponseDataType) => void
+type RequiredDataType = {
+  key?: string
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number | null
 }
 
-export default function useTable<T extends { key?: React.Key }>(initValue: TableItemWithKey<T>[]): UseTableProps<T> {
+interface Props<T extends RequiredDataType> {
+  loading: boolean
+  dataSource: T[]
+  scrollIndex: number
+  editingKey: string
+  deletingKey: string
+  showDeleted: boolean
+  setLoading: (state: boolean) => void
+  setScrollIndex: (index: number) => void
+  setEditingKey: (key: string) => void
+  setDeletingKey: (key: string) => void
+  setDeletedRecordState: (enable: boolean) => void
+  setDataSource: (newDataSource: T[]) => void
+  isEditing: (key: string) => boolean
+  isDelete: (key: string) => boolean
+  handleStartEditing: (key: string) => void
+  handleStartDeleting: (key: string) => void
+  handleStartRestore: (key: string) => void
+  handleEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
+  handleAddNew: (item: T) => void
+  handleDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleCancelEditing: () => void
+  handleCancelDeleting: () => void
+  handleCancelRestore: () => void
+  handleDraggableEnd: (event: DragEndEvent, onSuccess?: (newDataSource: T[]) => void) => void
+}
+
+export default function useTable<T extends RequiredDataType>(initValue: T[]): Props<T> {
   const [scrollIndex, setScrollIndex] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
-  const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
-  const [editingKey, setEditingKey] = useState<React.Key>('')
-  const [deletingKey, setDeletingKey] = useState<React.Key>('')
+  const [dataSource, setDataSource] = useState<T[]>(initValue)
+  const [editingKey, setEditingKey] = useState<string>('')
+  const [deletingKey, setDeletingKey] = useState<string>('')
   const [showDeleted, setDeletedRecordState] = useState<boolean>(false)
-  const isEditing = (key?: React.Key) => key === editingKey
-  const isDelete = (key?: React.Key) => key === deletingKey
+  const isEditing = (key: string) => key === editingKey
+  const isDelete = (key: string) => key === deletingKey
 
-  const handleConvertDataSource = (meta: ResponseDataType) => {
-    setLoading(true)
-    const items = meta.data as TableItemWithId<T>[]
-    setDataSource(
-      items.map((item: TableItemWithId<T>) => {
-        return {
-          ...item,
-          key: item.id
-        } as TableItemWithKey<T>
-      })
-    )
-    setLoading(false)
-  }
-
-  const handleStartEditing = (key: React.Key) => {
+  const handleStartEditing = (key: string) => {
     setEditingKey(key)
   }
 
-  const handleStartDeleting = (key: React.Key) => {
+  const handleStartDeleting = (key: string) => {
     setDeletingKey(key)
   }
 
-  const handleStartDeleteForever = (key: React.Key) => {
+  const handleStartRestore = (key: string) => {
     setDeletingKey(key)
   }
 
-  const handleStartRestore = (key: React.Key) => {
-    setDeletingKey(key)
-  }
-
-  const handleConfirmDeleting = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
+  const handleDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -85,7 +70,7 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setLoading(false)
   }
 
-  const handleConfirmDeleteForever = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
+  const handleRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -96,30 +81,19 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setLoading(false)
   }
 
-  const handleConfirmRestore = (key: React.Key, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
-    setLoading(true)
-    const itemFound = dataSource.find((item) => item.key === key)
-    if (itemFound) {
-      const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
-      setDataSource(dataSourceRemovedItem)
-      onDataSuccess?.(itemFound)
-    }
-    setLoading(false)
-  }
-
-  const handleConfirmCancelEditing = () => {
+  const handleCancelEditing = () => {
     setEditingKey('')
   }
 
-  const handleConfirmCancelDeleting = () => {
+  const handleCancelDeleting = () => {
     setDeletingKey('')
   }
 
-  const handleConfirmCancelRestore = () => {
+  const handleCancelRestore = () => {
     setDeletingKey('')
   }
 
-  const handleStartSaveEditing = async (key: React.Key, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
+  const handleEditing = async (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
     try {
       setLoading(true)
       const newData = [...dataSource]
@@ -148,13 +122,23 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     }
   }
 
-  const handleStartAddNew = (item: TableItemWithKey<T>) => {
+  const handleAddNew = (item: T) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
       key: item.key
-    } as TableItemWithKey<T>)
+    } as T)
     setDataSource(newDataSource)
+  }
+
+  const handleDraggableEnd = ({ active, over }: DragEndEvent, onFinish?: (newData: T[]) => void) => {
+    if (active.id !== over?.id) {
+      const activeIndex = dataSource.findIndex((i) => i.key === active.id)
+      const overIndex = dataSource.findIndex((i) => i.key === over?.id)
+      const newData = arrayMove(dataSource, activeIndex, overIndex)
+      setDataSource(newData)
+      onFinish?.(newData)
+    }
   }
 
   return {
@@ -172,18 +156,16 @@ export default function useTable<T extends { key?: React.Key }>(initValue: Table
     setScrollIndex,
     dataSource,
     setDataSource,
-    handleStartAddNew,
+    handleAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartRestore,
-    handleStartSaveEditing,
-    handleStartDeleteForever,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
-    handleConfirmCancelRestore,
-    handleConfirmDeleting,
-    handleConfirmDeleteForever,
-    handleConfirmRestore,
-    handleConvertDataSource
+    handleEditing,
+    handleCancelEditing,
+    handleCancelDeleting,
+    handleCancelRestore,
+    handleDeleting,
+    handleRestore,
+    handleDraggableEnd
   }
 }

@@ -94,12 +94,11 @@ export interface User {
   password?: string | null
   avatar?: string | null
   phone?: string | null
-  otp?: string | null
-  appPassword?: string | null
-  accessToken?: string | null
+  otp?: string | null | null
+  isAdmin?: boolean | null
   workDescription?: string | null
   birthday?: string | null
-  status?: ItemStatusType | null
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
@@ -110,12 +109,6 @@ export interface Product {
   quantityPO?: number | null
   dateInputNPL?: string | null
   dateOutputFCR?: string | null
-  progress?: {
-    sewing?: number | null
-    iron?: number | null
-    check?: number | null
-    pack?: number | null
-  }
   status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string

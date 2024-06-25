@@ -1,8 +1,6 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
-import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Importation, Product } from '~/typing'

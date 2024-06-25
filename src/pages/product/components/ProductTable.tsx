@@ -19,7 +19,7 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import useProduct from '../hooks/useProduct'
+import useProduct from '../hooks/useProductViewModel'
 import { ProductTableDataType } from '../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
 import ProductProgressStatus from './ProductProgressStatus'

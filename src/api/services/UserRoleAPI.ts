@@ -4,13 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'user-roles'
 
 export default {
-  createNewItem: async (item: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -18,20 +18,6 @@ export default {
           }
         }
       )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createNewItems: async (items: UserRole[], accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/items`, items, {
-        headers: {
-          authorization: accessToken
-        }
-      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -53,46 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
   getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItemByPk: async (id: number, item: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}/${id}`, item, {
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -104,16 +53,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: UserRole,
+  updateItemByPk: async (
+    id: number,
+    itemToUpdate: UserRole,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, item, {
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -125,45 +71,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemsBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    recordsToUpdate: UserRole[],
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: UserRole[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${NAMESPACE}/updateItems/${query.field}/${query.key}`, recordsToUpdate, {
+      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }
       })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateIDsBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    roleIDs: number[],
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .post(
-        `${NAMESPACE}/updateItems/${query.field}/${query.key}`,
-        { roleIDs: roleIDs },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
       .then((res) => {
         return responseFormatter(res)
       })

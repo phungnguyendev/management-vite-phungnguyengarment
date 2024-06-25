@@ -1,10 +1,12 @@
 import { CaretDownOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
+import { App as AntApp, Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
 import { Bell, Menu } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import AuthAPI from '~/api/services/AuthAPI'
+import useAuthService from '~/hooks/useAuthService'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import ProfileDialog from '~/pages/user/components/profiles/ProfileDialog'
 import { RootState } from '~/store/store'
@@ -18,11 +20,15 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 }
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
+  const { message } = AntApp.useApp()
   const [openProfile, setOpenProfile] = useState<boolean>(false)
-  const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')
+  const [, setAccessTokenStored] = useLocalStorage('accessToken', '')
+  const [refreshTokenStored, setRefreshTokenStored] = useLocalStorage('refreshToken', '')
   const [isHidden, setIsHidden] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false)
   const [offsetY, setOffsetY] = useState<number>(0)
   const navigate = useNavigate()
+  const authService = useAuthService(AuthAPI)
   const currentUser = useSelector((state: RootState) => state.user)
 
   // Saving last scroll position
@@ -59,9 +65,24 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
     {
       label: 'Log out',
       key: '3',
-      onClick: () => {
-        setAccessTokenStored(null)
-        navigate('/login')
+      onClick: async () => {
+        try {
+          if (refreshTokenStored) {
+            await authService
+              .logout(refreshTokenStored, setLoading)
+              .then(() => {
+                setAccessTokenStored(null)
+                setRefreshTokenStored(null)
+                navigate('/login')
+              })
+              .catch((error: any) => {
+                message.error(`${error.message}`)
+              })
+          }
+        } catch (error: any) {
+          message.error(`${error.message}`)
+        }
+        // navigate('/login')
       }
     }
   ]
@@ -97,7 +118,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
                   <Button type='link' className='' onClick={(e) => e.preventDefault()}>
                     <Flex gap={4} justify='center' className='h-full text-foreground'>
                       <Typography.Text className='m-0'>
-                        {extractEmailName(currentUser.user.email ?? '')}
+                        {extractEmailName(currentUser.user?.email ?? '')}
                       </Typography.Text>
                       <CaretDownOutlined />
                     </Flex>

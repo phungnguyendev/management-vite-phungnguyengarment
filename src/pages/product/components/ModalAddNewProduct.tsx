@@ -1,10 +1,9 @@
-import { Flex, Form, Modal, Spin } from 'antd'
+import { Flex, Form, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
@@ -20,77 +19,51 @@ export interface ProductAddNewProps {
   dateOutputFCR?: string | null
 }
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  loading: boolean
-  setOpenModal: (enable: boolean) => void
-  setLoading: (enable: boolean) => void
-  onAddNew: (recordToAddNew: ProductAddNewProps) => void
+interface Props extends SkyModalProps {
+  onAddNew: (recordToAddNew: ProductAddNewProps, setLoading?: (enable: boolean) => void) => void
 }
 
-const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal, setLoading, onAddNew, ...props }) => {
+const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
+  const [loading, setLoading] = useState<boolean>(false)
   const colorService = useAPIService<Color>(ColorAPI)
   const groupService = useAPIService<Group>(GroupAPI)
   const printService = useAPIService<Print>(PrintAPI)
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
-  console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    const loadData = async () => {
-      await colorService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setColors(meta.data as Color[])
-          }
-        }
-      )
-      await groupService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setGroups(meta.data as Group[])
-          }
-        }
-      )
-      await printService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setPrints(meta.data as Print[])
-          }
-        }
-      )
-    }
     loadData()
   }, [])
+
+  const loadData = async () => {
+    await colorService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setColors(meta.data as Color[])
+      }
+    })
+    await groupService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setGroups(meta.data as Group[])
+      }
+    })
+    await printService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setPrints(meta.data as Print[])
+      }
+    })
+  }
 
   async function handleOk() {
     const row = await form.validateFields()
     onAddNew(row)
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      centered
-      width='auto'
-      onCancel={handleCancel}
-    >
+    <SkyModal {...props} title='Add new' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
-        <Form labelCol={{ span: 8 }} labelAlign='left' labelWrap form={form} {...props}>
+        <Form labelCol={{ span: 8 }} labelAlign='left' labelWrap form={form}>
           <Flex vertical gap={20} className='w-full sm:w-[400px]'>
             <EditableFormCell
               isEditing={true}
@@ -177,7 +150,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal,
           </Flex>
         </Form>
       </Spin>
-    </Modal>
+    </SkyModal>
   )
 }
 

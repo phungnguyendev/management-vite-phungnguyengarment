@@ -1,44 +1,43 @@
+import type { DragCancelEvent, DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
+import { DndContext } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import type { TableProps } from 'antd'
 import { Table } from 'antd'
-import type { ColumnsType, TableProps } from 'antd/es/table'
-import { ColumnType } from 'antd/lib/table'
-import { useEffect, useRef, useState } from 'react'
-import { ResponseDataType, defaultRequestBody } from '~/api/client'
-import { cn } from '~/utils/helpers'
+import { ColumnType, ColumnsType } from 'antd/es/table'
+import { useState } from 'react'
 import ActionRow, { ActionProps } from '../ActionRow'
+import SkyTableRow from './SkyTableRow'
 
-export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
-  extends TableProps<T> {
-  metaData: ResponseDataType | undefined
-  onPageChange?: (page: number, pageSize: number) => void
-  isShowDeleted?: boolean
-  editingKey: React.Key
-  deletingKey: React.Key
-  actions?: ActionProps<T>
-  scrollTo?: number
-  pageSize?: number
+export type SkyTableRequiredDataType = {
+  key: string
+  id?: number
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number | null
 }
 
-const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
-  ...props
-}: SkyTableProps<T>) => {
-  const tblRef: Parameters<typeof Table>[0]['ref'] = useRef(null)
-  const [editKey, setEditKey] = useState<React.Key>('-1')
-  // const [deleteKey, setDeleteKey] = useState<React.Key>('-1')
-  const isEditing = (key?: React.Key): boolean => {
+export interface SkyTableProps<T extends SkyTableRequiredDataType> extends TableProps {
+  dataSource: T[]
+  onPageChange?: (page: number, pageSize: number) => void
+  actionProps?: ActionProps<T>
+  isShowDeleted?: boolean
+  editingKey?: string
+  deletingKey?: string
+  onDragStart?(event: DragStartEvent): void
+  onDragMove?(event: DragMoveEvent): void
+  onDragOver?(event: DragOverEvent): void
+  onDragEnd?(event: DragEndEvent): void
+  onDragCancel?(event: DragCancelEvent): void
+}
+
+const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProps<T>) => {
+  const [editKey, setEditKey] = useState<string>('-1')
+  const isEditing = (key: string): boolean => {
     return props.editingKey === key
   }
 
-  // const isDeleting = (key?: React.Key): boolean => {
-  //   return props.deletingKey === key
-  // }
-
-  useEffect(() => {
-    if (props.scrollTo) {
-      tblRef.current?.scrollTo({ index: props.scrollTo })
-    }
-  }, [props.scrollTo])
-
-  const actionsCols: ColumnType<T> = {
+  const actionsCol: ColumnType<T> = {
     title: 'Operation',
     width: '1%',
     dataIndex: 'operation',
@@ -47,97 +46,78 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
         <ActionRow
           isEditing={isEditing(record.key)}
           onAdd={{
-            ...props.actions?.onAdd,
-            onClick: (e) => props.actions?.onAdd?.onClick?.(e, record),
-            disabled: props.actions?.onAdd?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onAdd ? props.actions.onAdd.isShow ?? true : false
+            ...props.actionProps?.onAdd,
+            onClick: (e) => props.actionProps?.onAdd?.onClick?.(e, record),
+            disabled: props.actionProps?.onAdd?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onAdd ? props.actionProps.onAdd.isShow ?? true : false
           }}
           onSave={{
-            ...props.actions?.onSave,
-            onClick: (e) => props.actions?.onSave?.onClick?.(e, record),
-            disabled: props.actions?.onSave?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onSave ? props.actions.onSave.isShow ?? true : false
+            ...props.actionProps?.onSave,
+            onClick: (e) => props.actionProps?.onSave?.onClick?.(e, record),
+            disabled: props.actionProps?.onSave?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onSave ? props.actionProps.onSave.isShow ?? true : false
           }}
           onEdit={{
-            ...props.actions?.onEdit,
+            ...props.actionProps?.onEdit,
             onClick: (e) => {
               setEditKey(record.key!)
-              props.actions?.onEdit?.onClick?.(e, record)
+              props.actionProps?.onEdit?.onClick?.(e, record)
             },
-            disabled: props.actions?.onEdit?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onEdit ? props.actions.onEdit.isShow ?? true : false
+            disabled: props.actionProps?.onEdit?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onEdit ? props.actionProps.onEdit.isShow ?? true : false
           }}
           onDelete={{
-            ...props.actions?.onDelete,
+            ...props.actionProps?.onDelete,
             onClick: (e) => {
               // setDeleteKey(record.key!)
-              props.actions?.onDelete?.onClick?.(e, record)
+              props.actionProps?.onDelete?.onClick?.(e, record)
             },
-            disabled: props.actions?.onDelete?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onDelete ? props.actions.onDelete.isShow ?? true : false
-          }}
-          onDeleteForever={{
-            ...props.actions?.onDeleteForever,
-            onClick: (e) => {
-              // setDeleteKey(record.key!)
-              props.actions?.onDeleteForever?.onClick?.(e, record)
-            },
-            disabled: props.actions?.onDeleteForever?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onDeleteForever ? props.actions.onDeleteForever.isShow ?? true : false
+            disabled: props.actionProps?.onDelete?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onDelete ? props.actionProps.onDelete.isShow ?? true : false
           }}
           onRestore={{
-            ...props.actions?.onRestore,
+            ...props.actionProps?.onRestore,
             onClick: (e) => {
               // setDeleteKey(record.key!)
-              props.actions?.onRestore?.onClick?.(e, record)
+              props.actionProps?.onRestore?.onClick?.(e, record)
             },
-            disabled: props.actions?.onRestore?.disabled ?? isEditing(editKey),
-            isShow: props.actions?.onRestore ? props.actions.onRestore.isShow ?? true : false
+            disabled: props.actionProps?.onRestore?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onRestore ? props.actionProps.onRestore.isShow ?? true : false
           }}
-          onConfirmCancelEditing={(e) => props.actions?.onConfirmCancelEditing?.(e)}
-          onConfirmCancelDeleting={props.actions?.onConfirmCancelDeleting}
-          onConfirmDelete={() => props.actions?.onConfirmDelete?.(record)}
-          onConfirmRestore={() => props.actions?.onConfirmRestore?.(record)}
+          onConfirmCancelEditing={(e) => props.actionProps?.onConfirmCancelEditing?.(e)}
+          onConfirmCancelDeleting={props.actionProps?.onConfirmCancelDeleting}
+          onConfirmDelete={() => props.actionProps?.onConfirmDelete?.(record)}
+          onConfirmRestore={() => props.actionProps?.onConfirmRestore?.(record)}
         />
       )
     }
   }
 
-  const columns: ColumnsType<T> = props.columns
-    ? props.actions?.isShow
-      ? props.isShowDeleted
-        ? [...props.columns, actionsCols]
-        : [...props.columns, actionsCols]
-      : props.isShowDeleted
-        ? [...props.columns]
-        : [...props.columns]
-    : []
+  const getColumn = (showAction: boolean): ColumnsType<T> => {
+    return showAction ? [...props.columns!, actionsCol] : [...props.columns!]
+  }
 
   return (
-    <Table
-      {...props}
-      ref={tblRef}
-      className={props.className}
-      loading={props.loading}
-      bordered
-      columns={columns}
-      dataSource={props.dataSource}
-      rowClassName={cn('editable-row', props.rowClassName)}
-      pagination={
-        props.pagination ?? {
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          // pageSize: props.metaData?.pageSize
-          //   ? props.metaData.pageSize !== -1
-          //     ? props.metaData.pageSize
-          //     : undefined
-          //   : 10,
-          pageSize: props.pageSize ?? defaultRequestBody.paginator?.pageSize,
-          total: props.metaData?.total
-        }
-      }
-      expandable={props.expandable}
-    />
+    <DndContext modifiers={[restrictToVerticalAxis]} {...props}>
+      <SortableContext
+        // rowKey array
+        items={props.dataSource.map((i) => `${i.key}`)}
+        strategy={verticalListSortingStrategy}
+      >
+        <Table
+          {...props}
+          columns={getColumn(props.actionProps?.isShow ?? false)}
+          components={{
+            body: {
+              row: SkyTableRow
+            }
+          }}
+          className='z-0'
+          rowKey='key'
+          dataSource={props.dataSource}
+        />
+      </SortableContext>
+    </DndContext>
   )
 }
 

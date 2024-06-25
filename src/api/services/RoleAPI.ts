@@ -4,13 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'roles'
 
 export default {
-  createNewItem: async (item: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -39,12 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return await client
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -56,66 +53,31 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItemByPk: async (id: number, item: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: UserRole,
+  updateItemByPk: async (
+    id: number,
+    itemToUpdate: UserRole,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItems: async (itemsToUpdate: UserRole[], accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}`, itemsToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         return responseFormatter(res)
       })

@@ -3,7 +3,6 @@ import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
@@ -25,38 +24,40 @@ import {
 } from '~/utils/helpers'
 import ImportationTable from '../importation/components/ImportationTable'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
-import useProduct from './hooks/useProduct'
+import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
 const ProductPage: React.FC = () => {
   const currentUser = useSelector((state: RootState) => state.user)
-  const table = useTable<ProductTableDataType>([])
   const { width } = useDevice()
+  const { state, action, table } = useProductViewModel()
   const {
-    searchText,
-    setSearchText,
+    loading,
     newRecord,
     setNewRecord,
     openModal,
     setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handleConfirmDeleteForever,
-    handleConfirmRestore,
-    handlePageChange,
-    productService,
-    prints,
+    colors,
     groups,
-    colors
-  } = useProduct(table)
+    prints,
+    searchText,
+    setSearchText
+  } = state
+  const {
+    handleAddNew,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
+    handlePageChange,
+    handleReset,
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
   useTitle('Sản phẩm')
 
   const columns = {
-    productCode: (record: ProductTableDataType) => {
+    title: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -142,7 +143,7 @@ const ProductPage: React.FC = () => {
         </EditableStateCell>
       )
     },
-    productPrint: (record: ProductTableDataType) => {
+    printablePlace: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -202,7 +203,7 @@ const ProductPage: React.FC = () => {
       dataIndex: 'productCode',
       width: '10%',
       render: (_value: any, record: ProductTableDataType) => {
-        return columns.productCode(record)
+        return columns.title(record)
       }
     },
     {
@@ -232,15 +233,15 @@ const ProductPage: React.FC = () => {
         return columns.productGroup(record)
       }
     },
-    // {
-    //   title: 'Nơi in',
-    //   dataIndex: 'printID',
-    //   width: '10%',
-    //   responsive: ['xl'],
-    //   render: (_value: any, record: ProductTableDataType) => {
-    //     return columns.productPrint(record)
-    //   }
-    // },
+    {
+      title: 'Nơi in',
+      dataIndex: 'printID',
+      width: '10%',
+      responsive: ['xl'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.printablePlace(record)
+      }
+    },
     {
       title: 'Ngày nhập NPL',
       dataIndex: 'dateInputNPL',
@@ -264,24 +265,25 @@ const ProductPage: React.FC = () => {
   return (
     <>
       <BaseLayout
-        searchPlaceHolder='Mã hàng...'
         title='Danh sách sản phẩm'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Mã hàng..',
+          value: searchText,
+          onChange: (e) => setSearchText(e.target.value)
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+        sortProps={{
+          onChange: (checked) => handleSortChange(checked)
+        }}
+        resetProps={{
+          onClick: handleReset
+        }}
+        deleteProps={{
+          onChange: () => {}
+        }}
+        addNewProps={{
+          onClick: () => setOpenModal(true)
         }}
       >
         <SkyTable
@@ -292,10 +294,9 @@ const ProductPage: React.FC = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
-          actions={{
+          actionProps={{
             onEdit: {
               onClick: (_e, record) => {
                 setNewRecord({ ...record })
@@ -304,26 +305,26 @@ const ProductPage: React.FC = () => {
               isShow: !table.showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              onClick: (_e, record) => handleUpdate(record!)
             },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!),
               isShow: !table.showDeleted
             },
             onDeleteForever: {
-              onClick: (_e, record) => handleConfirmDeleteForever(record!.id!),
+              onClick: (_e, record) => handleDeleteForever(record!.id!),
               isShow: table.showDeleted
             },
             onRestore: {
               onClick: (_e, record) => table.handleStartRestore(record!.key!),
               isShow: table.showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            onConfirmRestore: (record) => handleConfirmRestore(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
@@ -331,28 +332,32 @@ const ProductPage: React.FC = () => {
                 <Flex className='overflow-hidden' vertical gap={10}>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
                     {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow
+                        className='w-1/2'
+                        title='Số lượng PO:'
+                        isEditing={table.isEditing(`${record.id}`)}
+                      >
                         {columns.quantityPO(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(`${record.id}`)}>
                         {columns.productColor(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow className='w-1/2' title='Nhóm:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Nhóm:' isEditing={table.isEditing(`${record.id}`)}>
                         {columns.productGroup(record)}
                       </ExpandableItemRow>
                     )}
-                    <ExpandableItemRow className='w-1/2' title='Nơi in:' isEditing={table.isEditing(record.id!)}>
-                      {columns.productPrint(record)}
+                    <ExpandableItemRow className='w-1/2' title='Nơi in:' isEditing={table.isEditing(`${record.id}`)}>
+                      {columns.printablePlace(record)}
                     </ExpandableItemRow>
                     {!(width >= breakpoint.md) && (
                       <ExpandableItemRow
                         title='Ngày nhập NPL:'
                         className='flex w-1/2 lg:hidden'
-                        isEditing={table.isEditing(record.id!)}
+                        isEditing={table.isEditing(`${record.id}`)}
                       >
                         {columns.dateInputNPL(record)}
                       </ExpandableItemRow>
@@ -361,7 +366,7 @@ const ProductPage: React.FC = () => {
                       <ExpandableItemRow
                         className='w-1/2'
                         title='Ngày xuất FCR:'
-                        isEditing={table.isEditing(record.id!)}
+                        isEditing={table.isEditing(`${record.id}`)}
                       >
                         {columns.dateInputNPL(record)}
                       </ExpandableItemRow>
@@ -387,15 +392,7 @@ const ProductPage: React.FC = () => {
           }}
         />
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewProduct
-          setLoading={table.setLoading}
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
-        />
-      )}
+      {openModal && <ModalAddNewProduct open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
     </>
   )
 }

@@ -1,41 +1,17 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { Product } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
+
 const NAMESPACE = 'products'
 
 export default {
-  createNewItem: async (item: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (
-    id: number,
-    item: Product,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${id}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -64,46 +40,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
   getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItemByPk: async (id: number, item: Product, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}/${id}`, item, {
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -115,16 +54,27 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: Product,
+  updateItemByPk: async (
+    id: number,
+    itemToUpdate: Product,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, item, {
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItems: async (itemsToUpdate: Product[], accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }
