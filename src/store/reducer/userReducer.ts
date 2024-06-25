@@ -2,11 +2,11 @@ import { createReducer } from '@reduxjs/toolkit'
 import { User } from '~/typing'
 import { setUser } from '../actions-creator'
 
-interface AppUser {
+interface UserState {
   user?: User
 }
 
-const initialState: AppUser = {
+const initialState: UserState = {
   user: {}
 }
 

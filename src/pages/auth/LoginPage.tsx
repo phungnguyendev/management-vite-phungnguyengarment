@@ -12,6 +12,7 @@ interface Props extends HTMLAttributes<HTMLElement> {}
 type LayoutType = Parameters<typeof Form>[0]['layout']
 
 const LoginPage: React.FC<Props> = () => {
+  useTitle('Login')
   const [form] = Form.useForm()
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
@@ -19,7 +20,6 @@ const LoginPage: React.FC<Props> = () => {
   const authService = useAuthService(AuthAPI)
   const [user, setUser] = useState<{ email?: string; password?: string }>({})
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
-  useTitle('Login')
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
     setFormLayout(layout)
@@ -86,6 +86,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Email'
                 name='email'
                 className='m-0 w-full p-0'
+                initialValue='soyoong.dev@gmail.com'
                 rules={[
                   { required: true, message: 'Please input your email!', validateTrigger: 'onBlur', type: 'email' }
                 ]}
@@ -104,6 +105,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Password'
                 name='password'
                 className='m-0 w-full p-0'
+                initialValue='Soyoongdev@2704'
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
                 <Input.Password

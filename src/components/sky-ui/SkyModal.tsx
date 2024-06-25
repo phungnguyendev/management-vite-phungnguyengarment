@@ -27,7 +27,7 @@ const SkyModal: React.FC<SkyModalProps> = ({ setOpenModal, ...props }) => {
       }
       onCancel={handleCancel}
       centered
-      width={props.width ?? 1200}
+      width={props.width ?? 900}
       className={cn('z-10 w-full', props.className)}
     >
       <Flex vertical gap={20}>

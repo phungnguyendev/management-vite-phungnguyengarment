@@ -1,9 +1,11 @@
-import { Flex, Form, Spin } from 'antd'
+import { Form, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
 import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
@@ -63,91 +65,105 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   return (
     <SkyModal {...props} title='Add new' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
-        <Form labelCol={{ span: 8 }} labelAlign='left' labelWrap form={form}>
-          <Flex vertical gap={20} className='w-full sm:w-[400px]'>
-            <EditableFormCell
-              isEditing={true}
-              title='Mã Code'
-              placeholder='Mã Code...'
-              dataIndex='productCode'
-              inputType='text'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Số lượng PO'
-              dataIndex='quantityPO'
-              placeholder='Số lượng PO...'
-              inputType='number'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Mã màu:'
-              dataIndex='colorID'
-              inputType='colorselector'
-              placeholder='Chọn mã màu...'
-              selectProps={{
-                options: colors.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.hexColor
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Nhóm:'
-              dataIndex='groupID'
-              inputType='select'
-              placeholder='Chọn nhóm...'
-              selectProps={{
-                options: groups.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.id
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Nơi in:'
-              dataIndex='printID'
-              inputType='select'
-              placeholder='Chọn nơi in...'
-              selectProps={{
-                options: prints.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.id
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Ngày nhập NPL:'
-              dataIndex='dateInputNPL'
-              inputType='datepicker'
-              required
-              placeholder='Ngày nhập NPL...'
-              initialValue={DayJS(Date.now())}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Ngày xuất FCR:'
-              dataIndex='dateOutputFCR'
-              inputType='datepicker'
-              required
-              placeholder='Ngày xuất FCR...'
-              initialValue={DayJS(Date.now())}
-            />
-          </Flex>
+        <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+          <SkyModalRow>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Mã Code'
+                placeholder='Mã Code...'
+                dataIndex='productCode'
+                inputType='text'
+                required
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Số lượng PO'
+                dataIndex='quantityPO'
+                placeholder='Số lượng PO...'
+                inputType='number'
+                required
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Mã màu:'
+                dataIndex='colorID'
+                inputType='colorselector'
+                placeholder='Chọn mã màu...'
+                selectProps={{
+                  options: colors.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.hexColor
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Nhóm:'
+                dataIndex='groupID'
+                inputType='select'
+                placeholder='Chọn nhóm...'
+                selectProps={{
+                  options: groups.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Nơi in:'
+                dataIndex='printID'
+                inputType='select'
+                placeholder='Chọn nơi in...'
+                selectProps={{
+                  options: prints.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Ngày nhập NPL:'
+                dataIndex='dateInputNPL'
+                inputType='datepicker'
+                required
+                placeholder='Ngày nhập NPL...'
+                initialValue={DayJS(Date.now())}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Ngày xuất FCR:'
+                dataIndex='dateOutputFCR'
+                inputType='datepicker'
+                required
+                placeholder='Ngày xuất FCR...'
+                initialValue={DayJS(Date.now())}
+              />
+            </SkyModalRowItem>
+          </SkyModalRow>
         </Form>
       </Spin>
     </SkyModal>

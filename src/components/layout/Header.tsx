@@ -2,15 +2,17 @@ import { CaretDownOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { App as AntApp, Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
 import { Bell, Menu } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
 import useAuthService from '~/hooks/useAuthService'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import ProfileDialog from '~/pages/user/components/profiles/ProfileDialog'
+import { setLoading } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { cn, extractEmailName } from '~/utils/helpers'
+import useScroll from '../hooks/useScroll'
 
 const { Header: AntHeader } = Layout
 
@@ -21,34 +23,19 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const { message } = AntApp.useApp()
+  const [loadingLocal, setLoadingLocal] = useState<boolean>(false)
   const [openProfile, setOpenProfile] = useState<boolean>(false)
   const [, setAccessTokenStored] = useLocalStorage('accessToken', '')
   const [refreshTokenStored, setRefreshTokenStored] = useLocalStorage('refreshToken', '')
-  const [isHidden, setIsHidden] = useState(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [offsetY, setOffsetY] = useState<number>(0)
+  const { isHidden, offsetY } = useScroll()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const authService = useAuthService(AuthAPI)
-  const currentUser = useSelector((state: RootState) => state.user)
-
-  // Saving last scroll position
-  const lastScrollTop = useRef(0)
-
-  const handleScroll = () => {
-    const scrollYOffset = window.scrollY
-    setOffsetY(scrollYOffset)
-    // Visible/Unvisitable state navbar
-    setIsHidden(scrollYOffset > lastScrollTop.current)
-    lastScrollTop.current = scrollYOffset
-  }
+  const userState = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
+    dispatch(setLoading(loadingLocal))
+  }, [loadingLocal])
 
   const items: MenuProps['items'] = [
     {
@@ -69,7 +56,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
         try {
           if (refreshTokenStored) {
             await authService
-              .logout(refreshTokenStored, setLoading)
+              .logout(refreshTokenStored, setLoadingLocal)
               .then(() => {
                 setAccessTokenStored(null)
                 setRefreshTokenStored(null)
@@ -117,9 +104,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
                 <Flex className='h-full'>
                   <Button type='link' className='' onClick={(e) => e.preventDefault()}>
                     <Flex gap={4} justify='center' className='h-full text-foreground'>
-                      <Typography.Text className='m-0'>
-                        {extractEmailName(currentUser.user?.email ?? '')}
-                      </Typography.Text>
+                      <Typography.Text className='m-0'>{extractEmailName(userState.user?.email ?? '')}</Typography.Text>
                       <CaretDownOutlined />
                     </Flex>
                   </Button>

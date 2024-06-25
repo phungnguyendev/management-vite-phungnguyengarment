@@ -75,7 +75,7 @@ export default function useProductViewModel() {
       setLoading(true)
       await productService.getItemsSync(
         {
-          filter: { status: showDeleted ? 'deleted' : 'active' }
+          filter: { status: showDeleted ? 'deleted' : 'active', items: [-1] }
         },
         setLoading,
         (meta) => {

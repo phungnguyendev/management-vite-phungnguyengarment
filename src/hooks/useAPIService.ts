@@ -3,18 +3,20 @@ import useLocalStorage from './useLocalStorage'
 
 export const defaultRequestBody: RequestBodyType = {
   filter: {
-    items: [-1],
-    field: '',
-    status: 'active'
+    status: 'active',
+    items: [-1]
   },
-  paginator: { page: 1, pageSize: 5 },
+  paginator: {
+    page: 1,
+    pageSize: 5
+  },
   search: {
     field: 'id',
     term: ''
   },
   sorting: {
-    column: 'id', // id
-    direction: 'desc' // direction: asc|desc sắp xếp trước sau
+    column: 'id',
+    direction: 'asc'
   }
 }
 

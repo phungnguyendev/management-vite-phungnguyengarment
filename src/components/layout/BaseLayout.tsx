@@ -88,34 +88,27 @@ const BaseLayout: React.FC<Props> = ({
               allowClear
             />
           )}
-          <Flex justify='space-between' className='w-full' align='center'>
-            <Flex gap={10} align='center' wrap='wrap'>
-              {/* <Switch
-                checkedChildren='Admin'
-                unCheckedChildren='Admin'
-                defaultChecked={false}
-                checked={user.isAdmin}
-                onChange={(val) => {
-                  dispatch(setAdminAction(val))
-                }}
-              /> */}
-              {sortProps && (
-                <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sorted' defaultChecked={false} />
-              )}
-              {deleteProps && <Switch {...deleteProps} checkedChildren='Deleted' unCheckedChildren='Deleted' />}
+          <Flex justify='space-between' className='w-full' align='start' gap={20}>
+            <Flex gap={20} align='start' className='w-full flex-col'>
               {searchProps && (
                 <Search
                   {...searchProps}
                   placeholder={searchProps.placeholder ?? 'Search...'}
                   size='middle'
                   enterButton
-                  className='w-full lg:hidden'
+                  className='hidden w-full lg:block lg:w-2/3'
                   name='search'
                   allowClear
                 />
               )}
+              <Flex gap={10} className='w-full'>
+                {sortProps && (
+                  <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sorted' defaultChecked={false} />
+                )}
+                {deleteProps && <Switch {...deleteProps} checkedChildren='Deleted' unCheckedChildren='Deleted' />}
+              </Flex>
             </Flex>
-            <Flex gap={10} align='center' wrap='wrap' justify='flex-end'>
+            <Flex gap={10} align='center' justify='flex-end' className='w-fit'>
               {resetProps && (
                 <Button {...resetProps} className='flex items-center' type='default'>
                   Reset

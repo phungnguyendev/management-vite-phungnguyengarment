@@ -36,7 +36,8 @@ const Main: React.FC = () => {
         navigate('/login')
       }
     } catch (error: any) {
-      message.error(`Error request user info!`)
+      message.error(`${error.message ?? 'Login session has expired, please log in again!'}`)
+      navigate('/logout')
     }
   }
 
