@@ -39,7 +39,7 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
 
   const actionsCol: ColumnType<T> = {
     title: 'Operation',
-    width: '1%',
+    width: '0.01%',
     dataIndex: 'operation',
     render: (_value: any, record: T) => {
       return (
@@ -47,42 +47,48 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
           isEditing={isEditing(record.key)}
           onAdd={{
             ...props.actionProps?.onAdd,
-            onClick: (e) => props.actionProps?.onAdd?.onClick?.(e, record),
+            onClick: () => props.actionProps?.onAdd?.handleClick?.(record),
             disabled: props.actionProps?.onAdd?.disabled ?? isEditing(editKey),
             isShow: props.actionProps?.onAdd ? props.actionProps.onAdd.isShow ?? true : false
           }}
           onSave={{
             ...props.actionProps?.onSave,
-            onClick: (e) => props.actionProps?.onSave?.onClick?.(e, record),
+            onClick: () => props.actionProps?.onSave?.handleClick?.(record),
             disabled: props.actionProps?.onSave?.disabled ?? isEditing(editKey),
             isShow: props.actionProps?.onSave ? props.actionProps.onSave.isShow ?? true : false
           }}
           onEdit={{
             ...props.actionProps?.onEdit,
-            onClick: (e) => {
+            onClick: () => {
               setEditKey(record.key!)
-              props.actionProps?.onEdit?.onClick?.(e, record)
+              props.actionProps?.onEdit?.handleClick?.(record)
             },
             disabled: props.actionProps?.onEdit?.disabled ?? isEditing(editKey),
             isShow: props.actionProps?.onEdit ? props.actionProps.onEdit.isShow ?? true : false
           }}
           onDelete={{
             ...props.actionProps?.onDelete,
-            onClick: (e) => {
-              // setDeleteKey(record.key!)
-              props.actionProps?.onDelete?.onClick?.(e, record)
+            onClick: () => {
+              props.actionProps?.onDelete?.handleClick?.(record)
             },
             disabled: props.actionProps?.onDelete?.disabled ?? isEditing(editKey),
             isShow: props.actionProps?.onDelete ? props.actionProps.onDelete.isShow ?? true : false
           }}
           onRestore={{
             ...props.actionProps?.onRestore,
-            onClick: (e) => {
-              // setDeleteKey(record.key!)
-              props.actionProps?.onRestore?.onClick?.(e, record)
+            onClick: () => {
+              props.actionProps?.onRestore?.handleClick?.(record)
             },
             disabled: props.actionProps?.onRestore?.disabled ?? isEditing(editKey),
             isShow: props.actionProps?.onRestore ? props.actionProps.onRestore.isShow ?? true : false
+          }}
+          onDeleteForever={{
+            ...props.actionProps?.onDeleteForever,
+            onClick: () => {
+              props.actionProps?.onDeleteForever?.handleClick?.(record)
+            },
+            disabled: props.actionProps?.onDeleteForever?.disabled ?? isEditing(editKey),
+            isShow: props.actionProps?.onDeleteForever ? props.actionProps.onDeleteForever.isShow ?? true : false
           }}
           onConfirmCancelEditing={(e) => props.actionProps?.onConfirmCancelEditing?.(e)}
           onConfirmCancelDeleting={props.actionProps?.onConfirmCancelDeleting}
@@ -112,6 +118,7 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
               row: SkyTableRow
             }
           }}
+          pagination={props.pagination ?? { pageSize: 5 }}
           className='z-0'
           rowKey='key'
           dataSource={props.dataSource}

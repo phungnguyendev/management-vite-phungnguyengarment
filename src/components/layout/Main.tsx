@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
+import RoleAPI from '~/api/services/RoleAPI'
+import useAPIService from '~/hooks/useAPIService'
 import useAuthService from '~/hooks/useAuthService'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setUser } from '~/store/actions-creator'
-import { User } from '~/typing'
+import { setUser, setUserRole } from '~/store/actions-creator'
+import { Role, User, UserRole } from '~/typing'
 import Footer from './Footer'
 import Header from './Header'
 import SideNav from './sidenav/SideNav'
@@ -17,9 +19,11 @@ const Main: React.FC = () => {
   const { message } = AntApp.useApp()
   const [openDrawer, setOpenDrawer] = useState(false)
   const [accessToken] = useLocalStorage<string>('accessToken', '')
+  const [refreshToken] = useLocalStorage<string>('refreshToken', '')
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const authService = useAuthService(AuthAPI)
+  const roleService = useAPIService(RoleAPI)
 
   useEffect(() => {
     initialize()
@@ -30,14 +34,40 @@ const Main: React.FC = () => {
     try {
       if (accessToken) {
         const result = await authService.userInfoFromAccessToken(accessToken)
-        const user = result.data as User
+        const user = result.data.user as User
+        const userRoles = result.data.userRoles as UserRole[]
+        await roleService
+          .getItems({
+            filter: {
+              field: 'id',
+              items: userRoles.map((item) => {
+                return item.id!
+              }),
+              status: 'active'
+            }
+          })
+          .then((result) => {
+            if (result) {
+              // console.log(result)
+              const roles = result.data as Role[]
+              dispatch(
+                setUserRole(
+                  roles.map((item) => {
+                    return item.role!
+                  })
+                )
+              )
+            }
+          })
         dispatch(setUser(user))
       } else {
         navigate('/login')
       }
     } catch (error: any) {
-      message.error(`${error.message ?? 'Login session has expired, please log in again!'}`)
-      navigate('/logout')
+      await authService.logout(refreshToken).then(() => {
+        navigate('/login')
+        message.error(`${error.message ?? 'Login session has expired, please log in again!'}`)
+      })
     }
   }
 

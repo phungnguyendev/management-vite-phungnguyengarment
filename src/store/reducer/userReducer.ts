@@ -1,18 +1,23 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { User } from '~/typing'
-import { setUser } from '../actions-creator'
+import { User, UserRoleType } from '~/typing'
+import { setUser, setUserRole } from '../actions-creator'
 
 interface UserState {
   user?: User
+  role?: UserRoleType[]
 }
 
 const initialState: UserState = {
-  user: {}
+  user: {},
+  role: ['staff']
 }
 
 const userReducer = createReducer(initialState, (builder) => {
   builder.addCase(setUser, (state, action) => {
     state.user = action.payload
+  })
+  builder.addCase(setUserRole, (state, action) => {
+    state.role = action.payload
   })
 })
 

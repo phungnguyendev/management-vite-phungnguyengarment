@@ -8,7 +8,7 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
-import useSewingLine from './hooks/useSewingLine'
+import useSewingLine from './hooks/useSewingLineViewModel'
 import { SewingLineTableDataType } from './type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}

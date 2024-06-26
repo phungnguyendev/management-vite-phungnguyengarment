@@ -6,18 +6,11 @@ const NAMESPACE = 'colors'
 export default {
   createItem: async (newItem: Color, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(
-        `${NAMESPACE}`,
-        {
-          ...newItem,
-          status: newItem.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}`, newItem, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -59,7 +52,7 @@ export default {
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }

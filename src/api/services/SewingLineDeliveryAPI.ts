@@ -39,6 +39,20 @@ export default {
         throwErrorFormatter(error)
       })
   },
+  getItemBy: async (query: SewingLineDelivery, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .get(`${NAMESPACE}/${[query]}/${query}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
   getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}/find`, bodyRequest, {
@@ -71,6 +85,24 @@ export default {
         throwErrorFormatter(error)
       })
   },
+  updateItemBy: async (
+    query: SewingLineDelivery,
+    itemToUpdate: SewingLineDelivery,
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
+    return client
+      .patch(`${NAMESPACE}/${[query]}/${query}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
   updateItems: async (
     itemsToUpdate: SewingLineDelivery[],
     accessToken: string
@@ -91,6 +123,20 @@ export default {
   deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  deleteItemBy: async (query: SewingLineDelivery, accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .delete(`${NAMESPACE}/${[query]}/${query}`, {
         headers: {
           authorization: accessToken
         }

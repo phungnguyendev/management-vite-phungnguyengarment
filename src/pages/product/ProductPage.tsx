@@ -26,6 +26,7 @@ import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
 const ProductPage: React.FC = () => {
+  useTitle('Product - Phung Nguyen')
   const { width } = useDevice()
   const { state, action, table } = useProductViewModel()
   const {
@@ -46,12 +47,10 @@ const ProductPage: React.FC = () => {
     handleDelete,
     handleDeleteForever,
     handlePageChange,
-    handleReset,
     handleRestore,
     handleSearch,
     handleSortChange
   } = action
-  useTitle('Sản phẩm')
 
   const columns = {
     title: (record: ProductTableDataType) => {
@@ -96,13 +95,16 @@ const ProductPage: React.FC = () => {
           title='Màu'
           inputType='colorselector'
           required={false}
-          onValueChange={(val) => setNewRecord({ ...newRecord, colorID: numberValidatorChange(val) })}
+          onValueChange={(val: number) => setNewRecord({ ...newRecord, colorID: numberValidatorChange(val) })}
           selectProps={{
-            options: colors.map((i) => {
-              return { label: i.name, value: i.id, key: i.hexColor }
+            options: colors.map((color) => {
+              return { label: color.name, value: color.id, key: color.id }
             }),
             defaultValue: numberValidatorInit(record.productColor?.colorID),
-            value: newRecord.colorID
+            value: newRecord.colorID,
+            onChange: (value, option) => {
+              console.log({ value, option })
+            }
           }}
         >
           <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
@@ -272,9 +274,6 @@ const ProductPage: React.FC = () => {
         }}
         sortProps={{
           onChange: (checked) => handleSortChange(checked)
-        }}
-        resetProps={{
-          onClick: handleReset
         }}
         deleteProps={{
           onChange: () => {}

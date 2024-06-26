@@ -12,6 +12,7 @@ import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { dateComparator, numberComparator, textComparator } from '~/utils/helpers'
 import { ProductAddNewProps } from '../components/ModalAddNewProduct'
 
 interface ProductNewRecord {
@@ -51,24 +52,12 @@ export default function useProductViewModel() {
   const [prints, setPrints] = useState<Print[]>([])
 
   useEffect(() => {
-    if (table.editingKey !== '') {
-      colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
-        if (meta?.success) {
-          setColors(meta.data as Color[])
-        }
-      })
-      groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
-        if (meta?.success) {
-          setGroups(meta.data as Group[])
-        }
-      })
-      printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
-        if (meta?.success) {
-          setPrints(meta.data as Print[])
-        }
-      })
-    }
+    loadDataEditingChange()
   }, [table.editingKey])
+
+  useEffect(() => {
+    loadData()
+  }, [showDeleted])
 
   const loadData = async () => {
     try {
@@ -127,119 +116,122 @@ export default function useProductViewModel() {
         })
         setDataSource([...dataSource, ...dataMapped])
       })
-    } catch (error) {
-      message.error(`${error}`)
+    } catch (error: any) {
+      message.error(`${error.message}`)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [showDeleted])
+  const loadDataEditingChange = async () => {
+    try {
+      if (table.editingKey !== '') {
+        await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+          if (!result?.success) throw new Error(`${result.message}`)
+          setColors(result.data as Color[])
+        })
+        await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+          if (!result?.success) throw new Error(`${result.message}`)
+          setGroups(result.data as Group[])
+        })
+        await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+          if (!result?.success) throw new Error(`${result.message}`)
+          setPrints(result.data as Print[])
+        })
+      }
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleUpdate = async (record: ProductTableDataType) => {
-    // const row = (await form.validateFields()) as any
-    // try {
-    //   setLoading(true)
-    //   if (newRecord) {
-    //     console.log({ old: record, new: newRecord })
-    //     if (
-    //       textComparator(newRecord.productCode, record.productCode) ||
-    //       numberComparator(newRecord.quantityPO, record.quantityPO) ||
-    //       dateComparator(newRecord.dateInputNPL, record.dateInputNPL) ||
-    //       dateComparator(newRecord.dateOutputFCR, record.dateOutputFCR)
-    //     ) {
-    //       console.log('Product progressing...')
-    //       try {
-    //         await productService.updateItemByPk(
-    //           record.id!,
-    //           {
-    //             productCode: newRecord.productCode,
-    //             quantityPO: newRecord.quantityPO,
-    //             dateInputNPL: newRecord.dateInputNPL,
-    //             dateOutputFCR: newRecord.dateOutputFCR
-    //           },
-    //           setLoading,
-    //           (meta) => {
-    //             if (!meta?.success) throw new Error('API update Product failed')
-    //           }
-    //         )
-    //       } catch (error: any) {
-    //         const resError: ResponseDataType = error
-    //         throw resError
-    //       }
-    //     }
-    //     if (
-    //       (newRecord.colorID && !record.productColor?.colorID) ||
-    //       numberComparator(newRecord.colorID, record.productColor?.colorID)
-    //     ) {
-    //       console.log('Product color progressing...')
-    //       try {
-    //         await productColorService.createOrUpdateItemBy(
-    //           { field: 'productID', key: record.key! },
-    //           { colorID: newRecord.colorID },
-    //           setLoading,
-    //           (meta) => {
-    //             if (!meta?.success) throw new Error('API update ProductColor failed')
-    //           }
-    //         )
-    //       } catch (error: any) {
-    //         const resError: ResponseDataType = error
-    //         throw resError
-    //       }
-    //     }
-    //     if (
-    //       (newRecord.groupID && !record.productGroup?.groupID) ||
-    //       numberComparator(newRecord.groupID, record.productGroup?.groupID)
-    //     ) {
-    //       console.log('ProductGroup progressing...')
-    //       try {
-    //         await productGroupService.createOrUpdateItemBy(
-    //           { field: 'productID', key: record.key! },
-    //           { groupID: newRecord.groupID },
-    //           setLoading,
-    //           (meta) => {
-    //             if (!meta?.success) throw new Error('API update ProductGroup failed')
-    //           }
-    //         )
-    //       } catch (error: any) {
-    //         const resError: ResponseDataType = error
-    //         throw resError
-    //       }
-    //     }
-    //     if (
-    //       (newRecord.printID && !record.printablePlace?.printID) ||
-    //       numberComparator(newRecord.printID, record.printablePlace?.printID)
-    //     ) {
-    //       console.log('PrintablePlace progressing...')
-    //       try {
-    //         await printablePlaceService.createOrUpdateItemBy(
-    //           { field: 'productID', key: record.key! },
-    //           { printID: newRecord.printID },
-    //           setLoading,
-    //           (meta) => {
-    //             if (!meta?.success) throw new Error('API update PrintablePlace failed')
-    //           }
-    //         )
-    //       } catch (error: any) {
-    //         const resError: ResponseDataType = error
-    //         throw resError
-    //       }
-    //     }
-    //     message.success('Success!')
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   handleCancelEditing()
-    //   loadData()
-    //   setLoading(false)
-    // }
+    try {
+      setLoading(true)
+      if (
+        textComparator(newRecord.productCode, record.productCode) ||
+        numberComparator(newRecord.quantityPO, record.quantityPO) ||
+        dateComparator(newRecord.dateInputNPL, record.dateInputNPL) ||
+        dateComparator(newRecord.dateOutputFCR, record.dateOutputFCR)
+      ) {
+        console.log('Product progressing...')
+        await productService.updateItemByPkSync(
+          record.id!,
+          {
+            productCode: newRecord.productCode,
+            quantityPO: newRecord.quantityPO,
+            dateInputNPL: newRecord.dateInputNPL,
+            dateOutputFCR: newRecord.dateOutputFCR
+          },
+          setLoading,
+          (meta) => {
+            if (!meta?.success) throw new Error('Product update failed')
+          }
+        )
+      }
+      if (numberComparator(newRecord.colorID, record.productColor?.colorID)) {
+        console.log('Product color progressing...')
+        await productColorService.updateItemBySync(
+          { productID: record.id! },
+          { colorID: newRecord.colorID },
+          setLoading,
+          (meta) => {
+            if (!meta?.success) throw new Error('API update ProductColor failed')
+          }
+        )
+      }
+      if (
+        (newRecord.groupID && !record.productGroup?.groupID) ||
+        numberComparator(newRecord.groupID, record.productGroup?.groupID)
+      ) {
+        console.log('ProductGroup progressing...')
+        try {
+          await productGroupService.updateItemBySync(
+            { productID: record.id! },
+            { groupID: newRecord.groupID },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) throw new Error('API update ProductGroup failed')
+            }
+          )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
+      }
+      if (
+        (newRecord.printID && !record.printablePlace?.printID) ||
+        numberComparator(newRecord.printID, record.printablePlace?.printID)
+      ) {
+        console.log('PrintablePlace progressing...')
+        try {
+          await printablePlaceService.updateItemBySync(
+            { productID: record.id! },
+            { printID: newRecord.printID },
+            setLoading,
+            (meta) => {
+              if (!meta?.success) throw new Error('API update PrintablePlace failed')
+            }
+          )
+        } catch (error: any) {
+          const resError: ResponseDataType = error
+          throw resError
+        }
+      }
+      message.success('Success!')
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      handleCancelEditing()
+      loadData()
+      setLoading(false)
+    }
   }
 
   const handleAddNew = async (formAddNew: ProductAddNewProps) => {
+    console.log(formAddNew)
     // try {
     //   console.log(formAddNew)
     //   setLoading(true)

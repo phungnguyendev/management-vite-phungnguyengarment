@@ -33,7 +33,7 @@
     --accent-foreground: #262626;
 
     /* Used for destructive actions such as <Button variant="destructive"> */
-    --destructive: #de1b35;
+    --destructive: #f5222d;
     --destructive-foreground: #fafafa;
 
     /* Default border color */
@@ -47,7 +47,7 @@
 
     --normal: rgba(42, 46, 54, 0.25);
     --warn: #faad14;
-    --error: #ff4d4f;
+    --error: #f5222d;
     --success: #52c41a;
     --incoming-success: #1ac4bc;
     --blue: #1677ff;

@@ -17,7 +17,7 @@ export interface ProductAddNewProps {
   colorID?: number | null
   groupID?: number | null
   printID?: number | null
-  dateInputNPL?: string
+  dateInputNPL?: string | null
   dateOutputFCR?: string | null
 }
 
@@ -63,7 +63,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   return (
-    <SkyModal {...props} title='Add new' okText='Create' onOk={handleOk}>
+    <SkyModal {...props} title='New product' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
         <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
           <SkyModalRow>

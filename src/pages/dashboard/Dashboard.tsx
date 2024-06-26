@@ -10,7 +10,7 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { breakpoint, numberValidatorCalc, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import StatisticSlide from './components/StatisticSlide'
-import useDashboard from './hooks/useDashboard'
+import useDashboard from './hooks/useDashboardViewModel'
 import { DashboardTableDataType } from './type'
 
 const Dashboard = () => {

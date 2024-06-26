@@ -29,10 +29,13 @@ export type SortedDirection = 'asc' | 'desc'
 export interface APIService<T extends RequiredDataType> {
   createItem: (newItem: T, accessToken: string) => Promise<ResponseDataType | undefined>
   getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
+  getItemBy?: (query: T, accessToken: string) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItemByPk: (id: number, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType | undefined>
+  updateItemBy?: (query: T, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItems: (itemsToUpdate: T[], accessToken: string) => Promise<ResponseDataType | undefined>
   deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
+  deleteItemBy?: (query: T, accessToken: string) => Promise<ResponseDataType | undefined>
 }
 
 export default function useAPIService<T extends RequiredDataType>(apiService: APIService<T>) {
@@ -48,6 +51,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return await apiService.createItem(itemNew, accessTokenStored)
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -71,6 +75,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
         })
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -85,6 +90,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return await apiService.getItemByPk(id, accessTokenStored)
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -102,6 +108,43 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       onDataSuccess?.(res)
     } catch (err) {
       console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const getItemBy = async (
+    query: T,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (res: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.getItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const getItemBySync = async (
+    query: T,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (res: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.getItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -117,6 +160,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return res
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -134,6 +178,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       onDataSuccess?.(res)
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -150,6 +195,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return meta
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -168,6 +214,43 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       onDataSuccess?.(res)
     } catch (err) {
       console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemBy = async (
+    query: T,
+    itemToUpdate: T,
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType | undefined> => {
+    try {
+      setLoading?.(true)
+      const meta = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
+      return meta
+    } catch (err) {
+      console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemBySync = async (
+    query: T,
+    itemToUpdate: T,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -183,6 +266,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return meta
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -200,6 +284,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       onDataSuccess?.(res)
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -215,6 +300,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       return res
     } catch (err) {
       console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -232,6 +318,41 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       onDataSuccess?.(res)
     } catch (err) {
       console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const deleteItemBy = async (
+    query: T,
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType | undefined> => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.deleteItemBy?.(query, accessTokenStored)
+      return res
+    } catch (err) {
+      console.error(err)
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const deleteItemBySync = async (
+    query: T,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.deleteItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
@@ -242,13 +363,19 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     createItemSync,
     getItemByPk,
     getItemByPkSync,
+    getItemBy,
+    getItemBySync,
     getItems,
     getItemsSync,
     updateItemByPk,
     updateItemByPkSync,
+    updateItemBy,
+    updateItemBySync,
     updateItems,
     updateItemsSync,
     deleteItem,
-    deleteItemSync
+    deleteItemSync,
+    deleteItemBy,
+    deleteItemBySync
   }
 }

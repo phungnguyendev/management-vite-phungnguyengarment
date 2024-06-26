@@ -1,11 +1,10 @@
 import { Flex, Typography } from 'antd'
 import React, { HTMLAttributes, memo } from 'react'
-import { TableItemWithKey } from '~/components/hooks/useTable'
 import ProgressBar from '~/components/sky-ui/ProgressBar'
 import { ProductTableDataType } from '../type'
 
 interface Props extends HTMLAttributes<HTMLElement> {
-  record: TableItemWithKey<ProductTableDataType>
+  record: ProductTableDataType
 }
 
 interface ProcessableProps {
@@ -16,19 +15,19 @@ const ProductProgressStatus: React.FC<Props> = ({ record }) => {
   const progressArr: { task: string; quantity: number }[] = [
     {
       task: 'May',
-      quantity: record.progress?.sewing ?? 0
+      quantity: 100
     },
     {
       task: 'Ủi',
-      quantity: record.progress?.iron ?? 0
+      quantity: 20
     },
     {
       task: 'Kiểm',
-      quantity: record.progress?.check ?? 0
+      quantity: 30
     },
     {
       task: 'Hoàn thành',
-      quantity: record.progress?.pack ?? 0
+      quantity: 50
     }
   ]
 

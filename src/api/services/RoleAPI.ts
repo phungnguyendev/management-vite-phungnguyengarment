@@ -1,10 +1,10 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { UserRole } from '~/typing'
+import { Role } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 const NAMESPACE = 'roles'
 
 export default {
-  createItem: async (newItem: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: Role, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -55,11 +55,11 @@ export default {
   },
   updateItemByPk: async (
     id: number,
-    itemToUpdate: UserRole,
+    itemToUpdate: Role,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -71,7 +71,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: UserRole[], accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: Role[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {

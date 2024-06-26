@@ -15,12 +15,10 @@ interface Props<T extends RequiredDataType> {
   scrollIndex: number
   editingKey: string
   deletingKey: string
-  showDeleted: boolean
   setLoading: (state: boolean) => void
   setScrollIndex: (index: number) => void
   setEditingKey: (key: string) => void
   setDeletingKey: (key: string) => void
-  setDeletedRecordState: (enable: boolean) => void
   setDataSource: (newDataSource: T[]) => void
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
@@ -43,7 +41,6 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
   const [dataSource, setDataSource] = useState<T[]>(initValue)
   const [editingKey, setEditingKey] = useState<string>('')
   const [deletingKey, setDeletingKey] = useState<string>('')
-  const [showDeleted, setDeletedRecordState] = useState<boolean>(false)
   const isEditing = (key: string) => key === editingKey
   const isDelete = (key: string) => key === deletingKey
 
@@ -144,8 +141,6 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
   return {
     loading,
     setLoading,
-    showDeleted,
-    setDeletedRecordState,
     isDelete,
     isEditing,
     editingKey,

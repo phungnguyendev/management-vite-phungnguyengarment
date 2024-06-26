@@ -19,7 +19,7 @@ export interface ProductNewRecordProps {
   printID?: number | null
 }
 
-export default function useDashboard(table: UseTableProps<DashboardTableDataType>) {
+export default function useDashboardViewModel() {
   const { setLoading, setDataSource, handleConfirmCancelEditing } = table
 
   const productService = useAPIService<Product>(ProductAPI)
@@ -38,84 +38,42 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
   const [sewingLineDeliveries, setSewingLineDeliveries] = useState<SewingLineDelivery[]>([])
   const [completions, setCompletions] = useState<Completion[]>([])
 
-  const loadData = async (defaultLoading?: boolean) => {
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
     try {
       setLoading(true)
-      try {
-        await productService.getListItems(
-          defaultLoading
-            ? defaultRequestBody
-            : {
-                ...defaultRequestBody,
-                paginator: { page: productService.page, pageSize: defaultRequestBody.paginator?.pageSize }
-              },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              setProducts(meta.data as Product[])
-            }
-          }
-        )
-      } catch (error: any) {
-        const resError: ResponseDataType = error
-        throw resError
-      }
+      await productService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          setProducts(meta.data as Product[])
+        }
+      })
 
-      try {
-        await productColorService.getListItems(
-          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              setProductColors(meta.data as ProductColor[])
-            }
-          }
-        )
-      } catch (error: any) {
-        const resError: ResponseDataType = error
-        throw resError
-      }
+      await productColorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          setProductColors(meta.data as ProductColor[])
+        }
+      })
 
-      try {
-        await sewingLineDeliveryService.getListItems(
-          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              setSewingLineDeliveries(meta.data as SewingLineDelivery[])
-            }
-          }
-        )
-      } catch (error: any) {
-        const resError: ResponseDataType = error
-        throw resError
-      }
+      await sewingLineDeliveryService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          setSewingLineDeliveries(meta.data as SewingLineDelivery[])
+        }
+      })
 
-      try {
-        await completionService.getListItems(
-          { ...defaultRequestBody, paginator: { page: 1, pageSize: -1 } },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              setCompletions(meta.data as Completion[])
-            }
-          }
-        )
-      } catch (error: any) {
-        const resError: ResponseDataType = error
-        throw resError
-      }
+      await completionService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+        if (meta?.success) {
+          setCompletions(meta.data as Completion[])
+        }
+      })
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error.message}`)
     } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   useEffect(() => {
     selfConvertDataSource(products, productColors, sewingLineDeliveries, completions)
@@ -195,7 +153,7 @@ export default function useDashboard(table: UseTableProps<DashboardTableDataType
     try {
       setLoading(true)
       if (value.length > 0) {
-        await productService.getListItems(
+        await productService.getItemsSync(
           {
             ...defaultRequestBody,
             search: {

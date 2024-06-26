@@ -10,7 +10,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   searchProps: SearchProps
   sortProps?: SwitchProps
   deleteProps?: SwitchProps
-  resetProps?: ButtonProps
   addNewProps?: ButtonProps
 }
 
@@ -20,58 +19,12 @@ const BaseLayout: React.FC<Props> = ({
   searchProps,
   sortProps,
   deleteProps,
-  resetProps,
   addNewProps,
   children,
   loading,
   // onLoading,
   ...props
 }) => {
-  // const [loading, setLoading] = useState<boolean>(true)
-  // const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
-  // const dispatch = useDispatch()
-  // const navigate = useNavigate()
-
-  // useEffect(() => {
-  //   const callApi = async () => {
-  //     try {
-  //       onLoading?.(true)
-  //       setLoading(true)
-  //       if (accessTokenStored) {
-  //         UserAPI.userRolesFromAccessToken(accessTokenStored)
-  //           .then((meta) => {
-  //             if (!meta?.success) throw new Error(meta?.message)
-
-  //             const userRoles = meta.data as UserRole[]
-  //             dispatch(
-  //               setUserRoleAction(
-  //                 userRoles.map((userRole) => {
-  //                   return userRole.role?.role as UserRoleType
-  //                 })
-  //               )
-  //             )
-  //             dispatch(setUserAction(meta.meta as User))
-  //           })
-  //           .catch((error) => {
-  //             console.error(error)
-  //           })
-  //       } else {
-  //         navigate('/login')
-  //       }
-  //     } catch (error) {
-  //       console.error(error)
-  //     } finally {
-  //       onLoading?.(false)
-  //       setLoading(false)
-  //     }
-  //   }
-  //   callApi()
-  // }, [])
-
-  // useEffect(() => {
-  //   if (!accessTokenStored) navigate('/login')
-  // }, [accessTokenStored])
-
   return (
     <div {...props} className='w-full'>
       <Flex vertical gap={20} className='w-full'>
@@ -109,11 +62,6 @@ const BaseLayout: React.FC<Props> = ({
               </Flex>
             </Flex>
             <Flex gap={10} align='center' justify='flex-end' className='w-fit'>
-              {resetProps && (
-                <Button {...resetProps} className='flex items-center' type='default'>
-                  Reset
-                </Button>
-              )}
               {addNewProps && (
                 <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                   New

@@ -86,7 +86,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Email'
                 name='email'
                 className='m-0 w-full p-0'
-                initialValue='soyoong.dev@gmail.com'
+                initialValue='phungnguyengarment.dev@gmail.com'
                 rules={[
                   { required: true, message: 'Please input your email!', validateTrigger: 'onBlur', type: 'email' }
                 ]}
@@ -105,7 +105,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Password'
                 name='password'
                 className='m-0 w-full p-0'
-                initialValue='Soyoongdev@2704'
+                initialValue='Phungnguyen@2771'
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
                 <Input.Password

@@ -54,7 +54,6 @@ export default {
         refreshToken: refreshToken
       })
       .then((res) => {
-        console.log(res)
         return responseFormatter(res)
       })
       .catch(function (error) {

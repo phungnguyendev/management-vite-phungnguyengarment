@@ -7,7 +7,7 @@ import useAPIService from '~/hooks/useAPIService'
 import { SewingLine } from '~/typing'
 import { SewingLineTableDataType } from '../type'
 
-export default function useSewingLine(table: UseTableProps<SewingLineTableDataType>) {
+export default function useSewingLineViewModel(table: UseTableProps<SewingLineTableDataType>) {
   const { setLoading, showDeleted, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
   // Services

@@ -2,14 +2,10 @@ export type UserRoleType =
   | 'admin'
   | 'product_manager'
   | 'importation_manager'
+  | 'sample_sewing_manager'
   | 'accessory_manager'
   | 'cutting_group_manager'
-  | 'sample_sewing_manager'
   | 'completion_manager'
-  | 'plan_manager'
-  | 'hcns_manager'
-  | 'accountant_manager'
-  | 'sewing_manager'
   | 'sewing_line_manager'
   | 'staff'
 
@@ -53,11 +49,6 @@ export type StepRound = {
   type: StatusType
 }
 
-export type StepRound = {
-  name: string
-  type: StatusType
-}
-
 export type TableListDataType<T> = {
   key: React.Key
   data: T
@@ -65,13 +56,10 @@ export type TableListDataType<T> = {
 
 export interface Role {
   id?: number
-  userID?: number | null
   role?: UserRoleType | null
-  isAdmin?: boolean | null
   shortName?: string | null
   desc?: string | null
   status?: ItemStatusType | null
-  user?: User | null
   createdAt?: string
   updatedAt?: string
 }
@@ -80,9 +68,7 @@ export interface UserRole {
   id?: number
   roleID?: number | null
   userID?: number | null
-  role?: Role | null
-  user?: User | null
-  status?: ItemStatusType
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
@@ -98,7 +84,7 @@ export interface User {
   isAdmin?: boolean | null
   workDescription?: string | null
   birthday?: string | null
-  status?: ItemStatusType
+  status?: ItemStatusType | null
   createdAt?: string
   updatedAt?: string
 }
