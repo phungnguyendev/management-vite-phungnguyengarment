@@ -6,7 +6,7 @@ import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { textValidatorDisplay } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewGroup from './components/ModalAddNewGroup'
 import useGroupViewModel from './hooks/useGroupViewModel'
 import { GroupTableDataType } from './type'
@@ -16,16 +16,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 const GroupPage: React.FC<Props> = () => {
   useTitle('Nhóm | Phung Nguyen')
   const { state, action, table } = useGroupViewModel()
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    showDeleted,
-    setShowDeleted,
-    searchTextChange,
-    setSearchTextChange
-  } = state
+  const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
     handleAddNew,
     handleUpdate,
@@ -52,7 +43,7 @@ const GroupPage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+            onValueChange={(val: string) => setNewRecord({ ...newRecord, name: textValidatorChange(val) })}
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -68,9 +59,7 @@ const GroupPage: React.FC<Props> = () => {
         loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
-          placeholder: 'Tên nhóm..',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          placeholder: 'Tên nhóm..'
         }}
         sortProps={{
           onChange: handleSortChange

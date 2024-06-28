@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
 import GroupAPI from '~/api/services/GroupAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Group } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { GroupAddNewProps } from '../components/ModalAddNewGroup'
-import { GroupTableDataType } from '../type'
+import { GroupAddNewProps, GroupTableDataType } from '../type'
 
 export default function useGroupViewModel() {
   const { message } = AntApp.useApp()
@@ -20,16 +20,33 @@ export default function useGroupViewModel() {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<GroupAddNewProps>({})
   const [paginator, setPaginator] = useState<Paginator>({
     page: 1,
     pageSize: -1
   })
   const [shorted, setSorted] = useState<boolean>(false)
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     loadData()
   }, [showDeleted, shorted, paginator, searchText])
+
+  useEffect(() => {
+    mappedData()
+  }, [groups])
+
+  const mappedData = useCallback(() => {
+    table.setDataSource(() => {
+      const _dataSource = groups.map((self) => {
+        return {
+          ...self,
+          key: `${self.id}`
+        } as GroupTableDataType
+      })
+      return _dataSource
+    })
+  }, [groups])
 
   const loadData = useCallback(async () => {
     try {
@@ -43,16 +60,9 @@ export default function useGroupViewModel() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
-          const Groups = meta.data as Group[]
-          table.setDataSource(
-            Groups.map((item) => {
-              return {
-                ...item,
-                key: `${item.id}`
-              }
-            })
-          )
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
+          const _groups = meta.data as Group[]
+          setGroups(_groups)
         }
       )
     } catch (error: any) {
@@ -63,41 +73,35 @@ export default function useGroupViewModel() {
   }, [showDeleted, paginator, shorted, searchText])
 
   const handleUpdate = async (record: GroupTableDataType) => {
-    console.log('handleUpdate')
-    // const row = (await form.validateFields()) as any
     try {
       if (textComparator(record.name, newRecord.name)) {
-        console.log('Group progressing...')
         await groupService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+          if (!meta?.success) throw new Error(define('update_failed'))
           const itemUpdated = meta.data as Group
           table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as GroupTableDataType)
-          message.success('Success!')
+          message.success(define('updated_success'))
         })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       table.handleCancelEditing()
+      table.setLoading(false)
     }
   }
 
   const handleAddNew = async (formAddNew: GroupAddNewProps) => {
     try {
-      console.log('handleAddNew')
-      console.log(formAddNew)
-      table.setLoading(true)
       await groupService.createItemSync(
         {
           name: formAddNew.name
         },
         table.setLoading,
-        async (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+        (meta) => {
+          if (!meta?.success) throw new Error(define('create_failed'))
           const newGroup = meta.data as Group
           table.handleAddNew({ ...newGroup, key: `${newGroup.id}` })
-          message.success(meta.message)
+          message.success(define('created_success'))
         }
       )
     } catch (error: any) {
@@ -109,12 +113,11 @@ export default function useGroupViewModel() {
   }
 
   const handleDelete = async (record: GroupTableDataType) => {
-    console.log('handleDelete')
     try {
       await groupService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta.success) throw new Error(define('failed'))
         table.handleDeleting(record.key)
-        message.success('Deleted!')
+        message.success(define('success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -127,9 +130,9 @@ export default function useGroupViewModel() {
     console.log(id)
     try {
       await groupService.deleteItemSync(id, table.setLoading, (res) => {
-        if (!res.success) throw new Error(res.message)
+        if (!res.success) throw new Error(define('delete_failed'))
         table.handleDeleting(`${id}`)
-        message.success(`${res.message}`)
+        message.success(define('deleted_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -141,9 +144,9 @@ export default function useGroupViewModel() {
   const handleRestore = async (record: GroupTableDataType) => {
     try {
       await groupService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta.success) throw new Error(define('restore_failed'))
         table.handleDeleting(`${record.id!}`)
-        message.success('Restored!')
+        message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -163,7 +166,6 @@ export default function useGroupViewModel() {
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
-    console.log(value)
   }
 
   return {
