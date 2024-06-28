@@ -210,7 +210,7 @@ function EditableFormCell({
           rules={[
             {
               required: required,
-              message: subtitle
+              message: `Vui lòng nhập "${subtitle ?? title}"`
             }
           ]}
         >

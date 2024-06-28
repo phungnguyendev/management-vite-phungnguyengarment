@@ -1,43 +1,45 @@
-import { Form, Modal } from 'antd'
+import { Form } from 'antd'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import { SewingLine } from '~/typing'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: SewingLine) => void
+export interface PrintAddNewProps {
+  name?: string
 }
 
-const ModalAddNewPrint: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+interface Props extends SkyModalProps {
+  onAddNew: (formAddNew: PrintAddNewProps) => void
+}
+
+const ModalAddNewPrint: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
-  async function handleOk() {
+  const handleOk = async () => {
     const row = await form.validateFields()
     onAddNew({
-      ...row
+      name: row.name
     })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal title={<AddNewTitle title='Add new' />} open={openModal} onOk={handleOk} onCancel={handleCancel} centered>
-      <Form form={form} labelCol={{ flex: '100px' }} {...props}>
-        <EditableFormCell
-          isEditing
-          allowClear
-          dataIndex='print-place'
-          title='Print place'
-          subtitle='Please enter print place!'
-          placeholder='TIẾN THẮNG, ĐẠI VIỆT PHÁT, v.v..'
-          required
-        />
+    <SkyModal {...props} title='Thêm nơi In - Thêu' okText='Create' onOk={handleOk}>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Tên:'
+              placeholder='Ví dụ: T THINH, TIẾN THẮNG'
+              dataIndex='name'
+              inputType='text'
+              required
+            />
+          </SkyModalRowItem>
+        </SkyModalRow>
       </Form>
-    </Modal>
+    </SkyModal>
   )
 }
 

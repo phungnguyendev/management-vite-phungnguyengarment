@@ -7,8 +7,8 @@ import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 
 export interface ColorAddNewProps {
-  name?: string | null
-  hexColor?: string | null
+  name?: string
+  hexColor?: string
 }
 
 interface Props extends SkyModalProps {
@@ -32,14 +32,14 @@ const ModalAddNewColor: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   return (
-    <SkyModal {...props} title='New color' okText='Create' onOk={handleOk}>
+    <SkyModal {...props} title='Thêm màu' okText='Create' onOk={handleOk}>
       <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
         <SkyModalRow>
           <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
-              title='Color name:'
-              placeholder='Name'
+              title='Tên màu:'
+              placeholder='Ví dụ: Black'
               dataIndex='name'
               inputType='text'
               required
@@ -48,8 +48,8 @@ const ModalAddNewColor: React.FC<Props> = ({ onAddNew, ...props }) => {
           <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
-              title='Pick color:'
-              placeholder='Hex color'
+              title='Chọn mã màu:'
+              placeholder='Ví dụ: #000000'
               dataIndex='hexColor'
               inputType='colorpicker'
               required

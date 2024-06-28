@@ -1,37 +1,39 @@
 import { ColumnsType } from 'antd/es/table'
-import { useSelector } from 'react-redux'
-import useTable from '~/components/hooks/useTable'
+import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import ModalAddNewRole from './components/ModalAddNewRole'
-import useRole from './hooks/useRole'
+import useRoleViewModel from './hooks/useRoleViewModel'
 import { RoleTableDataType } from './type'
 
 const RolePage = () => {
-  const table = useTable<RoleTableDataType>([])
+  useTitle('Vai trò | Phung Nguyen')
+  const { state, action, table } = useRoleViewModel()
   const {
-    searchText,
-    setSearchText,
     newRecord,
     setNewRecord,
     openModal,
     setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
+    showDeleted,
+    setShowDeleted,
+    searchTextChange,
+    setSearchTextChange
+  } = state
+  const {
+    handleAddNew,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    roleService
-  } = useRole(table)
-  const currentUser = useSelector((state: RootState) => state.user)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
 
   const columns = {
     role: (record: RoleTableDataType) => {
@@ -44,7 +46,11 @@ const RolePage = () => {
           required={true}
           initialValue={textValidatorInit(record.role)}
           value={newRecord.role}
-          onValueChange={(val) => setNewRecord({ ...newRecord, role: textValidatorChange(val) as UserRoleType })}
+          onValueChange={(val: UserRoleType) =>
+            setNewRecord((prev) => {
+              return { ...prev, role: val }
+            })
+          }
         >
           <SkyTableTypography strong status={'active'}>
             {textValidatorDisplay(record.role)}
@@ -62,7 +68,11 @@ const RolePage = () => {
           required={true}
           initialValue={textValidatorInit(record.shortName)}
           value={newRecord.shortName}
-          onValueChange={(val) => setNewRecord({ ...newRecord, shortName: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, shortName: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{textValidatorDisplay(record.shortName)}</SkyTableTypography>
         </EditableStateCell>
@@ -78,7 +88,11 @@ const RolePage = () => {
           required={true}
           initialValue={textValidatorInit(record.desc)}
           value={newRecord.desc}
-          onValueChange={(val) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
+          onValueChange={(val) =>
+            setNewRecord((prev) => {
+              return { ...prev, desc: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{textValidatorDisplay(record.desc)}</SkyTableTypography>
         </EditableStateCell>
@@ -116,19 +130,22 @@ const RolePage = () => {
   return (
     <ProtectedLayout>
       <BaseLayout
-        searchPlaceHolder='Search..'
-        searchValue={searchText}
-        onDeletedRecordStateChange={(enable) => table.setDeletedRecordState(enable)}
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        title='Danh sách vai trò'
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Ví dụ: Product Manager...',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin')
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
+        }}
+        addNewProps={{
+          onClick: () => setOpenModal(true)
         }}
       >
         <SkyTable
@@ -139,30 +156,42 @@ const RolePage = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={roleService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
+              handleClick: (record) => {
                 setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
-              }
+                table.handleStartEditing(record.key)
+              },
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin')
+            onDeleteForever: {
+              isShow: showDeleted
+            },
+            onRestore: {
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
+            },
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewRole openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
+      {openModal && <ModalAddNewRole open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
     </ProtectedLayout>
   )
 }

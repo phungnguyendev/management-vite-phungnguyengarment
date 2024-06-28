@@ -1,52 +1,53 @@
-import { ColumnType } from 'antd/es/table'
-import { useSelector } from 'react-redux'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import { ColumnsType } from 'antd/es/table'
+import { memo } from 'react'
+import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import { textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewPrint from './components/ModalAddNewPrint'
-import usePrint from './hooks/usePrint'
-import { PrintTableDataType } from './type'
+import usePrintableViewModel from './hooks/usePrintableViewModel'
+import { PrintableTableDataType } from './type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
-const PrintTable: React.FC<Props> = () => {
-  const table = useTable<PrintTableDataType>([])
-
+const SewingLinePage: React.FC<Props> = () => {
+  useTitle('Nơi in - Thêu | Phung Nguyen')
+  const { state, action, table } = usePrintableViewModel()
   const {
-    searchText,
-    setSearchText,
     newRecord,
     setNewRecord,
     openModal,
     setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handleConfirmRestore,
+    showDeleted,
+    setShowDeleted,
+    searchTextChange,
+    setSearchTextChange
+  } = state
+  const {
+    handleAddNew,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    printService
-  } = usePrint(table)
-  const currentUser = useSelector((state: RootState) => state.user)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
 
-  const columns: ColumnType<PrintTableDataType>[] = [
+  const tableColumns: ColumnsType<PrintableTableDataType> = [
     {
-      title: 'Nơi in',
+      title: 'Tên',
       dataIndex: 'name',
       width: '15%',
-      render: (_value: any, record: TableItemWithKey<PrintTableDataType>) => {
+      render: (_value: any, record: PrintableTableDataType) => {
         return (
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
             dataIndex='name'
-            title='Nơi in'
+            title='Sewing line name'
             inputType='text'
             required={true}
             initialValue={record.name}
@@ -63,66 +64,70 @@ const PrintTable: React.FC<Props> = () => {
   return (
     <ProtectedLayout>
       <BaseLayout
-        title='Nơi in - Thêu'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') ? (enable) => table.setDeletedRecordState(enable) : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        title='Danh sách nơi In - Thêu'
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Ví dụ: T THINH, TIẾN THẮNG',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin')
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
+        }}
+        addNewProps={{
+          onClick: () => setOpenModal(true)
         }}
       >
         <SkyTable
           bordered
           loading={table.loading}
-          columns={columns}
+          columns={tableColumns}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={printService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord(record)
-                table.handleStartEditing(record!.key!)
+              handleClick: (record) => {
+                setNewRecord({ ...record })
+                table.handleStartEditing(record.key)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!),
-              isShow: true
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
+            },
+            onDeleteForever: {
+              isShow: showDeleted
             },
             onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            onConfirmRestore: (record) => handleConfirmRestore(record),
-            isShow: currentUser.userRoles.includes('admin')
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewPrint openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
+      {openModal && <ModalAddNewPrint open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
     </ProtectedLayout>
   )
 }
 
-export default PrintTable
+export default memo(SewingLinePage)

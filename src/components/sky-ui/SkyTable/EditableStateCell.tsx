@@ -19,6 +19,7 @@ import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
@@ -198,10 +199,10 @@ function EditableStateCell({
           <DatePicker
             {...datePickerProps}
             title={title}
-            placeholder={placeholder}
+            placeholder={placeholder ?? `Ví dụ: ${dateFormatter(Date.now())}`}
             name={dataIndex}
             required={required}
-            onChange={(val) => onValueChange?.(val)}
+            onChange={(val) => val && onValueChange?.(val)}
             disabled={disabled}
             value={value}
             defaultValue={initialValue}
@@ -214,7 +215,7 @@ function EditableStateCell({
           <Input
             {...inputProps}
             required
-            placeholder={placeholder ?? 'Enter password'}
+            placeholder={placeholder ?? 'Ví dụ: Abc@@123??'}
             name={dataIndex}
             type={visible ? 'text' : 'password'}
             onChange={(event) => onValueChange?.(event.target.value)}
@@ -239,7 +240,7 @@ function EditableStateCell({
             {...inputProps}
             required
             title={title}
-            placeholder={placeholder}
+            placeholder={placeholder ?? 'Ví dụ: nguyenvana@gmail.com'}
             name={dataIndex}
             type='email'
             autoComplete='give-text'

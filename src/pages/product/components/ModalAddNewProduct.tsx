@@ -9,16 +9,16 @@ import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
-import DayJS from '~/utils/date-formatter'
+import DayJS, { dateFormatter } from '~/utils/date-formatter'
 
 export interface ProductAddNewProps {
-  productCode?: string | null
-  quantityPO?: number | null
-  colorID?: number | null
-  groupID?: number | null
-  printID?: number | null
-  dateInputNPL?: string | null
-  dateOutputFCR?: string | null
+  productCode?: string
+  quantityPO?: number
+  colorID?: number
+  groupID?: number
+  printID?: number
+  dateInputNPL?: string
+  dateOutputFCR?: string
 }
 
 interface Props extends SkyModalProps {
@@ -63,7 +63,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   return (
-    <SkyModal {...props} title='New product' okText='Create' onOk={handleOk}>
+    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
         <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
           <SkyModalRow>
@@ -71,7 +71,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Mã Code'
-                placeholder='Mã Code...'
+                placeholder='Ví dụ: GAC021254'
                 dataIndex='productCode'
                 inputType='text'
                 required
@@ -82,7 +82,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 isEditing={true}
                 title='Số lượng PO'
                 dataIndex='quantityPO'
-                placeholder='Số lượng PO...'
+                placeholder='Ví dụ: 1000'
                 inputType='number'
                 required
               />
@@ -93,7 +93,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 title='Mã màu:'
                 dataIndex='colorID'
                 inputType='colorselector'
-                placeholder='Chọn mã màu...'
+                placeholder='Ví dụ: Black'
                 selectProps={{
                   options: colors.map((item) => {
                     return {
@@ -111,7 +111,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 title='Nhóm:'
                 dataIndex='groupID'
                 inputType='select'
-                placeholder='Chọn nhóm...'
+                placeholder='Ví dụ: G1-4'
                 selectProps={{
                   options: groups.map((item) => {
                     return {
@@ -129,7 +129,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 title='Nơi in:'
                 dataIndex='printID'
                 inputType='select'
-                placeholder='Chọn nơi in...'
+                placeholder='Ví dụ: T THINH, TIẾN THẮNG..'
                 selectProps={{
                   options: prints.map((item) => {
                     return {
@@ -148,7 +148,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 dataIndex='dateInputNPL'
                 inputType='datepicker'
                 required
-                placeholder='Ngày nhập NPL...'
+                placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
                 initialValue={DayJS(Date.now())}
               />
             </SkyModalRowItem>
@@ -159,7 +159,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 dataIndex='dateOutputFCR'
                 inputType='datepicker'
                 required
-                placeholder='Ngày xuất FCR...'
+                placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
                 initialValue={DayJS(Date.now())}
               />
             </SkyModalRowItem>

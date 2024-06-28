@@ -19,7 +19,7 @@ import {
   numberValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
-import useCuttingGroup from '../hooks/useCuttingGroup'
+import useCuttingGroup from '../hooks/useCuttingGroupViewModel'
 import { CuttingGroupTableDataType } from '../type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}

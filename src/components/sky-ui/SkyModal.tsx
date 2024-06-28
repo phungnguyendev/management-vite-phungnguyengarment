@@ -1,13 +1,13 @@
-import type { ModalProps } from 'antd'
-import { Flex, Modal, Typography } from 'antd'
+import { Flex, Modal, ModalProps, Spin, Typography } from 'antd'
 import React from 'react'
 import { cn } from '~/utils/helpers'
 
 export interface SkyModalProps extends ModalProps {
+  loading?: boolean
   setOpenModal: (enable: boolean) => void
 }
 
-const SkyModal: React.FC<SkyModalProps> = ({ setOpenModal, ...props }) => {
+const SkyModal: React.FC<SkyModalProps> = ({ loading, setOpenModal, ...props }) => {
   const handleCancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     props.onCancel?.(e)
     setOpenModal(false)
@@ -31,7 +31,7 @@ const SkyModal: React.FC<SkyModalProps> = ({ setOpenModal, ...props }) => {
       className={cn('z-10 w-full', props.className)}
     >
       <Flex vertical gap={20}>
-        {props.children}
+        {loading ? <Spin spinning>{props.children}</Spin> : props.children}
       </Flex>
     </Modal>
   )

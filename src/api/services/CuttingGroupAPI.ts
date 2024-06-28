@@ -4,7 +4,7 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'cutting-groups'
 
 export default {
-  createItem: async (newItem: CuttingGroup, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: CuttingGroup, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -25,7 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -39,9 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (query: CuttingGroup, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .get(`${NAMESPACE}/${[query]}/${query}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -53,7 +53,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
@@ -67,13 +67,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: CuttingGroup,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: CuttingGroup, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -89,9 +85,9 @@ export default {
     query: CuttingGroup,
     itemToUpdate: CuttingGroup,
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .patch(`${NAMESPACE}/${[query]}/${query}`, itemToUpdate, {
+      .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -103,7 +99,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: CuttingGroup[], accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: CuttingGroup[], accessToken: string): Promise<ResponseDataType> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
@@ -117,7 +113,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {
@@ -131,9 +127,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemBy: async (query: CuttingGroup, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemBy: async (query: CuttingGroup, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .delete(`${NAMESPACE}/${[query]}/${query}`, {
+      .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }

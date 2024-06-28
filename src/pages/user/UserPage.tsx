@@ -1,21 +1,19 @@
 import { Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
+import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
-import { RootState } from '~/store/store'
-import { UserRole } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
-  dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
   textValidatorChange,
@@ -23,31 +21,24 @@ import {
   textValidatorInit
 } from '~/utils/helpers'
 import ModalAddNewUser from './components/ModalAddNewUser'
-import useUser from './hooks/useUser'
+import useUserViewModel from './hooks/useUserViewModel'
 import { UserTableDataType } from './type'
 
 const UserPage = () => {
-  const table = useTable<UserTableDataType>([])
-  const { setLoading } = table
+  useTitle('Người dùng - Phung Nguyen')
+  const { state, action, table } = useUserViewModel()
+  const { roles, newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted, setSearchText } = state
   const {
-    searchText,
-    setSearchText,
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
+    handleAddNew,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    userService,
-    roles
-  } = useUser(table)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
   const { width } = useDevice()
-  const currentUser = useSelector((state: RootState) => state.user)
 
   const columns = {
     email: (record: UserTableDataType) => {
@@ -57,10 +48,14 @@ const UserPage = () => {
           dataIndex='email'
           title='Email'
           inputType='text'
-          required={true}
+          required
           initialValue={textValidatorInit(record.email)}
           value={newRecord.email}
-          onValueChange={(val) => setNewRecord({ ...newRecord, email: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, email: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{textValidatorDisplay(record.email)}</SkyTableTypography>
         </EditableStateCell>
@@ -73,10 +68,14 @@ const UserPage = () => {
           dataIndex='fullName'
           title='Full name'
           inputType='text'
-          required={true}
+          required
           initialValue={textValidatorInit(record.fullName)}
           value={newRecord.fullName}
-          onValueChange={(val) => setNewRecord({ ...newRecord, fullName: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, fullName: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{textValidatorDisplay(record.fullName)}</SkyTableTypography>
         </EditableStateCell>
@@ -89,10 +88,14 @@ const UserPage = () => {
           dataIndex='password'
           title='Password'
           inputType='password'
-          required={true}
+          required
           initialValue={textValidatorInit(record.password)}
           value={newRecord.password}
-          onValueChange={(val) => setNewRecord({ ...newRecord, password: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, password: textValidatorChange(val) }
+            })
+          }
         >
           <TextHint title={record.password ?? undefined} />
         </EditableStateCell>
@@ -105,10 +108,14 @@ const UserPage = () => {
           dataIndex='phone'
           title='Phone'
           inputType='text'
-          required={true}
+          required
           initialValue={textValidatorInit(record.phone)}
           value={newRecord.phone}
-          onValueChange={(val) => setNewRecord({ ...newRecord, phone: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, phone: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography copyable={record.phone !== null} status={'active'}>
             {textValidatorDisplay(record.phone)}
@@ -123,10 +130,15 @@ const UserPage = () => {
           dataIndex='workDescription'
           title='Work description'
           inputType='textarea'
-          required={true}
+          required
+          placeholder='Ví dụ: Quản lý sản phẩm, Quản lý xuất nhập khẩu,...'
           initialValue={textValidatorInit(record.workDescription)}
           value={newRecord.workDescription}
-          onValueChange={(val) => setNewRecord({ ...newRecord, workDescription: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, workDescription: textValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{textValidatorDisplay(record.workDescription)}</SkyTableTypography>
         </EditableStateCell>
@@ -139,9 +151,13 @@ const UserPage = () => {
           dataIndex='birthday'
           title='Birthday'
           inputType='datepicker'
-          required={true}
+          required
           initialValue={dateValidatorInit(record.birthday)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, birthday: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, birthday: dateFormatter(val.toDate(), 'iso8601') }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.birthday)}</SkyTableTypography>
         </EditableStateCell>
@@ -154,45 +170,35 @@ const UserPage = () => {
           dataIndex='roles'
           title='Vai trò'
           inputType='multipleselect'
-          required={true}
+          required
           selectProps={{
-            options: roles.map((item) => {
+            options: roles.map((role) => {
               return {
-                value: item.id,
-                label: item.desc
+                value: role.id,
+                label: <SkyTableRowHighLightItem title={role.desc} role={role.role} />
               }
             }),
-            defaultValue:
-              record.userRoles &&
-              record.userRoles.map((item) => {
-                return {
-                  value: item.role?.id,
-                  label: item.role?.desc
-                }
-              })
+            defaultValue: record.roles.map((role) => {
+              return {
+                value: role.id,
+                label: <SkyTableRowHighLightItem title={role.desc} role={role.role} />
+              }
+            })
           }}
-          onValueChange={(val: number[]) => {
-            setNewRecord({
-              ...newRecord,
-              userRoles: val.map((roleID) => {
-                return { roleID: roleID, userID: record.id } as UserRole
-              })
+          onValueChange={(roleIDs: number[]) => {
+            setNewRecord((prevData) => {
+              return { ...prevData, roleIDs: roleIDs }
             })
           }}
         >
           <Space size='small' wrap>
-            {record.userRoles &&
-              record.userRoles.map((item, index) => {
-                return (
-                  <SkyTableTypography
-                    type={item.role?.role === 'admin' ? 'success' : undefined}
-                    className='my-[2px] h-6 rounded-sm bg-black bg-opacity-[0.06] px-2 py-1'
-                    key={index}
-                  >
-                    {textValidatorDisplay(item.role?.desc)}
-                  </SkyTableTypography>
-                )
-              })}
+            {record.roles.map((role, index) => {
+              return (
+                <span key={index}>
+                  <SkyTableRowHighLightItem title={role.desc} role={role.role} background />
+                </span>
+              )
+            })}
           </Space>
         </EditableStateCell>
       )
@@ -204,7 +210,7 @@ const UserPage = () => {
       title: 'Full name',
       key: 'fullName',
       dataIndex: 'fullName',
-      width: '15%',
+      width: '10%',
       render: (_value: any, record: UserTableDataType) => {
         return columns.fullName(record)
       }
@@ -244,7 +250,7 @@ const UserPage = () => {
       key: 'phone',
       dataIndex: 'phone',
       width: '10%',
-      responsive: ['xl'],
+      responsive: ['xxl'],
       render: (_value: any, record: UserTableDataType) => {
         return columns.phone(record)
       }
@@ -274,21 +280,20 @@ const UserPage = () => {
   return (
     <ProtectedLayout>
       <BaseLayout
-        onLoading={(enable) => setLoading(enable)}
         title='Danh sách người dùng'
-        searchValue={searchText}
-        // onDeletedRecordStateChange={(enable) => table.setDeletedRecordState(enable)}
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        searchPlaceHolder='Tên...'
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Ví dụ: abc@gmail.com'
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin')
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
+        }}
+        addNewProps={{
+          onClick: () => setOpenModal(true)
         }}
       >
         <SkyTable
@@ -299,29 +304,45 @@ const UserPage = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={userService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
+              handleClick: (record) => {
+                setNewRecord({
+                  ...record,
+                  roleIDs:
+                    record.roles &&
+                    record.roles.map((item) => {
+                      return item.id!
+                    })
+                })
+                table.handleStartEditing(record.key)
               },
-              isShow: true
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!),
-              isShow: true
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: true
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin')
+            onDeleteForever: {
+              isShow: showDeleted
+            },
+            onRestore: {
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
+            },
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
           expandable={{
             expandedRowRender: (record) => {
@@ -343,7 +364,7 @@ const UserPage = () => {
                         {columns.password(record)}
                       </ExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.xl) && (
+                    {!(width >= breakpoint.xxl) && (
                       <ExpandableItemRow title='Phone:' isEditing={table.isEditing(record.id!)}>
                         {columns.phone(record)}
                       </ExpandableItemRow>
@@ -367,7 +388,14 @@ const UserPage = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewUser openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
+      {openModal && (
+        <ModalAddNewUser
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </ProtectedLayout>
   )
 }

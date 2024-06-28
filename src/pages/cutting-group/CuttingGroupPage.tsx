@@ -1,16 +1,13 @@
 import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateTimeValidatorDisplay,
@@ -23,27 +20,23 @@ import {
   numberValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
-import useCuttingGroup from './hooks/useCuttingGroup'
+import useCuttingGroupViewModel from './hooks/useCuttingGroupViewModel'
 import { CuttingGroupTableDataType } from './type'
 
 const SampleSewingPage = () => {
-  const table = useTable<CuttingGroupTableDataType>([])
-  const { width } = useDevice()
+  useTitle('Người dùng - Phung Nguyen')
+  const { state, action, table } = useCuttingGroupViewModel()
+  const { newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } = state
   const {
-    searchText,
-    setSearchText,
-    newRecord,
-    setNewRecord,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleConfirmDelete,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    productService
-  } = useCuttingGroup(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  useTitle('Tổ cắt')
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
+  const { width } = useDevice()
 
   const columns = {
     productCode: (record: CuttingGroupTableDataType) => {
@@ -131,7 +124,7 @@ const SampleSewingPage = () => {
             title='Ngày gửi in thêu'
             inputType='datepicker'
             required
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
@@ -162,16 +155,16 @@ const SampleSewingPage = () => {
           <EditableStateCell
             dataIndex='amountQuantityEmbroidered'
             title='Còn lại'
-            isEditing={table.isEditing(record.id!)}
+            isEditing={table.isEditing(record.key)}
             editableRender={
               <SkyTableTypography
                 status={record.status}
-                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
               >
                 {total}
               </SkyTableTypography>
             }
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             initialValue={total}
             inputType='number'
           >
@@ -549,18 +542,18 @@ const SampleSewingPage = () => {
     <>
       <BaseLayout
         title='Tổ cắt'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Ví dụ: abc@gmail.com',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
+        }}
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
         }}
       >
         <SkyTable
@@ -571,12 +564,11 @@ const SampleSewingPage = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
+              handleClick: (record) => {
                 setNewRecord({
                   ...record?.cuttingGroup,
                   cuttingGroupID: record?.cuttingGroup ? record?.cuttingGroup.id : null, // Using for compare check box
@@ -584,23 +576,30 @@ const SampleSewingPage = () => {
                 })
                 table.handleStartEditing(record!.key!)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
+            },
+            onDeleteForever: {
+              isShow: showDeleted
             },
             onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('cutting_group_manager')
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
           expandable={{
             expandedRowRender: (record) => {
@@ -609,7 +608,7 @@ const SampleSewingPage = () => {
                   <Flex vertical>
                     <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                       {!(width >= breakpoint.sm) && (
-                        <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                        <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
                           {columns.productColor(record)}
                         </ExpandableItemRow>
                       )}
@@ -617,7 +616,7 @@ const SampleSewingPage = () => {
                         <ExpandableItemRow
                           className='w-1/2'
                           title='Số lượng PO:'
-                          isEditing={table.isEditing(record.id!)}
+                          isEditing={table.isEditing(record.key)}
                         >
                           {columns.quantityPO(record)}
                         </ExpandableItemRow>
@@ -627,14 +626,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-1/2'
                             title='SL thực cắt:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.quantityRealCut(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-1/2'
                             title='SL còn lại:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.remainingAmount(record)}
                           </ExpandableItemRow>
@@ -644,7 +643,7 @@ const SampleSewingPage = () => {
                         <ExpandableItemRow
                           className='w-1/2'
                           title='Ngày giờ cắt:'
-                          isEditing={table.isEditing(record.id!)}
+                          isEditing={table.isEditing(record.key)}
                         >
                           {columns.timeCut(record)}
                         </ExpandableItemRow>
@@ -654,21 +653,21 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-1/2'
                             title='Ngày gửi in thêu:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroidered.dateSendEmbroidered(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-1/2'
                             title='SL còn lại:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroidered.amountQuantityEmbroidered(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-1/2'
                             title='In thêu?:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroidered.syncStatus(record)}
                           </ExpandableItemRow>
@@ -679,14 +678,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-1/2'
                             title='SL Giao BTP:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.btp.quantityDeliveredBTP(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-1/2'
                             title='Số lượng BTP còn lại:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.btp.amountQuantityDeliveredBTP(record)}
                           </ExpandableItemRow>
@@ -704,14 +703,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th1.quantityArrived(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th1.dateArrived(record)}
                           </ExpandableItemRow>
@@ -725,14 +724,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th2.quantityArrived(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th2.dateArrived(record)}
                           </ExpandableItemRow>
@@ -746,14 +745,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th3.quantityArrived(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th3.dateArrived(record)}
                           </ExpandableItemRow>
@@ -767,14 +766,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th4.quantityArrived(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th4.dateArrived(record)}
                           </ExpandableItemRow>
@@ -788,14 +787,14 @@ const SampleSewingPage = () => {
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th5.quantityArrived(record)}
                           </ExpandableItemRow>
                           <ExpandableItemRow
                             className='w-fit pr-5'
                             title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
+                            isEditing={table.isEditing(record.key)}
                           >
                             {columns.embroideringArrived.th5.dateArrived(record)}
                           </ExpandableItemRow>

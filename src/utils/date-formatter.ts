@@ -16,7 +16,7 @@ dayjs.tz.setDefault('Asia/Ho_Chi_Minh')
 export type DateFormatType = 'dateOnly' | 'dateTime' | 'timeOnly' | 'iso8601'
 
 export const dateFormatter = (
-  date?: string | number | Date | dayjs.Dayjs | null | undefined,
+  date?: string | number | Date | dayjs.Dayjs | undefined,
   formatType?: DateFormatType
 ): string => {
   switch (formatType) {

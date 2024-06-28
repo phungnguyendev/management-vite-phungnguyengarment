@@ -1,58 +1,60 @@
-import { ColumnType } from 'antd/es/table'
-import { useSelector } from 'react-redux'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
+import { ColumnsType } from 'antd/es/table'
+import { memo } from 'react'
+import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
+import { textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
-import useSewingLine from './hooks/useSewingLineViewModel'
+import useSewingLineViewModel from './hooks/useSewingLineViewModel'
 import { SewingLineTableDataType } from './type'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLinePage: React.FC<Props> = () => {
-  const table = useTable<SewingLineTableDataType>([])
-
+  useTitle('Chuyền may | Phung Nguyen')
+  const { state, action, table } = useSewingLineViewModel()
   const {
-    searchText,
-    setSearchText,
     newRecord,
     setNewRecord,
     openModal,
     setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handleConfirmRestore,
+    showDeleted,
+    setShowDeleted,
+    searchTextChange,
+    setSearchTextChange
+  } = state
+  const {
+    handleAddNew,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    sewingLineService
-  } = useSewingLine(table)
-  const currentUser = useSelector((state: RootState) => state.user)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
 
-  const columns: ColumnType<SewingLineTableDataType>[] = [
+  const tableColumns: ColumnsType<SewingLineTableDataType> = [
     {
-      title: 'Tên chuyền',
+      title: 'Tên',
       dataIndex: 'name',
       width: '15%',
-      render: (_value: any, record: TableItemWithKey<SewingLineTableDataType>) => {
+      render: (_value: any, record: SewingLineTableDataType) => {
         return (
           <EditableStateCell
             isEditing={table.isEditing(record.key!)}
             dataIndex='name'
-            title='Tên chuyền'
+            title='Sewing line name'
             inputType='text'
             required={true}
             initialValue={record.name}
             value={newRecord.name}
             onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
           >
-            <SkyTableTypography status={'active'}>{record.name}</SkyTableTypography>
+            <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -62,68 +64,70 @@ const SewingLinePage: React.FC<Props> = () => {
   return (
     <ProtectedLayout>
       <BaseLayout
-        title='Chuyền may'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') ? (enable) => table.setDeletedRecordState(enable) : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        title='Danh sách chuyền may'
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Tên chuyền..',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('sewing_line_manager')
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
+        }}
+        addNewProps={{
+          onClick: () => setOpenModal(true)
         }}
       >
         <SkyTable
           bordered
           loading={table.loading}
-          columns={columns}
+          columns={tableColumns}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={sewingLineService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord(record)
-                table.handleStartEditing(record!.key!)
+              handleClick: (record) => {
+                setNewRecord({ ...record })
+                table.handleStartEditing(record.key)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord),
-              isShow: true
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
+            },
+            onDeleteForever: {
+              isShow: showDeleted
             },
             onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            onConfirmRestore: (record) => handleConfirmRestore(record),
-            isShow: currentUser.userRoles.includes('admin')
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
         />
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewSewingLine openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
-      )}
+      {openModal && <ModalAddNewSewingLine open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
     </ProtectedLayout>
   )
 }
 
-export default SewingLinePage
+export default memo(SewingLinePage)

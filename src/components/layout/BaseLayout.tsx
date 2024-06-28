@@ -2,7 +2,7 @@ import { Button, ButtonProps, Flex, Input, Spin, Switch, Typography } from 'antd
 import { SearchProps } from 'antd/es/input'
 import { SwitchProps } from 'antd/lib'
 import { Plus } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   loading?: boolean
@@ -25,6 +25,8 @@ const BaseLayout: React.FC<Props> = ({
   // onLoading,
   ...props
 }) => {
+  const [searchText, setSearchText] = useState<string>('')
+
   return (
     <div {...props} className='w-full'>
       <Flex vertical gap={20} className='w-full'>
@@ -36,6 +38,11 @@ const BaseLayout: React.FC<Props> = ({
               placeholder={searchProps.placeholder ?? 'Search...'}
               size='middle'
               enterButton
+              value={searchProps.value ?? searchText}
+              onChange={(e) => {
+                props.onChange?.(e)
+                setSearchText(e.target.value)
+              }}
               className='w-full lg:hidden'
               name='search'
               allowClear
@@ -49,6 +56,11 @@ const BaseLayout: React.FC<Props> = ({
                   placeholder={searchProps.placeholder ?? 'Search...'}
                   size='middle'
                   enterButton
+                  value={searchProps.value ?? searchText}
+                  onChange={(e) => {
+                    props.onChange?.(e)
+                    setSearchText(e.target.value)
+                  }}
                   className='hidden w-full lg:block lg:w-2/3'
                   name='search'
                   allowClear

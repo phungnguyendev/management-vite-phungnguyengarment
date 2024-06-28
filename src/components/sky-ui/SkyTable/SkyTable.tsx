@@ -14,7 +14,7 @@ export type SkyTableRequiredDataType = {
   id?: number
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
 export interface SkyTableProps<T extends SkyTableRequiredDataType> extends TableProps {
@@ -92,8 +92,10 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
           }}
           onConfirmCancelEditing={(e) => props.actionProps?.onConfirmCancelEditing?.(e)}
           onConfirmCancelDeleting={props.actionProps?.onConfirmCancelDeleting}
+          onConfirmCancelDeleteForever={props.actionProps?.onConfirmCancelDeleteForever}
           onConfirmDelete={() => props.actionProps?.onConfirmDelete?.(record)}
           onConfirmRestore={() => props.actionProps?.onConfirmRestore?.(record)}
+          onConfirmDeleteForever={() => props.actionProps?.onConfirmDeleteForever?.(record)}
         />
       )
     }

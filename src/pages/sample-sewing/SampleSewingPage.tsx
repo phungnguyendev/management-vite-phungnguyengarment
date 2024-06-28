@@ -1,16 +1,13 @@
 import { ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateValidatorChange,
@@ -18,27 +15,24 @@ import {
   dateValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
+import { SampleSewingAddNewProps } from './components/ModalAddNewSampleSewing'
 import useSampleSewing from './hooks/useSampleSewing'
 import { SampleSewingTableDataType } from './type'
 
 const SampleSewingPage = () => {
-  const table = useTable<SampleSewingTableDataType>([])
+  useTitle('May mẫu | Phung Nguyen')
+  const { state, action, table } = useSampleSewing()
+  const { newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } = state
   const {
-    searchText,
-    setSearchText,
-    newRecord,
-    setNewRecord,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleConfirmDelete,
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    productService
-  } = useSampleSewing(table)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
   const { width } = useDevice()
-  const currentUser = useSelector((state: RootState) => state.user)
-  useTitle('May mẫu')
 
   const columns = {
     productCode: (record: SampleSewingTableDataType) => {
@@ -324,19 +318,18 @@ const SampleSewingPage = () => {
     <>
       <BaseLayout
         title='May mẫu'
-        searchPlaceHolder='Mã hàng...'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Tên nhóm..',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
+        }}
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
         }}
       >
         <SkyTable
@@ -347,30 +340,38 @@ const SampleSewingPage = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({
-                  ...record?.sampleSewing
-                })
-                table.handleStartEditing(record!.key!)
+              handleClick: (record) => {
+                setNewRecord({ ...record } as SampleSewingAddNewProps)
+                table.handleStartEditing(record.key)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!, newRecord!)
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('sample_sewing_manager')
+            onDeleteForever: {
+              isShow: showDeleted
+            },
+            onRestore: {
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
+            },
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
           expandable={{
             expandedRowRender: (record) => {

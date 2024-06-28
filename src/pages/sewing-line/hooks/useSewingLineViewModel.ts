@@ -1,271 +1,196 @@
 import { App as AntApp } from 'antd'
-import { useEffect, useState } from 'react'
-import { ResponseDataType, defaultRequestBody } from '~/api/client'
+import { useCallback, useEffect, useState } from 'react'
+import { Paginator } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
-import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
+import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { SewingLine } from '~/typing'
+import { textComparator } from '~/utils/helpers'
+import { SewingLineAddNewProps } from '../components/ModalAddNewSewingLine'
 import { SewingLineTableDataType } from '../type'
 
-export default function useSewingLineViewModel(table: UseTableProps<SewingLineTableDataType>) {
-  const { setLoading, showDeleted, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
+export default function useSewingLineViewModel() {
+  const { message } = AntApp.useApp()
+  const table = useTable<SewingLineTableDataType>([])
 
-  // Services
   const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
 
-  // UI
-  const { message } = AntApp.useApp()
-
-  // State changes
+  // State
+  const [showDeleted, setShowDeleted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
+  const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<any>({})
-
-  // List
-  const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
-
-  // New
-  const [SewingLineNew, setSewingLineNew] = useState<SewingLine | undefined>(undefined)
-
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      await sewingLineService.getListItems(
-        {
-          ...defaultRequestBody,
-          paginator: { page: sewingLineService.page, pageSize: defaultRequestBody.paginator?.pageSize },
-          filter: { ...defaultRequestBody.filter, status: showDeleted ? 'deleted' : 'active' }
-        },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setSewingLines(meta.data as SewingLine[])
-          }
-        }
-      )
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [paginator, setPaginator] = useState<Paginator>({
+    page: 1,
+    pageSize: -1
+  })
+  const [shorted, setSorted] = useState<boolean>(false)
 
   useEffect(() => {
     loadData()
-  }, [SewingLineNew, showDeleted])
+  }, [showDeleted, shorted, paginator, searchText])
 
-  useEffect(() => {
-    selfConvertDataSource(sewingLines)
-  }, [sewingLines])
-
-  const selfConvertDataSource = (_sewingLines: SewingLine[]) => {
-    const items = _sewingLines ? _sewingLines : sewingLines
-    setDataSource(
-      items.map((item) => {
-        return {
-          ...item,
-          key: item.id
-        } as SewingLineTableDataType
-      })
-    )
-  }
-
-  const handleSaveClick = async (record: TableItemWithKey<SewingLineTableDataType>, newRecord: any) => {
-    // const row = (await form.validateFields()) as any
-    console.log({ old: record, new: newRecord })
+  const loadData = useCallback(async () => {
     try {
-      setLoading(true)
-      if (newRecord) {
-        if (newRecord.name && newRecord.name !== record.name) {
-          console.log('SewingLine progressing...')
-          await sewingLineService.updateItemByPk(record.id!, { name: newRecord.name }, setLoading, (meta) => {
-            if (!meta?.success) throw new Error('API update SewingLine failed')
-          })
+      table.setLoading(true)
+      await sewingLineService.getItemsSync(
+        {
+          paginator: paginator,
+          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
+          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
+          search: { field: 'name', term: searchText }
+        },
+        table.setLoading,
+        (meta) => {
+          if (!meta?.success) throw new Error(`${meta.message}`)
+          const sewingLines = meta.data as SewingLine[]
+          table.setDataSource(
+            sewingLines.map((item) => {
+              return {
+                ...item,
+                key: `${item.id}`
+              }
+            })
+          )
         }
-        message.success('Success!')
+      )
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }, [showDeleted, paginator, shorted, searchText])
+
+  const handleUpdate = async (record: SewingLineTableDataType) => {
+    console.log('handleUpdate')
+    // const row = (await form.validateFields()) as any
+    try {
+      if (textComparator(record.name, newRecord.name)) {
+        console.log('SewingLine progressing...')
+        await sewingLineService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
+          if (!meta?.success) throw new Error(`${meta.message}`)
+          const itemUpdated = meta.data as SewingLine
+          table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as SewingLineTableDataType)
+          message.success('Success!')
+        })
       }
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error.message}`)
     } finally {
-      handleConfirmCancelEditing()
-      loadData()
-      setLoading(false)
+      table.setLoading(false)
+      table.handleCancelEditing()
     }
   }
 
-  const handleAddNewItem = async (formAddNew: SewingLine) => {
+  const handleAddNew = async (formAddNew: SewingLineAddNewProps) => {
     try {
-      // console.log(formAddNew)
-      setLoading(true)
-      await sewingLineService.createNewItem(
+      console.log('handleAddNew')
+      console.log(formAddNew)
+      table.setLoading(true)
+      await sewingLineService.createItemSync(
         {
           name: formAddNew.name
         },
-        setLoading,
-        async (meta, msg) => {
-          if (!meta?.success) throw new Error(msg)
-          setSewingLineNew(meta.data as SewingLine)
-          message.success(msg)
+        table.setLoading,
+        async (meta) => {
+          if (!meta?.success) throw new Error(`${meta.message}`)
+          const newSewingLine = meta.data as SewingLine
+          table.handleAddNew({ ...newSewingLine, key: `${newSewingLine.id}` })
+          message.success(meta.message)
         }
       )
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error.message}`)
     } finally {
+      table.setLoading(false)
       setOpenModal(false)
-      setLoading(false)
     }
   }
 
-  const handleConfirmDelete = async (
-    record: TableItemWithKey<SewingLineTableDataType>,
-    onDataSuccess?: (meta: ResponseDataType | undefined) => void
-  ) => {
-    console.log(record)
+  const handleDelete = async (record: SewingLineTableDataType) => {
+    console.log('handleDelete')
     try {
-      setLoading(true)
-      await sewingLineService.updateItemByPk(record.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
-        if (!meta?.success) throw new Error(msg)
-        handleConfirmDeleting(record.id!)
-        onDataSuccess?.(meta)
+      await sewingLineService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
+        if (!meta?.success) throw new Error(meta?.message)
+        table.handleDeleting(record.key)
         message.success('Deleted!')
       })
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error.message}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
-  const handleConfirmRestore = async (
-    record: TableItemWithKey<SewingLineTableDataType>,
-    onDataSuccess?: (meta: ResponseDataType | undefined) => void
-  ) => {
+  const handleDeleteForever = async (id: number) => {
+    console.log(id)
     try {
-      await sewingLineService.updateItemByPk(record.id!, { status: 'active' }, setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
-        handleConfirmDeleting(record.id!)
-        message.success('Restored!')
-        onDataSuccess?.(meta)
+      await sewingLineService.deleteItemSync(id, table.setLoading, (res) => {
+        if (!res.success) throw new Error(res.message)
+        table.handleDeleting(`${id}`)
+        message.success(`${res.message}`)
       })
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
+
+  const handleRestore = async (record: SewingLineTableDataType) => {
+    try {
+      await sewingLineService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
+        if (!meta?.success) throw new Error(meta?.message)
+        table.handleDeleting(`${record.id!}`)
+        message.success('Restored!')
+      })
+    } catch (error: any) {
+      message.error(`${error.message}`)
     } finally {
       loadData()
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
-  const handlePageChange = async (_page: number) => {
-    try {
-      setLoading(true)
-      await sewingLineService.pageChange(
-        _page,
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            selfConvertDataSource(meta?.data as SewingLine[])
-          }
-        },
-        { field: 'name', term: searchText }
-      )
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleResetClick = async () => {
-    try {
-      setLoading(true)
-      setSearchText('')
-      await sewingLineService.getListItems(defaultRequestBody, setLoading, (meta) => {
-        if (meta?.success) {
-          selfConvertDataSource(meta?.data as SewingLine[])
-        }
-      })
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
+  const handlePageChange = async (page: number, pageSize: number) => {
+    setPaginator({ page, pageSize })
   }
 
   const handleSortChange = async (checked: boolean) => {
-    try {
-      setLoading(true)
-      await sewingLineService.sortedListItems(
-        checked ? 'asc' : 'desc',
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            selfConvertDataSource(meta?.data as SewingLine[])
-          }
-        },
-        { field: 'name', term: searchText }
-      )
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
+    setSorted(checked)
   }
 
   const handleSearch = async (value: string) => {
-    try {
-      setLoading(true)
-      if (value.length > 0) {
-        await sewingLineService.getListItems(
-          {
-            ...defaultRequestBody,
-            search: {
-              field: 'name',
-              term: value
-            }
-          },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              selfConvertDataSource(meta?.data as SewingLine[])
-            }
-          }
-        )
-      }
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
+    setSearchText(value)
+    console.log(value)
   }
 
   return {
-    searchText,
-    setSearchText,
-    openModal,
-    loadData,
-    newRecord,
-    setNewRecord,
-    setLoading,
-    setOpenModal,
-    setDataSource,
-    sewingLineService,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handleConfirmRestore,
-    selfConvertDataSource,
-    handlePageChange,
-    handleSortChange,
-    handleResetClick,
-    handleSearch
+    state: {
+      showDeleted,
+      setShowDeleted,
+      searchTextChange,
+      setSearchTextChange,
+      openModal,
+      newRecord,
+      setNewRecord,
+      setOpenModal
+    },
+    service: {
+      sewingLineService
+    },
+    action: {
+      loadData,
+      handleUpdate,
+      handleSortChange,
+      handleSearch,
+      handleAddNew,
+      handlePageChange,
+      handleDelete,
+      handleDeleteForever,
+      handleRestore
+    },
+    table
   }
 }

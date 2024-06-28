@@ -27,25 +27,30 @@ interface RequiredDataType {
 export type SortedDirection = 'asc' | 'desc'
 
 export interface APIService<T extends RequiredDataType> {
-  createItem: (newItem: T, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItemBy?: (query: T, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItemByPk: (id: number, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItemBy?: (query: T, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItems: (itemsToUpdate: T[], accessToken: string) => Promise<ResponseDataType | undefined>
-  deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
-  deleteItemBy?: (query: T, accessToken: string) => Promise<ResponseDataType | undefined>
+  createItem: (newItem: T, accessToken: string) => Promise<ResponseDataType>
+  getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType>
+  getItemBy?: (query: { field: string; id: number }, accessToken: string) => Promise<ResponseDataType>
+  getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType>
+  updateItemByPk: (id: number, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType>
+  updateItemBy?: (
+    query: { field: string; id: number },
+    itemToUpdate: T,
+    accessToken: string
+  ) => Promise<ResponseDataType>
+  updateItemsBy?: (
+    query: { field: string; id: number },
+    itemsToUpdate: T[],
+    accessToken: string
+  ) => Promise<ResponseDataType>
+  deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType>
+  deleteItemBy?: (query: { field: string; id: number }, accessToken: string) => Promise<ResponseDataType>
 }
 
 export default function useAPIService<T extends RequiredDataType>(apiService: APIService<T>) {
   const [tokenStored] = useLocalStorage<string>('accessToken', '')
   const accessTokenStored = tokenStored ?? ''
 
-  const createItem = async (
-    itemNew: T,
-    setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  const createItem = async (itemNew: T, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       return await apiService.createItem(itemNew, accessTokenStored)
@@ -81,10 +86,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     }
   }
 
-  const getItemByPk = async (
-    id: number,
-    setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  const getItemByPk = async (id: number, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       return await apiService.getItemByPk(id, accessTokenStored)
@@ -115,7 +117,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const getItemBy = async (
-    query: T,
+    query: { field: string; id: number },
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (res: ResponseDataType) => void
   ) => {
@@ -133,7 +135,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const getItemBySync = async (
-    query: T,
+    query: { field: string; id: number },
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (res: ResponseDataType) => void
   ) => {
@@ -153,7 +155,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   const getItems = async (
     params: RequestBodyType,
     setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       const res = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored)
@@ -188,7 +190,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     id: number,
     itemToUpdate: T,
     setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       const meta = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored)
@@ -221,14 +223,15 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const updateItemBy = async (
-    query: T,
+    query: { field: string; id: number },
     itemToUpdate: T,
     setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
-      return meta
+      const res = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
     } catch (err) {
       console.error(err)
       throw err
@@ -238,7 +241,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const updateItemBySync = async (
-    query: T,
+    query: { field: string; id: number },
     itemToUpdate: T,
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType) => void
@@ -256,14 +259,16 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     }
   }
 
-  const updateItems = async (
+  const updateItemsBy = async (
+    query: { field: string; id: number },
     itemsToUpdate: T[],
     setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItems(itemsToUpdate, accessTokenStored)
-      return meta
+      const res = await apiService.updateItemsBy?.(query, itemsToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
     } catch (err) {
       console.error(err)
       throw err
@@ -273,13 +278,14 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const updateItemsSync = async (
+    query: { field: string; id: number },
     itemsToUpdate: T[],
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const res = await apiService.updateItems(itemsToUpdate, accessTokenStored)
+      const res = await apiService.updateItemsBy?.(query, itemsToUpdate, accessTokenStored)
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
@@ -290,10 +296,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     }
   }
 
-  const deleteItem = async (
-    id: number,
-    setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  const deleteItem = async (id: number, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       const res = await apiService.deleteItemByPk(id, accessTokenStored)
@@ -325,12 +328,13 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const deleteItemBy = async (
-    query: T,
+    query: { field: string; id: number },
     setLoading?: (enable: boolean) => void
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       const res = await apiService.deleteItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
       return res
     } catch (err) {
       console.error(err)
@@ -341,7 +345,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   }
 
   const deleteItemBySync = async (
-    query: T,
+    query: { field: string; id: number },
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType) => void
   ) => {
@@ -371,7 +375,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
     updateItemByPkSync,
     updateItemBy,
     updateItemBySync,
-    updateItems,
+    updateItemsBy,
     updateItemsSync,
     deleteItem,
     deleteItemSync,

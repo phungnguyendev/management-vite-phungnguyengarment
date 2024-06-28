@@ -5,7 +5,7 @@ import { cn } from '~/utils/helpers'
 import DotRequired from '../DotRequired'
 
 export interface SkyTableTypographyProps extends BlockProps {
-  status?: ItemStatusType | null
+  status?: ItemStatusType
   required?: boolean
 }
 

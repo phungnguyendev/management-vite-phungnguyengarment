@@ -1,23 +1,23 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { Paginator, ResponseDataType } from '~/api/client'
+import CuttingGroupAPI from '~/api/services/CuttingGroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
-import SampleSewingAPI from '~/api/services/SampleSewingAPI'
 import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductColor, SampleSewing } from '~/typing'
-import { SampleSewingAddNewProps } from '../components/ModalAddNewSampleSewing'
-import { SampleSewingTableDataType } from '../type'
+import { CuttingGroup, Product, ProductColor } from '~/typing'
+import { dateValidator, numberValidator } from '~/utils/helpers'
+import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
 
-export default function useSampleSewing() {
+export default function useCuttingGroupViewModel() {
   const { message } = AntApp.useApp()
-  const table = useTable<SampleSewingTableDataType>([])
+  const table = useTable<CuttingGroupTableDataType>([])
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
-  const sampleSewingService = useAPIService<SampleSewing>(SampleSewingAPI)
+  const cuttingGroupService = useAPIService<CuttingGroup>(CuttingGroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -29,15 +29,15 @@ export default function useSampleSewing() {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<SampleSewingAddNewProps>({})
+  const [newRecord, setNewRecord] = useState<CuttingGroupNewRecordProps>({})
 
   // List
   const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
-  const [sampleSewings, setSampleSewings] = useState<SampleSewing[]>([])
+  const [cuttingGroups, setCuttingGroups] = useState<CuttingGroup[]>([])
 
   // New
-  const [sampleSewingNew, setSampleSewingNew] = useState<SampleSewing | undefined>(undefined)
+  const [sampleSewingNew, setCuttingGroupNew] = useState<CuttingGroup | undefined>(undefined)
 
   useEffect(() => {
     loadData()
@@ -45,73 +45,122 @@ export default function useSampleSewing() {
 
   useEffect(() => {
     mappedData()
-  }, [products, productColors, sampleSewings])
+  }, [products, productColors, cuttingGroups])
 
   const mappedData = useCallback(() => {
     table.setDataSource(() => {
-      const dataSource = products.map((self) => {
+      const _dataSource = products.map((self) => {
         return {
           ...self,
           key: `${self.id}`,
-          productColor: productColors.find((item) => item.productID === item.id),
-          sampleSewing: sampleSewings.find((item) => item.productID === item.id)
-        } as SampleSewingTableDataType
+          productColor: productColors.find((item) => item.productID === self.id),
+          cuttingGroup: cuttingGroups.find((item) => item.productID === self.id)
+        } as CuttingGroupTableDataType
       })
-      return [...dataSource]
+      return [..._dataSource]
     })
-  }, [products, productColors, sampleSewings])
+  }, [products, productColors, cuttingGroups])
 
   const loadData = async () => {
     try {
-      await productService.getItemsSync(
+      table.setLoading(true)
+      const productResult = await productService.getItems(
         {
           paginator: paginator,
           sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
           filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
           search: { field: 'title', term: searchText }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-          setProducts(meta.data as Product[])
-        }
+        table.setLoading
       )
-      await productColorService.getItemsSync(
+      setProducts(productResult.data as Product[])
+
+      const productColorResult = await productColorService.getItems(
         {
           paginator: { page: 1, pageSize: -1 }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-          setProductColors(meta.data as ProductColor[])
-        }
+        table.setLoading
       )
-      await sampleSewingService.getItemsSync(
+      setProductColors(productColorResult.data as ProductColor[])
+
+      const completionResult = await cuttingGroupService.getItems(
         {
           paginator: { page: 1, pageSize: -1 }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-          setSampleSewings(meta.data as SampleSewing[])
-        }
+        table.setLoading
       )
+      setCuttingGroups(completionResult.data as CuttingGroup[])
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       table.setLoading(false)
     }
   }
 
-  const handleUpdate = async (record: SampleSewingTableDataType) => {
+  const handleUpdate = async (record: CuttingGroupTableDataType) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
     try {
       table.setLoading(true)
-      if (newRecord && record.sampleSewing) {
-        console.log('SampleSewing progressing: ', newRecord)
-        await sampleSewingService.updateItemBySync(
-          { productID: record.id },
+      if (newRecord.quantityRealCut && !numberValidator(newRecord.quantityRealCut))
+        throw new Error('Quantity must be than zero!')
+
+      if (newRecord.timeCut && !dateValidator(newRecord.timeCut)) throw new Error('Invalid time cut!')
+
+      if (newRecord.dateSendEmbroidered && !dateValidator(newRecord.dateSendEmbroidered))
+        throw new Error('Invalid date send embroidered!')
+
+      if (newRecord.quantityDeliveredBTP && !numberValidator(newRecord.quantityDeliveredBTP))
+        throw new Error('Invalid quantity delivery BTP!')
+
+      if (newRecord.quantityArrived1Th && !numberValidator(newRecord.quantityArrived1Th)) throw new Error('Invalid 1!')
+
+      if (newRecord.quantityArrived2Th && !numberValidator(newRecord.quantityArrived2Th)) throw new Error('Invalid 2!')
+
+      if (newRecord.quantityArrived3Th && !numberValidator(newRecord.quantityArrived3Th)) throw new Error('Invalid 3!')
+
+      if (newRecord.quantityArrived4Th && !numberValidator(newRecord.quantityArrived4Th)) throw new Error('Invalid 4!')
+
+      if (newRecord.quantityArrived5Th && !numberValidator(newRecord.quantityArrived5Th)) throw new Error('Invalid 5!')
+
+      if (newRecord.quantityArrived6Th && !numberValidator(newRecord.quantityArrived6Th)) throw new Error('Invalid 6!')
+
+      if (newRecord.quantityArrived7Th && !numberValidator(newRecord.quantityArrived7Th)) throw new Error('Invalid 7!')
+
+      if (newRecord.quantityArrived8Th && !numberValidator(newRecord.quantityArrived8Th)) throw new Error('Invalid 8!')
+
+      if (newRecord.quantityArrived9Th && !numberValidator(newRecord.quantityArrived9Th)) throw new Error('Invalid 9!')
+
+      if (newRecord.quantityArrived10Th && !numberValidator(newRecord.quantityArrived10Th))
+        throw new Error('Invalid 10!')
+
+      if (
+        !record.cuttingGroup &&
+        (newRecord.quantityRealCut ||
+          newRecord.timeCut ||
+          newRecord.dateSendEmbroidered ||
+          newRecord.quantityDeliveredBTP ||
+          newRecord.quantityArrived1Th ||
+          newRecord.quantityArrived2Th ||
+          newRecord.quantityArrived3Th ||
+          newRecord.quantityArrived4Th ||
+          newRecord.quantityArrived5Th ||
+          newRecord.quantityArrived6Th ||
+          newRecord.quantityArrived7Th ||
+          newRecord.quantityArrived8Th ||
+          newRecord.quantityArrived9Th ||
+          newRecord.quantityArrived10Th)
+      ) {
+        console.log('add new')
+        await cuttingGroupService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
+          if (!meta?.success) throw new Error(meta.message)
+        })
+      }
+      if (record.cuttingGroup) {
+        console.log('CuttingGroup progressing: ', newRecord)
+        await cuttingGroupService.updateItemBySync(
+          { productID: record.id! },
           {
             ...newRecord
           },
@@ -120,11 +169,6 @@ export default function useSampleSewing() {
             if (!meta?.success) throw new Error(meta.message)
           }
         )
-      } else {
-        console.log('add new')
-        await sampleSewingService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-        })
       }
       message.success('Success!')
     } catch (error: any) {
@@ -135,44 +179,12 @@ export default function useSampleSewing() {
     }
   }
 
-  const handleAddNewItem = async (formAddNew: any) => {
-    // try {
-    //   console.log(formAddNew)
-    //   table.setLoading(true)
-    //   await sampleSewingService.createNewItem(
-    //     {
-    //       productID: formAddNew.productID,
-    //       dateSubmissionNPL: formAddNew.dateSubmissionNPL,
-    //       dateApprovalPP: formAddNew.dateApprovalPP,
-    //       dateApprovalSO: formAddNew.dateApprovalSO,
-    //       dateSubmissionFirstTime: formAddNew.dateSubmissionFirstTime,
-    //       dateSubmissionSecondTime: formAddNew.dateSubmissionSecondTime,
-    //       dateSubmissionThirdTime: formAddNew.dateSubmissionThirdTime,
-    //       dateSubmissionForthTime: formAddNew.dateSubmissionForthTime,
-    //       dateSubmissionFifthTime: formAddNew.dateSubmissionFifthTime
-    //     },
-    //     table.setLoading,
-    //     async (meta, msg) => {
-    //       if (!meta?.success) throw new Error(`${msg}`)
-    //       setSampleSewingNew(meta.data as SampleSewing)
-    //       message.success(msg)
-    //     }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   setOpenModal(false)
-    //   table.setLoading(false)
-    // }
-  }
-
-  const handleDelete = async (record: SampleSewingTableDataType) => {
+  const handleDelete = async (record: CuttingGroupTableDataType) => {
     // try {
     //   table.setLoading(true)
-    //   if (record.sampleSewing) {
-    //     await sampleSewingService.deleteItemByPk(record.sampleSewing.id!, table.setLoading, (meta, msg) => {
-    //       if (!meta?.success) throw new Error(msg)
+    //   if (record.cuttingGroup) {
+    //     await cuttingGroupService.deleteItemByPk(record.cuttingGroup.id!, table.setLoading, (meta, msg) => {
+    //       if (!meta?.success) throw new Error('API delete failed')
     //       message.success(msg)
     //       onDataSuccess?.(meta)
     //     })
@@ -202,7 +214,7 @@ export default function useSampleSewing() {
     // }
   }
 
-  const handleRestore = async (record: SampleSewingTableDataType) => {
+  const handleRestore = async (record: CuttingGroupTableDataType) => {
     // try {
     //   await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
     //     if (!meta?.success) throw new Error(meta?.message)
@@ -237,7 +249,7 @@ export default function useSampleSewing() {
     //   table.setLoading(false)
     // }
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSortChange = async (checked: boolean) => {
     // try {
     //   table.setLoading(true)
@@ -263,7 +275,7 @@ export default function useSampleSewing() {
     // try {
     //   table.setLoading(true)
     //   if (value.length > 0) {
-    //     await productService.getItemsSync(
+    //     await productService.getListItems(
     //       {
     //         ...defaultRequestBody,
     //         search: {
@@ -289,7 +301,6 @@ export default function useSampleSewing() {
 
   return {
     state: {
-      sampleSewings,
       showDeleted,
       setShowDeleted,
       searchTextChange,
@@ -302,7 +313,7 @@ export default function useSampleSewing() {
     service: {
       productService,
       productColorService,
-      sampleSewingService
+      cuttingGroupService
     },
     action: {
       loadData,

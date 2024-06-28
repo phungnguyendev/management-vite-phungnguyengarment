@@ -5,7 +5,7 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'accessory-notes'
 
 export default {
-  createItem: async (newItem: AccessoryNote, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: AccessoryNote, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -26,7 +26,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -40,7 +40,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
@@ -54,13 +54,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: AccessoryNote,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: AccessoryNote, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -72,7 +68,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: AccessoryNote[], accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: AccessoryNote[], accessToken: string): Promise<ResponseDataType> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
@@ -86,7 +82,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {

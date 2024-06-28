@@ -10,13 +10,13 @@ import { Completion, Product, ProductColor, SewingLineDelivery } from '~/typing'
 import { DashboardTableDataType } from '../type'
 
 export interface ProductNewRecordProps {
-  colorID?: number | null
-  quantityPO?: number | null
-  productCode?: string | null
-  dateInputNPL?: string | null
-  dateOutputFCR?: string | null
-  groupID?: number | null
-  printID?: number | null
+  colorID?: number
+  quantityPO?: number
+  productCode?: string
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  groupID?: number
+  printID?: number
 }
 
 export default function useDashboardViewModel() {

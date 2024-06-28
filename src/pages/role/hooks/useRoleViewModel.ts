@@ -1,33 +1,31 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
+import RoleAPI from '~/api/services/RoleAPI'
 import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Color } from '~/typing'
+import { Role } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { ColorAddNewProps } from '../components/ModalAddNewColor'
-import { ColorTableDataType } from '../type'
+import { RoleAddNewProps } from '../components/ModalAddNewRole'
+import { RoleTableDataType } from '../type'
 
-export default function useColorViewModel() {
+export default function useRoleViewModel() {
   const { message } = AntApp.useApp()
-  const table = useTable<ColorTableDataType>([])
+  const table = useTable<RoleTableDataType>([])
 
-  const colorService = useAPIService<Color>(ColorAPI)
+  const roleService = useAPIService<Role>(RoleAPI)
 
   // State
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<RoleAddNewProps>({})
   const [paginator, setPaginator] = useState<Paginator>({
     page: 1,
     pageSize: -1
   })
   const [shorted, setSorted] = useState<boolean>(false)
-
-  console.log('loadViewModel')
 
   useEffect(() => {
     loadData()
@@ -35,9 +33,8 @@ export default function useColorViewModel() {
 
   const loadData = useCallback(async () => {
     try {
-      console.log('loadData')
       table.setLoading(true)
-      await colorService.getItemsSync(
+      await roleService.getItemsSync(
         {
           paginator: paginator,
           sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
@@ -47,10 +44,9 @@ export default function useColorViewModel() {
         table.setLoading,
         (meta) => {
           if (!meta?.success) throw new Error(`${meta.message}`)
-          const colors = meta.data as Color[]
-          console.log(colors.length)
+          const roles = meta.data as Role[]
           table.setDataSource(
-            colors.map((item) => {
+            roles.map((item) => {
               return {
                 ...item,
                 key: `${item.id}`
@@ -66,23 +62,22 @@ export default function useColorViewModel() {
     }
   }, [showDeleted, paginator, shorted, searchText])
 
-  const handleUpdate = async (record: ColorTableDataType) => {
+  const handleUpdate = async (record: RoleTableDataType) => {
     console.log('handleUpdate')
     // const row = (await form.validateFields()) as any
     try {
-      if (textComparator(record.name, newRecord.name) || textComparator(record.hexColor, newRecord.hexColor)) {
-        console.log('Color progressing...')
-        await colorService.updateItemByPkSync(
-          record.id!,
-          { name: newRecord.name, hexColor: newRecord.hexColor },
-          table.setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error(`${meta.message}`)
-            const itemUpdated = meta.data as Color
-            table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as ColorTableDataType)
-            message.success('Success!')
-          }
-        )
+      if (
+        textComparator(record.role, newRecord.role) ||
+        textComparator(record.shortName, newRecord.shortName) ||
+        textComparator(record.desc, newRecord.desc)
+      ) {
+        console.log('Role progressing...')
+        await roleService.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (meta) => {
+          if (!meta?.success) throw new Error(`${meta.message}`)
+          const itemUpdated = meta.data as Role
+          table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as RoleTableDataType)
+          message.success('Success!')
+        })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -92,36 +87,35 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleAddNew = async (formAddNew: ColorAddNewProps) => {
-    try {
-      console.log('handleAddNew')
-      console.log(formAddNew)
-      table.setLoading(true)
-      await colorService.createItemSync(
-        {
-          name: formAddNew.name,
-          hexColor: formAddNew.hexColor
-        },
-        table.setLoading,
-        async (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
-          const newColor = meta.data as Color
-          table.handleAddNew({ ...newColor, key: `${newColor.id}` })
-          message.success(meta.message)
-        }
-      )
-    } catch (error: any) {
-      message.error(`${error.message}`)
-    } finally {
-      table.setLoading(false)
-      setOpenModal(false)
-    }
+  const handleAddNew = async (formAddNew: RoleAddNewProps) => {
+    // try {
+    //   console.log('handleAddNew')
+    //   console.log(formAddNew)
+    //   table.setLoading(true)
+    //   await roleService.createItemSync(
+    //     {
+    //       name: formAddNew.name
+    //     },
+    //     table.setLoading,
+    //     async (meta) => {
+    //       if (!meta?.success) throw new Error(`${meta.message}`)
+    //       const newRole = meta.data as Role
+    //       table.handleAddNew({ ...newRole, key: `${newRole.id}` })
+    //       message.success(meta.message)
+    //     }
+    //   )
+    // } catch (error: any) {
+    //   message.error(`${error.message}`)
+    // } finally {
+    //   table.setLoading(false)
+    //   setOpenModal(false)
+    // }
   }
 
-  const handleDelete = async (record: ColorTableDataType) => {
+  const handleDelete = async (record: RoleTableDataType) => {
     console.log('handleDelete')
     try {
-      await colorService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
+      await roleService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(meta?.message)
         table.handleDeleting(record.key)
         message.success('Deleted!')
@@ -134,8 +128,9 @@ export default function useColorViewModel() {
   }
 
   const handleDeleteForever = async (id: number) => {
+    console.log(id)
     try {
-      await colorService.deleteItemSync(id, table.setLoading, (res) => {
+      await roleService.deleteItemSync(id, table.setLoading, (res) => {
         if (!res.success) throw new Error(res.message)
         table.handleDeleting(`${id}`)
         message.success(`${res.message}`)
@@ -147,9 +142,9 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleRestore = async (record: ColorTableDataType) => {
+  const handleRestore = async (record: RoleTableDataType) => {
     try {
-      await colorService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
+      await roleService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(meta?.message)
         table.handleDeleting(`${record.id!}`)
         message.success('Restored!')
@@ -182,15 +177,15 @@ export default function useColorViewModel() {
       searchTextChange,
       setSearchTextChange,
       openModal,
-      loadData,
       newRecord,
       setNewRecord,
       setOpenModal
     },
     service: {
-      colorService
+      roleService
     },
     action: {
+      loadData,
       handleUpdate,
       handleSortChange,
       handleSearch,

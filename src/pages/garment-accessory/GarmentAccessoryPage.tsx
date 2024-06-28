@@ -2,16 +2,13 @@ import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable, { TableItemWithKey } from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import { GarmentAccessoryNote } from '~/typing'
 import {
   breakpoint,
@@ -24,30 +21,31 @@ import {
   numberValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
-import useGarmentAccessory from './hooks/useGarmentAccessory'
+import useGarmentAccessoryViewModel from './hooks/useGarmentAccessoryViewModel'
 import { GarmentAccessoryTableDataType } from './type'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {}
-
-const GarmentAccessoryPage: React.FC<Props> = () => {
-  const table = useTable<GarmentAccessoryTableDataType>([])
+const GarmentAccessoryPage = () => {
+  useTitle('Phụ liệu - Phung Nguyen')
+  const { state, action, table } = useGarmentAccessoryViewModel()
   const {
-    searchText,
-    setSearchText,
+    accessoryNotes,
     newRecord,
     setNewRecord,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleConfirmDelete,
+    showDeleted,
+    setShowDeleted,
+    searchTextChange,
+    setSearchTextChange
+  } = state
+  const {
+    handleUpdate,
+    handleDelete,
+    handleDeleteForever,
     handlePageChange,
-    productService,
-    accessoryNotes
-  } = useGarmentAccessory(table)
+    handleRestore,
+    handleSearch,
+    handleSortChange
+  } = action
   const { width } = useDevice()
-  const currentUser = useSelector((state: RootState) => state.user)
-  useTitle('Phụ liệu')
 
   const columns = {
     productCode: (record: GarmentAccessoryTableDataType) => {
@@ -57,10 +55,10 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             <SkyTableTypography strong status={'active'} className='flex gap-[2px]'>
               {textValidatorDisplay(record.productCode)}
             </SkyTableTypography>
-            {table.isEditing(record.id!) && newRecord.syncStatus && (
+            {table.isEditing(record.key) && newRecord.syncStatus && (
               <Check size={16} color='#ffffff' className='relative top-[2px] rounded-full bg-success p-[2px]' />
             )}
-            {record.garmentAccessory && record.garmentAccessory.syncStatus && !table.isEditing(record.id!) && (
+            {record.garmentAccessory && record.garmentAccessory.syncStatus && !table.isEditing(record.key) && (
               <Check size={16} color='#ffffff' className='relative top-[2px] m-0 rounded-full bg-success p-[2px]' />
             )}
           </Space>
@@ -103,13 +101,13 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             title='Cắt được'
             inputType='number'
             required={true}
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             initialValue={record.garmentAccessory && numberValidatorInit(record.garmentAccessory.amountCutting)}
             value={newRecord.amountCutting}
-            onValueChange={(val) =>
+            onValueChange={(val: number) =>
               setNewRecord({
                 ...newRecord,
-                amountCutting: val > 0 ? numberValidatorChange(val) : null
+                amountCutting: numberValidatorChange(val > 0 ? val : 0)
               })
             }
           >
@@ -130,16 +128,16 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
           <EditableStateCell
             dataIndex='remainingAmount'
             title='Còn lại'
-            isEditing={table.isEditing(record.id!)}
+            isEditing={table.isEditing(record.key)}
             editableRender={
               <SkyTableTypography
                 status={record.status}
-                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+                disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
               >
                 {numberValidatorDisplay(amount)}
               </SkyTableTypography>
             }
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             initialValue={amount}
             inputType='number'
           >
@@ -160,7 +158,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             title='Giao chuyền'
             inputType='datepicker'
             required={true}
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             initialValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
@@ -212,7 +210,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
             title='Ghi chú'
             inputType='multipleselect'
             required={true}
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
+            disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
             selectProps={{
               options: accessoryNotes.map((item) => {
                 return {
@@ -294,7 +292,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
           title: 'Cắt được',
           dataIndex: 'amountCutting',
           width: '10%',
-          render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+          render: (_value: any, record: GarmentAccessoryTableDataType) => {
             return columns.garmentAccessory.amountCutting(record)
           }
         },
@@ -302,7 +300,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
           title: 'Còn lại',
           dataIndex: 'remainingAmount',
           width: '10%',
-          render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+          render: (_value: any, record: GarmentAccessoryTableDataType) => {
             return columns.garmentAccessory.remainingAmount(record)
           }
         }
@@ -313,7 +311,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
       dataIndex: 'passingDeliveryDate',
       responsive: ['lg'],
       width: '15%',
-      render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+      render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.garmentAccessory.passingDeliveryDate(record)
       }
     },
@@ -322,7 +320,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
       dataIndex: 'syncStatus',
       responsive: ['md'],
       width: '10%',
-      render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+      render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.garmentAccessory.syncStatus(record)
       }
     },
@@ -330,7 +328,7 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
       title: 'Ghi chú',
       dataIndex: 'accessoryNotes',
       responsive: ['xl'],
-      render: (_value: any, record: TableItemWithKey<GarmentAccessoryTableDataType>) => {
+      render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.garmentAccessory.accessoryNotes(record)
       }
     }
@@ -340,19 +338,18 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
     <>
       <BaseLayout
         title='Phụ liệu'
-        searchPlaceHolder='Mã hàng...'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={table.loading}
+        searchProps={{
+          onSearch: handleSearch,
+          placeholder: 'Ví dụ: abc@gmail.com',
+          value: searchTextChange,
+          onChange: (e) => setSearchTextChange(e.target.value)
+        }}
+        sortProps={{
+          onChange: handleSortChange
+        }}
+        deleteProps={{
+          onChange: setShowDeleted
         }}
       >
         <SkyTable
@@ -363,12 +360,11 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
           deletingKey={table.deletingKey}
           dataSource={table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
+          isShowDeleted={showDeleted}
+          actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
+              handleClick: (record) => {
                 setNewRecord({
                   garmentAccessoryID: record?.garmentAccessory?.id, // Using for compare check box
                   productColorID: record?.productColor?.colorID, // Using for compare check box
@@ -379,19 +375,30 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
                 })
                 table.handleStartEditing(record!.key!)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
+              handleClick: (record) => handleUpdate(record),
+              isShow: !showDeleted
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
             },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('accessory_manager')
+            onDeleteForever: {
+              isShow: showDeleted
+            },
+            onRestore: {
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
+            },
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmCancelEditing: () => table.handleCancelEditing(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
+            onConfirmRestore: (record) => handleRestore(record),
+            isShow: true
           }}
           expandable={{
             expandedRowRender: (record) => {
@@ -399,16 +406,16 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
                 <Flex vertical className='overflow-hidden'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                     {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
                         {columns.productColor(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.md) && (
                       <>
-                        <ExpandableItemRow className='w-1/2' title='Cắt được:' isEditing={table.isEditing(record.id!)}>
+                        <ExpandableItemRow className='w-1/2' title='Cắt được:' isEditing={table.isEditing(record.key)}>
                           {columns.garmentAccessory.amountCutting(record)}
                         </ExpandableItemRow>
-                        <ExpandableItemRow className='w-1/2' title='Còn lại:' isEditing={table.isEditing(record.id!)}>
+                        <ExpandableItemRow className='w-1/2' title='Còn lại:' isEditing={table.isEditing(record.key)}>
                           {columns.garmentAccessory.remainingAmount(record)}
                         </ExpandableItemRow>
                       </>
@@ -417,18 +424,18 @@ const GarmentAccessoryPage: React.FC<Props> = () => {
                       <ExpandableItemRow
                         className='w-1/2'
                         title='Ngày giao chuyền:'
-                        isEditing={table.isEditing(record.id!)}
+                        isEditing={table.isEditing(record.key)}
                       >
                         {columns.garmentAccessory.passingDeliveryDate(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow className='w-1/2' title='Đồng bộ PL:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/2' title='Đồng bộ PL:' isEditing={table.isEditing(record.key)}>
                         {columns.garmentAccessory.syncStatus(record)}
                       </ExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow className='w-1/3' title='Ghi chú:' isEditing={table.isEditing(record.id!)}>
+                      <ExpandableItemRow className='w-1/3' title='Ghi chú:' isEditing={table.isEditing(record.key)}>
                         {columns.garmentAccessory.accessoryNotes(record)}
                       </ExpandableItemRow>
                     )}

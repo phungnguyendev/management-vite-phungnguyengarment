@@ -1,23 +1,26 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { Paginator, ResponseDataType } from '~/api/client'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
-import SampleSewingAPI from '~/api/services/SampleSewingAPI'
+import SewingLineAPI from '~/api/services/SewingLineAPI'
+import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductColor, SampleSewing } from '~/typing'
-import { SampleSewingAddNewProps } from '../components/ModalAddNewSampleSewing'
-import { SampleSewingTableDataType } from '../type'
+import { GarmentAccessory, Product, ProductColor, SewingLine, SewingLineDelivery } from '~/typing'
+import { SewingLineDeliveryTableDataType } from '../type'
 
-export default function useSampleSewing() {
-  const { message } = AntApp.useApp()
-  const table = useTable<SampleSewingTableDataType>([])
+export default function useSewingLineDeliveryViewModel() {
+  const table = useTable<SewingLineDeliveryTableDataType>([])
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)
+  const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
+  const sewingLineDeliveryService = useAPIService<SewingLineDelivery>(SewingLineDeliveryAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
-  const sampleSewingService = useAPIService<SampleSewing>(SampleSewingAPI)
+
+  // UI
+  const { message } = AntApp.useApp()
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -29,23 +32,24 @@ export default function useSampleSewing() {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<SampleSewingAddNewProps>({})
+  const [newRecord, setNewRecord] = useState<SewingLineDelivery[]>([])
 
   // List
   const [products, setProducts] = useState<Product[]>([])
+  const [sewingLineDeliveries, setSewingLineDeliveries] = useState<SewingLineDelivery[]>([])
+  const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
-  const [sampleSewings, setSampleSewings] = useState<SampleSewing[]>([])
 
   // New
-  const [sampleSewingNew, setSampleSewingNew] = useState<SampleSewing | undefined>(undefined)
+  const [garmentAccessoryNew, setGarmentAccessoryNew] = useState<GarmentAccessory | undefined>(undefined)
 
   useEffect(() => {
     loadData()
-  }, [sampleSewingNew, showDeleted])
+  }, [garmentAccessoryNew, showDeleted])
 
   useEffect(() => {
     mappedData()
-  }, [products, productColors, sampleSewings])
+  }, [products, productColors, sewingLineDeliveries])
 
   const mappedData = useCallback(() => {
     table.setDataSource(() => {
@@ -54,12 +58,12 @@ export default function useSampleSewing() {
           ...self,
           key: `${self.id}`,
           productColor: productColors.find((item) => item.productID === item.id),
-          sampleSewing: sampleSewings.find((item) => item.productID === item.id)
-        } as SampleSewingTableDataType
+          sewingLineDeliveries: sewingLineDeliveries.find((item) => item.productID === item.id)
+        } as SewingLineDeliveryTableDataType
       })
       return [...dataSource]
     })
-  }, [products, productColors, sampleSewings])
+  }, [products, productColors, sewingLineDeliveries])
 
   const loadData = async () => {
     try {
@@ -76,85 +80,129 @@ export default function useSampleSewing() {
           setProducts(meta.data as Product[])
         }
       )
-      await productColorService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
+      await productColorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (meta) => {
+        if (!meta?.success) throw new Error(meta.message)
+        setProductColors(meta.data as ProductColor[])
+      })
+      await sewingLineDeliveryService.getItemsSync(
+        { paginator: { page: 1, pageSize: -1 } },
         table.setLoading,
         (meta) => {
           if (!meta?.success) throw new Error(meta.message)
-          setProductColors(meta.data as ProductColor[])
+          setSewingLineDeliveries(meta.data as SewingLineDelivery[])
         }
       )
-      await sampleSewingService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
+      await sewingLineService.getItemsSync(
+        { paginator: { pageSize: -1, page: 1 }, sorting: { direction: 'asc', column: 'id' } },
         table.setLoading,
         (meta) => {
           if (!meta?.success) throw new Error(meta.message)
-          setSampleSewings(meta.data as SampleSewing[])
+          setSewingLines(meta.data as SewingLine[])
         }
       )
     } catch (error: any) {
-      message.error(`${error.message}`)
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
     } finally {
       table.setLoading(false)
     }
   }
 
-  const handleUpdate = async (record: SampleSewingTableDataType) => {
+  const handleUpdate = async (record: SewingLineDeliveryTableDataType) => {
     // const row = (await form.validateFields()) as any
     console.log({ old: record, new: newRecord })
-    try {
-      table.setLoading(true)
-      if (newRecord && record.sampleSewing) {
-        console.log('SampleSewing progressing: ', newRecord)
-        await sampleSewingService.updateItemBySync(
-          { productID: record.id },
-          {
-            ...newRecord
-          },
-          table.setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error(meta.message)
-          }
-        )
-      } else {
-        console.log('add new')
-        await sampleSewingService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-        })
-      }
-      message.success('Success!')
-    } catch (error: any) {
-      message.error(`${error.message}`)
-    } finally {
-      table.handleCancelEditing()
-      table.setLoading(false)
-    }
+    // try {
+    //   table.setLoading(true)
+    //   if (record.sewingLineDeliveries && record.sewingLineDeliveries.length > 0) {
+    //     // Update GarmentAccessory
+    //     console.log('Update SewingLineDelivery')
+    //     try {
+    //       await sewingLineDeliveryService.updateItemBySync(
+    //         { productID: record.id! },
+    //         { ...newRecord },
+    //         table.setLoading,
+    //         (meta) => {
+    //           if (!meta?.success) throw new Error('API update SewingLineDelivery failed')
+    //           console.log(meta.data)
+    //         }
+    //       )
+    //     } catch (error: any) {
+    //       const resError: ResponseDataType = error
+    //       throw resError
+    //     }
+    //   } else {
+    //     console.log('Create SewingLineDelivery')
+    //     try {
+    //       await sewingLineDeliveryService.createNewItems(
+    //         newRecord.map((item) => {
+    //           return {
+    //             ...item,
+    //             productID: record.id
+    //           } as SewingLineDelivery
+    //         }),
+    //         table.setLoading,
+    //         (meta) => {
+    //           if (!meta?.success) throw new Error('API create SewingLineDelivery failed')
+    //         }
+    //       )
+    //     } catch (error: any) {
+    //       const resError: ResponseDataType = error
+    //       throw resError
+    //     }
+    //   }
+
+    //   message.success('Success!')
+    // } catch (error: any) {
+    //   const resError: ResponseDataType = error.data
+    //   message.error(`${resError.message}`)
+    // } finally {
+    //   handleConfirmCancelEditing()
+    //   loadData()
+    //   table.setLoading(false)
+    // }
   }
 
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNew = async (formAddNew: any) => {
     // try {
     //   console.log(formAddNew)
     //   table.setLoading(true)
-    //   await sampleSewingService.createNewItem(
+    //   await sewingLineDeliveryService.createNewItem(
     //     {
-    //       productID: formAddNew.productID,
-    //       dateSubmissionNPL: formAddNew.dateSubmissionNPL,
-    //       dateApprovalPP: formAddNew.dateApprovalPP,
-    //       dateApprovalSO: formAddNew.dateApprovalSO,
-    //       dateSubmissionFirstTime: formAddNew.dateSubmissionFirstTime,
-    //       dateSubmissionSecondTime: formAddNew.dateSubmissionSecondTime,
-    //       dateSubmissionThirdTime: formAddNew.dateSubmissionThirdTime,
-    //       dateSubmissionForthTime: formAddNew.dateSubmissionForthTime,
-    //       dateSubmissionFifthTime: formAddNew.dateSubmissionFifthTime
+    //       quantitySewed: formAddNew.quantitySewed,
+    //       expiredDate: formAddNew.expiredDate
     //     },
     //     table.setLoading,
     //     async (meta, msg) => {
-    //       if (!meta?.success) throw new Error(`${msg}`)
-    //       setSampleSewingNew(meta.data as SampleSewing)
+    //       if (meta?.data) {
+    //         setGarmentAccessoryNew(meta.data as GarmentAccessory)
+    //         message.success(msg)
+    //       } else {
+    //         console.log('Errr')
+    //         message.error(msg)
+    //       }
+    //     }
+    //   )
+    // } catch (error) {
+    //   console.error(error)
+    // } finally {
+    //   table.setLoading(false)
+    //   setOpenModal(false)
+    // }
+  }
+
+  const handleDelete = async (record: SewingLineDeliveryTableDataType) => {
+    // try {
+    //   table.setLoading(true)
+    //   await sewingLineDeliveryService.deleteItemBy(
+    //     {
+    //       field: 'productID',
+    //       key: record.id!
+    //     },
+    //     table.setLoading,
+    //     async (meta, msg) => {
+    //       if (!meta?.success) throw new Error('API delete GarmentAccessory failed')
+    //       // Other service here...
+    //       onDataSuccess?.(meta)
     //       message.success(msg)
     //     }
     //   )
@@ -162,28 +210,8 @@ export default function useSampleSewing() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setOpenModal(false)
-    //   table.setLoading(false)
-    // }
-  }
-
-  const handleDelete = async (record: SampleSewingTableDataType) => {
-    // try {
-    //   table.setLoading(true)
-    //   if (record.sampleSewing) {
-    //     await sampleSewingService.deleteItemByPk(record.sampleSewing.id!, table.setLoading, (meta, msg) => {
-    //       if (!meta?.success) throw new Error(msg)
-    //       message.success(msg)
-    //       onDataSuccess?.(meta)
-    //     })
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
     //   loadData()
     //   table.setLoading(false)
-    //   setOpenModal(false)
     // }
   }
 
@@ -202,7 +230,7 @@ export default function useSampleSewing() {
     // }
   }
 
-  const handleRestore = async (record: SampleSewingTableDataType) => {
+  const handleRestore = async (record: SewingLineDeliveryTableDataType) => {
     // try {
     //   await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
     //     if (!meta?.success) throw new Error(meta?.message)
@@ -224,9 +252,8 @@ export default function useSampleSewing() {
     //     _page,
     //     table.setLoading,
     //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
+    //       if (!meta?.success) throw new Error(meta.message)
+    //       selfConvertDataSource(meta?.data as Product[])
     //     },
     //     { field: 'productCode', term: searchText }
     //   )
@@ -245,9 +272,8 @@ export default function useSampleSewing() {
     //     checked ? 'asc' : 'desc',
     //     table.setLoading,
     //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
+    //       if (!meta?.success) throw new Error(meta.message)
+    //       selfConvertDataSource(meta?.data as Product[])
     //     },
     //     { field: 'productCode', term: searchText }
     //   )
@@ -273,9 +299,8 @@ export default function useSampleSewing() {
     //       },
     //       table.setLoading,
     //       (meta) => {
-    //         if (meta?.success) {
-    //           selfConvertDataSource(meta?.data as Product[])
-    //         }
+    //         if (!meta?.success) throw new Error(meta.message)
+    //         selfConvertDataSource(meta?.data as Product[])
     //       }
     //     )
     //   }
@@ -289,7 +314,8 @@ export default function useSampleSewing() {
 
   return {
     state: {
-      sampleSewings,
+      sewingLines,
+      sewingLineDeliveries,
       showDeleted,
       setShowDeleted,
       searchTextChange,
@@ -302,7 +328,7 @@ export default function useSampleSewing() {
     service: {
       productService,
       productColorService,
-      sampleSewingService
+      sewingLineDeliveryService
     },
     action: {
       loadData,

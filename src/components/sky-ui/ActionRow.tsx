@@ -23,9 +23,11 @@ export interface ActionProps<T extends { key: string }> {
   onRestore?: ActionButtonProps<T>
   onConfirmDelete?: (record: T) => void
   onConfirmRestore?: (record: T) => void
+  onConfirmDeleteForever?: (record: T) => void
   onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelRestore?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onConfirmCancelDeleteForever?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
 }
 
 export interface ActionRowProps<T extends { key: string }> extends HTMLAttributes<HTMLElement> {
@@ -37,13 +39,13 @@ export interface ActionRowProps<T extends { key: string }> extends HTMLAttribute
   onDelete?: ActionButtonProps<T>
   onDeleteForever?: ActionButtonProps<T>
   onRestore?: ActionButtonProps<T>
+  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
+  onConfirmRestore?: (e?: React.MouseEvent<HTMLElement>) => void
+  onConfirmDeleteForever?: (e?: React.MouseEvent<HTMLElement>) => void
   onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelRestore?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleteForever?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
-  onConfirmDelete?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmRestore?: (e?: React.MouseEvent<HTMLElement>) => void
-  onConfirmRestoreForever?: (e?: React.MouseEvent<HTMLElement>) => void
 }
 
 const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) => {
@@ -51,7 +53,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
     <Flex className={props.className}>
       <Flex align='center' justify='space-between'>
         {props.isEditing && props.onSave.isShow ? (
-          <Flex className={cn('flex-col', props.className)} gap={5}>
+          <Flex className={cn('flex-col lg:flex-row', props.className)} gap={5}>
             <Button type={props.onSave.type ? props.onSave.type : 'primary'} onClick={props.onSave.onClick}>
               Save
             </Button>
@@ -70,7 +72,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
             </PopConfirm>
           </Flex>
         ) : (
-          <Flex gap={10} vertical className={props.className} justify='center'>
+          <Flex gap={10} className={cn('flex-col lg:flex-row', props.className)} justify='center'>
             {props.onAdd?.isShow && (
               <Button
                 type={props.onAdd.type ? props.onAdd.type : 'primary'}
@@ -123,7 +125,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
               <PopConfirm
                 title={`Sure to ${props.onDeleteForever.title ? props.onDeleteForever.title : 'delete forever'}?`}
                 onCancel={props.onConfirmCancelDeleteForever}
-                onConfirm={props.onConfirmRestoreForever}
+                onConfirm={props.onConfirmDeleteForever}
               >
                 <Button
                   type={props.onDeleteForever.type ? props.onDeleteForever.type : 'dashed'}

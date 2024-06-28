@@ -16,19 +16,18 @@ import { dateComparator, numberComparator, textComparator } from '~/utils/helper
 import { ProductAddNewProps } from '../components/ModalAddNewProduct'
 
 interface ProductNewRecord {
-  colorID?: number | null
-  quantityPO?: number | null
-  productCode?: string | null
-  dateInputNPL?: string | null
-  dateOutputFCR?: string | null
-  groupID?: number | null
-  printID?: number | null
+  colorID?: number
+  quantityPO?: number
+  productCode?: string
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  groupID?: number
+  printID?: number
 }
 
 export default function useProductViewModel() {
   const { message } = AntApp.useApp()
   const table = useTable<ProductTableDataType>([])
-  const { loading, setLoading, showDeleted, dataSource, setDataSource, handleCancelEditing, handleDeleting } = table
 
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
@@ -38,15 +37,12 @@ export default function useProductViewModel() {
   const groupService = useAPIService<Group>(GroupAPI)
   const printService = useAPIService<Group>(PrintAPI)
 
+  const [showDeleted, setShowDeleted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ProductNewRecord>({})
 
   // Data
-  const [products, setProducts] = useState<Product[]>([])
-  const [productColors, setProductColors] = useState<ProductColor[]>([])
-  const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
-  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
@@ -61,12 +57,12 @@ export default function useProductViewModel() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
+      table.setLoading(true)
       await productService.getItemsSync(
         {
           filter: { status: showDeleted ? 'deleted' : 'active', items: [-1] }
         },
-        setLoading,
+        table.setLoading,
         (meta) => {
           if (!meta?.success) throw new Error(`${meta.message}`)
           // setProducts(meta.data as Product[])
@@ -77,64 +73,69 @@ export default function useProductViewModel() {
               key: `${item.id}`
             } as ProductTableDataType
           })
-          setDataSource([...dataSource, ...dataMapped])
+          table.setDataSource((prevDataSource) => [...prevDataSource, ...dataMapped])
         }
       )
-      await productColorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+      await productColorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(`${meta.message}`)
-        // setProductColors(meta.data as ProductColor[])
         const data = meta.data as ProductColor[]
-        const dataMapped = dataSource.map((item) => {
-          return {
-            ...item,
-            productColor: data.find((self) => self.productID === item.id)
-          } as ProductTableDataType
+        table.setDataSource((prevDataSource) => {
+          const dataMapped = prevDataSource.map((item) => {
+            return {
+              ...item,
+              productColor: data.find((self) => self.productID === item.id)
+            } as ProductTableDataType
+          })
+          return [...prevDataSource, ...dataMapped]
         })
-        setDataSource([...dataSource, ...dataMapped])
       })
-      await productGroupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+      await productGroupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(`${meta.message}`)
         // setProductGroups(meta.data as ProductGroup[])
         const data = meta.data as ProductGroup[]
-        const dataMapped = dataSource.map((item) => {
-          return {
-            ...item,
-            productGroup: data.find((self) => self.productID === item.id)
-          } as ProductTableDataType
+        table.setDataSource((prevDataSource) => {
+          const dataMapped = prevDataSource.map((item) => {
+            return {
+              ...item,
+              productGroup: data.find((self) => self.productID === item.id)
+            } as ProductTableDataType
+          })
+          return [...prevDataSource, ...dataMapped]
         })
-        setDataSource([...dataSource, ...dataMapped])
       })
-      await printablePlaceService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (meta) => {
+      await printablePlaceService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(`${meta.message}`)
         // setPrintablePlaces(meta.data as PrintablePlace[])
         const data = meta.data as PrintablePlace[]
-        const dataMapped = dataSource.map((item) => {
-          return {
-            ...item,
-            printablePlace: data.find((self) => self.productID === item.id)
-          } as ProductTableDataType
+        table.setDataSource((prevDataSource) => {
+          const dataMapped = prevDataSource.map((item) => {
+            return {
+              ...item,
+              printablePlace: data.find((self) => self.productID === item.id)
+            } as ProductTableDataType
+          })
+          return [...prevDataSource, ...dataMapped]
         })
-        setDataSource([...dataSource, ...dataMapped])
       })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
   const loadDataEditingChange = async () => {
     try {
       if (table.editingKey !== '') {
-        await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+        await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
           if (!result?.success) throw new Error(`${result.message}`)
           setColors(result.data as Color[])
         })
-        await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+        await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
           if (!result?.success) throw new Error(`${result.message}`)
           setGroups(result.data as Group[])
         })
-        await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, setLoading, (result) => {
+        await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
           if (!result?.success) throw new Error(`${result.message}`)
           setPrints(result.data as Print[])
         })
@@ -142,13 +143,13 @@ export default function useProductViewModel() {
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
-      setLoading(true)
+      table.setLoading(true)
       if (
         textComparator(newRecord.productCode, record.productCode) ||
         numberComparator(newRecord.quantityPO, record.quantityPO) ||
@@ -164,7 +165,7 @@ export default function useProductViewModel() {
             dateInputNPL: newRecord.dateInputNPL,
             dateOutputFCR: newRecord.dateOutputFCR
           },
-          setLoading,
+          table.setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('Product update failed')
           }
@@ -175,7 +176,7 @@ export default function useProductViewModel() {
         await productColorService.updateItemBySync(
           { productID: record.id! },
           { colorID: newRecord.colorID },
-          setLoading,
+          table.setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update ProductColor failed')
           }
@@ -190,7 +191,7 @@ export default function useProductViewModel() {
           await productGroupService.updateItemBySync(
             { productID: record.id! },
             { groupID: newRecord.groupID },
-            setLoading,
+            table.setLoading,
             (meta) => {
               if (!meta?.success) throw new Error('API update ProductGroup failed')
             }
@@ -209,7 +210,7 @@ export default function useProductViewModel() {
           await printablePlaceService.updateItemBySync(
             { productID: record.id! },
             { printID: newRecord.printID },
-            setLoading,
+            table.setLoading,
             (meta) => {
               if (!meta?.success) throw new Error('API update PrintablePlace failed')
             }
@@ -224,9 +225,9 @@ export default function useProductViewModel() {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
-      handleCancelEditing()
+      table.handleCancelEditing()
       loadData()
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
@@ -234,7 +235,7 @@ export default function useProductViewModel() {
     console.log(formAddNew)
     // try {
     //   console.log(formAddNew)
-    //   setLoading(true)
+    //   table.setLoading(true)
     //   await productService.createNewItem(
     //     {
     //       productCode: formAddNew.productCode,
@@ -242,7 +243,7 @@ export default function useProductViewModel() {
     //       dateInputNPL: dateValidatorChange(formAddNew.dateInputNPL),
     //       dateOutputFCR: dateValidatorChange(formAddNew.dateOutputFCR)
     //     },
-    //     setLoading,
+    //     table.setLoading,
     //     async (meta) => {
     //       if (!meta?.success) throw new Error('Create new product item failed!')
     //       const productNew = meta.data as Product
@@ -251,7 +252,7 @@ export default function useProductViewModel() {
     //         try {
     //           await productColorService.createNewItem(
     //             { productID: productNew.id!, colorID: formAddNew.colorID },
-    //             setLoading,
+    //             table.setLoading,
     //             (meta) => {
     //               if (!meta?.success) {
     //                 throw new Error('Create new color item failed!')
@@ -268,7 +269,7 @@ export default function useProductViewModel() {
     //         try {
     //           await productGroupService.createNewItem(
     //             { productID: productNew.id!, groupID: formAddNew.groupID },
-    //             setLoading,
+    //             table.setLoading,
     //             (meta) => {
     //               if (!meta?.success) {
     //                 throw new Error('Create new group item failed!')
@@ -285,7 +286,7 @@ export default function useProductViewModel() {
     //         try {
     //           await printablePlaceService.createNewItem(
     //             { productID: productNew.id!, printID: formAddNew.printID },
-    //             setLoading,
+    //             table.setLoading,
     //             (meta) => {
     //               if (!meta?.success) {
     //                 throw new Error('Create new print item failed!')
@@ -306,17 +307,14 @@ export default function useProductViewModel() {
     // } finally {
     //   setOpenModal(false)
     //   loadData()
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
-  const handleDelete = async (
-    item: ProductTableDataType,
-    onDataSuccess?: (meta: ResponseDataType | undefined) => void
-  ) => {
+  const handleDelete = async (record: ProductTableDataType) => {
     // try {
-    //   setLoading(true)
-    //   await productService.updateItemByPk(item.id!, { status: 'deleted' }, setLoading, (meta, msg) => {
+    //   table.setLoading(true)
+    //   await productService.updateItemByPk(item.id!, { status: 'deleted' }, table.setLoading, (meta, msg) => {
     //     if (meta) {
     //       if (meta.success) {
     //         handleDeleting(item.id!)
@@ -331,14 +329,14 @@ export default function useProductViewModel() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
-  const handleDeleteForever = async (id: number, onDataSuccess?: (meta: ResponseDataType | undefined) => void) => {
+  const handleDeleteForever = async (id: number) => {
     // try {
-    //   setLoading(true)
-    //   await productService.deleteItemByPk(id, setLoading, (meta, msg) => {
+    //   table.setLoading(true)
+    //   await productService.deleteItemByPk(id, table.setLoading, (meta, msg) => {
     //     if (meta) {
     //       if (meta.success) {
     //         handleDeleting(id)
@@ -353,22 +351,19 @@ export default function useProductViewModel() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
-  const handleRestore = async (
-    item: ProductTableDataType,
-    onDataSuccess?: (meta: ResponseDataType | undefined) => void
-  ) => {
+  const handleRestore = async (record: ProductTableDataType) => {
     // try {
-    //   setLoading(true)
+    //   table.setLoading(true)
     //   await productService.updateItemByPk(
     //     item.id!,
     //     {
     //       status: 'active'
     //     },
-    //     setLoading,
+    //     table.setLoading,
     //     (meta) => {
     //       if (!meta?.success) throw new Error('API update Product failed')
     //       onDataSuccess?.(meta)
@@ -380,16 +375,16 @@ export default function useProductViewModel() {
     //   message.error(`${resError.message}`)
     // } finally {
     //   loadData()
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
-  const handlePageChange = async (_page: number) => {
+  const handlePageChange = async (page: number, pageSize: number) => {
     // try {
-    //   setLoading(true)
+    //   table.setLoading(true)
     //   await productService.pageChange(
     //     _page,
-    //     setLoading,
+    //     table.setLoading,
     //     (meta) => {
     //       if (!meta?.success) throw new Error(`${meta.message}`)
     //       selfConvertDataSource(meta?.data as Product[])
@@ -400,21 +395,16 @@ export default function useProductViewModel() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
-  }
-
-  const handleReset = async () => {
-    setSearchText('')
-    loadData()
   }
 
   const handleSortChange = async (checked: boolean) => {
     // try {
-    //   setLoading(true)
+    //   table.setLoading(true)
     //   await productService.sortedListItems(
     //     checked ? 'asc' : 'desc',
-    //     setLoading,
+    //     table.setLoading,
     //     (meta) => {
     //       if (meta?.success) {
     //         selfConvertDataSource(meta?.data as Product[])
@@ -426,13 +416,13 @@ export default function useProductViewModel() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
   const handleSearch = async (value: string) => {
     // try {
-    //   setLoading(true)
+    //   table.setLoading(true)
     //   if (value.length > 0) {
     //     await productService.getItemsSync(
     //       {
@@ -442,7 +432,7 @@ export default function useProductViewModel() {
     //           term: value
     //         }
     //       },
-    //       setLoading,
+    //       table.setLoading,
     //       (meta) => {
     //         if (meta?.success) {
     //           selfConvertDataSource(meta?.data as Product[])
@@ -454,27 +444,23 @@ export default function useProductViewModel() {
     //   const resError: ResponseDataType = error.data
     //   message.error(`${resError.message}`)
     // } finally {
-    //   setLoading(false)
+    //   table.setLoading(false)
     // }
   }
 
   return {
     state: {
-      loading,
+      showDeleted,
+      setShowDeleted,
       searchText,
       setSearchText,
       openModal,
-      loadData,
       newRecord,
       setNewRecord,
-      setLoading,
       setOpenModal,
-      dataSource,
-      setDataSource,
       prints,
       colors,
-      groups,
-      products
+      groups
     },
     service: {
       productService,
@@ -483,8 +469,8 @@ export default function useProductViewModel() {
       printablePlaceService
     },
     action: {
+      loadData,
       handleUpdate,
-      handleReset,
       handleSortChange,
       handleSearch,
       handleAddNew,

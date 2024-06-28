@@ -126,16 +126,16 @@ const routes: SideType[] = [
   },
   {
     key: '12',
-    name: 'Chuyền',
+    name: 'Chuyền may',
     role: 'admin',
-    path: 'deliveries',
+    path: 'sewing-line',
     component: SewingLinePage,
     icon: DeliveryIcon
   },
   {
     key: '13',
-    name: 'Nơi In - Thêu',
-    path: 'print',
+    name: 'Nơi in - Thêu',
+    path: 'prints',
     role: 'admin',
     component: PrintPage,
     icon: PrintIcon
@@ -143,7 +143,7 @@ const routes: SideType[] = [
   {
     key: '14',
     name: 'Ghi chú phụ liệu',
-    path: 'notes',
+    path: 'accessory-notes',
     role: 'admin',
     component: NotePage,
     icon: NoteIcon

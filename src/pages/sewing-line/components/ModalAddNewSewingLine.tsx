@@ -1,52 +1,45 @@
-import { Flex, Form, Modal } from 'antd'
+import { Form } from 'antd'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import { SewingLine } from '~/typing'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: SewingLine) => void
+export interface SewingLineAddNewProps {
+  name?: string
 }
 
-const ModalAddNewSewingLine: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+interface Props extends SkyModalProps {
+  onAddNew: (formAddNew: SewingLineAddNewProps) => void
+}
+
+const ModalAddNewSewingLine: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
-  async function handleOk() {
+  const handleOk = async () => {
     const row = await form.validateFields()
     onAddNew({
-      ...row
+      name: row.name
     })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width={450}
-    >
-      <Form form={form} labelCol={{ flex: '100px' }} labelAlign='left' {...props}>
-        <Flex vertical gap={10}>
-          <EditableFormCell
-            isEditing={true}
-            title='Name:'
-            required
-            subtitle='Please enter name!'
-            dataIndex='name'
-            inputType='text'
-            placeholder='C1, C2, v.v..'
-          />
-        </Flex>
+    <SkyModal {...props} title='Thêm chuyền may' okText='Create' onOk={handleOk}>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Tên chuyền:'
+              placeholder='Ví dụ: Chuyền 1'
+              dataIndex='name'
+              inputType='text'
+              required
+            />
+          </SkyModalRowItem>
+        </SkyModalRow>
       </Form>
-    </Modal>
+    </SkyModal>
   )
 }
 

@@ -26,11 +26,11 @@ import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
 const ProductPage: React.FC = () => {
-  useTitle('Product - Phung Nguyen')
+  useTitle('Sản phẩm | Phung Nguyen')
   const { width } = useDevice()
   const { state, action, table } = useProductViewModel()
   const {
-    loading,
+    showDeleted,
     newRecord,
     setNewRecord,
     openModal,
@@ -265,7 +265,7 @@ const ProductPage: React.FC = () => {
     <>
       <BaseLayout
         title='Danh sách sản phẩm'
-        loading={loading}
+        loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
           placeholder: 'Mã hàng..',
@@ -291,29 +291,29 @@ const ProductPage: React.FC = () => {
           dataSource={table.dataSource}
           rowClassName='editable-row'
           onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
+          isShowDeleted={showDeleted}
           actionProps={{
             onEdit: {
-              onClick: (_e, record) => {
+              handleClick: (record) => {
                 setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
+                table.handleStartEditing(record.key)
               },
-              isShow: !table.showDeleted
+              isShow: !showDeleted
             },
             onSave: {
-              onClick: (_e, record) => handleUpdate(record!)
+              handleClick: (record) => handleUpdate(record!)
             },
             onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
+              handleClick: (record) => table.handleStartDeleting(record.key),
+              isShow: !showDeleted
             },
             onDeleteForever: {
-              onClick: (_e, record) => handleDeleteForever(record!.id!),
-              isShow: table.showDeleted
+              handleClick: (record) => handleDeleteForever(record!.id!),
+              isShow: showDeleted
             },
             onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
+              handleClick: (record) => table.handleStartRestore(record.key),
+              isShow: showDeleted
             },
             onConfirmCancelEditing: () => table.handleCancelEditing(),
             onConfirmCancelDeleting: () => table.handleCancelDeleting(),

@@ -1,19 +1,19 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
-import ColorAPI from '~/api/services/ColorAPI'
+import PrintAPI from '~/api/services/PrintAPI'
 import useTable from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Color } from '~/typing'
+import { Print } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { ColorAddNewProps } from '../components/ModalAddNewColor'
-import { ColorTableDataType } from '../type'
+import { PrintAddNewProps } from '../components/ModalAddNewPrint'
+import { PrintableTableDataType } from '../type'
 
-export default function useColorViewModel() {
+export default function usePrintableViewModel() {
   const { message } = AntApp.useApp()
-  const table = useTable<ColorTableDataType>([])
+  const table = useTable<PrintableTableDataType>([])
 
-  const colorService = useAPIService<Color>(ColorAPI)
+  const printService = useAPIService<Print>(PrintAPI)
 
   // State
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -27,17 +27,14 @@ export default function useColorViewModel() {
   })
   const [shorted, setSorted] = useState<boolean>(false)
 
-  console.log('loadViewModel')
-
   useEffect(() => {
     loadData()
   }, [showDeleted, shorted, paginator, searchText])
 
   const loadData = useCallback(async () => {
     try {
-      console.log('loadData')
       table.setLoading(true)
-      await colorService.getItemsSync(
+      await printService.getItemsSync(
         {
           paginator: paginator,
           sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
@@ -47,10 +44,9 @@ export default function useColorViewModel() {
         table.setLoading,
         (meta) => {
           if (!meta?.success) throw new Error(`${meta.message}`)
-          const colors = meta.data as Color[]
-          console.log(colors.length)
+          const prints = meta.data as Print[]
           table.setDataSource(
-            colors.map((item) => {
+            prints.map((item) => {
               return {
                 ...item,
                 key: `${item.id}`
@@ -66,23 +62,18 @@ export default function useColorViewModel() {
     }
   }, [showDeleted, paginator, shorted, searchText])
 
-  const handleUpdate = async (record: ColorTableDataType) => {
+  const handleUpdate = async (record: PrintableTableDataType) => {
     console.log('handleUpdate')
     // const row = (await form.validateFields()) as any
     try {
-      if (textComparator(record.name, newRecord.name) || textComparator(record.hexColor, newRecord.hexColor)) {
-        console.log('Color progressing...')
-        await colorService.updateItemByPkSync(
-          record.id!,
-          { name: newRecord.name, hexColor: newRecord.hexColor },
-          table.setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error(`${meta.message}`)
-            const itemUpdated = meta.data as Color
-            table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as ColorTableDataType)
-            message.success('Success!')
-          }
-        )
+      if (textComparator(record.name, newRecord.name)) {
+        console.log('Print progressing...')
+        await printService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
+          if (!meta?.success) throw new Error(`${meta.message}`)
+          const itemUpdated = meta.data as Print
+          table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as PrintableTableDataType)
+          message.success('Success!')
+        })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -92,21 +83,19 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleAddNew = async (formAddNew: ColorAddNewProps) => {
+  const handleAddNew = async (formAddNew: PrintAddNewProps) => {
     try {
       console.log('handleAddNew')
-      console.log(formAddNew)
       table.setLoading(true)
-      await colorService.createItemSync(
+      await printService.createItemSync(
         {
-          name: formAddNew.name,
-          hexColor: formAddNew.hexColor
+          name: formAddNew.name
         },
         table.setLoading,
         async (meta) => {
           if (!meta?.success) throw new Error(`${meta.message}`)
-          const newColor = meta.data as Color
-          table.handleAddNew({ ...newColor, key: `${newColor.id}` })
+          const newPrint = meta.data as Print
+          table.handleAddNew({ ...newPrint, key: `${newPrint.id}` })
           message.success(meta.message)
         }
       )
@@ -118,10 +107,10 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleDelete = async (record: ColorTableDataType) => {
+  const handleDelete = async (record: PrintableTableDataType) => {
     console.log('handleDelete')
     try {
-      await colorService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
+      await printService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(meta?.message)
         table.handleDeleting(record.key)
         message.success('Deleted!')
@@ -134,8 +123,9 @@ export default function useColorViewModel() {
   }
 
   const handleDeleteForever = async (id: number) => {
+    console.log(id)
     try {
-      await colorService.deleteItemSync(id, table.setLoading, (res) => {
+      await printService.deleteItemSync(id, table.setLoading, (res) => {
         if (!res.success) throw new Error(res.message)
         table.handleDeleting(`${id}`)
         message.success(`${res.message}`)
@@ -147,9 +137,9 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleRestore = async (record: ColorTableDataType) => {
+  const handleRestore = async (record: PrintableTableDataType) => {
     try {
-      await colorService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
+      await printService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(meta?.message)
         table.handleDeleting(`${record.id!}`)
         message.success('Restored!')
@@ -182,15 +172,15 @@ export default function useColorViewModel() {
       searchTextChange,
       setSearchTextChange,
       openModal,
-      loadData,
       newRecord,
       setNewRecord,
       setOpenModal
     },
     service: {
-      colorService
+      printService
     },
     action: {
+      loadData,
       handleUpdate,
       handleSortChange,
       handleSearch,

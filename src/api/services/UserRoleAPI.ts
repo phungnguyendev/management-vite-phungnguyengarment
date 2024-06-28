@@ -4,7 +4,7 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'user-roles'
 
 export default {
-  createItem: async (newItem: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: UserRole, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -25,7 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -39,9 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (query: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .get(`${NAMESPACE}/${[query]}/${query}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -53,7 +53,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
@@ -67,13 +67,41 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: UserRole,
+  updateItemByPk: async (id: number, itemToUpdate: UserRole, accessToken: string): Promise<ResponseDataType> => {
+    return client
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItemBy: async (query: { field: string; id: number }, itemToUpdate: UserRole, accessToken: string): Promise<ResponseDataType> => {
+    return client
+      .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: UserRole[],
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -85,39 +113,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: UserRole,
-    itemToUpdate: UserRole,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .patch(`${NAMESPACE}/${[query]}/${query}`, itemToUpdate, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItems: async (itemsToUpdate: UserRole[], accessToken: string): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}`, itemsToUpdate, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {
@@ -131,9 +127,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemBy: async (query: UserRole, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .delete(`${NAMESPACE}/${[query]}/${query}`, {
+      .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }

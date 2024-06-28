@@ -32,8 +32,8 @@ export type InputType =
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
-  title?: string | null | React.ReactNode
-  desc?: string | null | React.ReactNode
+  title?: string | React.ReactNode
+  desc?: string | React.ReactNode
   editable?: boolean
   dataIndex: string
   initialField?: {
@@ -56,239 +56,240 @@ export type TableListDataType<T> = {
 
 export interface Role {
   id?: number
-  role?: UserRoleType | null
-  shortName?: string | null
-  desc?: string | null
-  status?: ItemStatusType | null
+  role?: UserRoleType
+  shortName?: string
+  desc?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface UserRole {
   id?: number
-  roleID?: number | null
-  userID?: number | null
-  status?: ItemStatusType | null
+  roleID?: number
+  userID?: number
+  role?: Role
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface User {
   id?: number
-  fullName?: string | null
-  email?: string | null
-  password?: string | null
-  avatar?: string | null
-  phone?: string | null
-  otp?: string | null | null
-  isAdmin?: boolean | null
-  workDescription?: string | null
-  birthday?: string | null
-  status?: ItemStatusType | null
+  fullName?: string
+  email?: string
+  password?: string
+  avatar?: string
+  phone?: string
+  otp?: string
+  isAdmin?: boolean
+  workDescription?: string
+  birthday?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Product {
   id?: number
-  productCode?: string | null
-  quantityPO?: number | null
-  dateInputNPL?: string | null
-  dateOutputFCR?: string | null
-  status?: ItemStatusType | null
+  productCode?: string
+  quantityPO?: number
+  dateInputNPL?: string
+  dateOutputFCR?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Color {
   id?: number
-  name?: string | null
-  hexColor?: string | null
-  status?: ItemStatusType | null
+  name?: string
+  hexColor?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
 export interface ProductColor {
   id?: number
-  colorID?: number | null
-  productID?: number | null
-  status?: ItemStatusType | null
+  colorID?: number
+  productID?: number
+  status?: ItemStatusType
   color?: Color
-  product?: Product | null
+  product?: Product
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Group {
   id?: number
-  name?: string | null
-  status?: ItemStatusType | null
+  name?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
 export interface Print {
   id?: number
-  name?: string | null
-  status?: ItemStatusType | null
+  name?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
 export interface PrintablePlace {
   id?: number
-  printID?: number | null
-  productID?: number | null
-  status?: ItemStatusType | null
-  product?: Product | null
-  print?: Print | null
+  printID?: number
+  productID?: number
+  status?: ItemStatusType
+  product?: Product
+  print?: Print
   createdAt?: string
   updatedAt?: string
 }
 
 export interface ProductGroup {
   id?: number
-  groupID?: number | null
-  productID?: number | null
-  name?: string | null
-  status?: ItemStatusType | null
+  groupID?: number
+  productID?: number
+  name?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  product?: Product | null
-  group?: Group | null
+  product?: Product
+  group?: Group
 }
 
 export interface GarmentAccessory {
   id?: number
-  productID?: number | null
-  amountCutting?: number | null
-  passingDeliveryDate?: string | null
-  status?: ItemStatusType | null
-  syncStatus?: boolean | null
-  product?: Product | null
+  productID?: number
+  amountCutting?: number
+  passingDeliveryDate?: string
+  status?: ItemStatusType
+  syncStatus?: boolean
+  product?: Product
   createdAt?: string
   updatedAt?: string
 }
 
 export interface AccessoryNote {
   id?: number
-  title?: string | null
-  summary?: string | null
-  status?: ItemStatusType | null
+  title?: string
+  summary?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface GarmentAccessoryNote {
   id?: number
-  productID?: number | null
-  product?: Product | null
-  accessoryNoteID?: number | null
+  productID?: number
+  product?: Product
+  accessoryNoteID?: number
   accessoryNote?: AccessoryNote
-  garmentAccessoryID?: number | null
-  garmentAccessory?: GarmentAccessory | null
-  noteStatus?: NoteItemStatusType | null
-  status?: ItemStatusType | null
+  garmentAccessoryID?: number
+  garmentAccessory?: GarmentAccessory
+  noteStatus?: NoteItemStatusType
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Importation {
   id?: number
-  productID?: number | null
-  quantity?: number | null
-  status?: ItemStatusType | null
-  dateImported?: string | null
-  product?: Product | null
+  productID?: number
+  quantity?: number
+  status?: ItemStatusType
+  dateImported?: string
+  product?: Product
   createdAt?: string
   updatedAt?: string
 }
 
 export type SampleSewing = {
   id?: number
-  productID?: number | null
-  dateSubmissionNPL?: string | null
-  dateApprovalSO?: string | null
-  dateApprovalPP?: string | null
-  dateSubmissionFirstTime?: string | null
-  dateSubmissionSecondTime?: string | null
-  dateSubmissionThirdTime?: string | null
-  dateSubmissionForthTime?: string | null
-  dateSubmissionFifthTime?: string | null
-  status?: ItemStatusType | null
+  productID?: number
+  dateSubmissionNPL?: string
+  dateApprovalSO?: string
+  dateApprovalPP?: string
+  dateSubmissionFirstTime?: string
+  dateSubmissionSecondTime?: string
+  dateSubmissionThirdTime?: string
+  dateSubmissionForthTime?: string
+  dateSubmissionFifthTime?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
-  product?: Product | null
+  product?: Product
 }
 
 export interface CuttingGroup {
   id?: number
-  productID?: number | null
-  quantityRealCut?: number | null
-  timeCut?: string | null
-  dateSendEmbroidered?: string | null
-  quantityArrivedEmbroidered?: number | null
-  quantityDeliveredBTP?: number | null
+  productID?: number
+  quantityRealCut?: number
+  timeCut?: string
+  dateSendEmbroidered?: string
+  quantityArrivedEmbroidered?: number
+  quantityDeliveredBTP?: number
   status?: ItemStatusType
-  syncStatus?: boolean | null
-  dateArrived1Th?: string | null
-  quantityArrived1Th?: number | null
-  dateArrived2Th?: string | null
-  quantityArrived2Th?: number | null
-  dateArrived3Th?: string | null
-  quantityArrived3Th?: number | null
-  dateArrived4Th?: string | null
-  quantityArrived4Th?: number | null
-  dateArrived5Th?: string | null
-  quantityArrived5Th?: number | null
-  dateArrived6Th?: string | null
-  quantityArrived6Th?: number | null
-  dateArrived7Th?: string | null
-  quantityArrived7Th?: number | null
-  dateArrived8Th?: string | null
-  quantityArrived8Th?: number | null
-  dateArrived9Th?: string | null
-  quantityArrived9Th?: number | null
-  dateArrived10Th?: string | null
-  quantityArrived10Th?: number | null
+  syncStatus?: boolean
+  dateArrived1Th?: string
+  quantityArrived1Th?: number
+  dateArrived2Th?: string
+  quantityArrived2Th?: number
+  dateArrived3Th?: string
+  quantityArrived3Th?: number
+  dateArrived4Th?: string
+  quantityArrived4Th?: number
+  dateArrived5Th?: string
+  quantityArrived5Th?: number
+  dateArrived6Th?: string
+  quantityArrived6Th?: number
+  dateArrived7Th?: string
+  quantityArrived7Th?: number
+  dateArrived8Th?: string
+  quantityArrived8Th?: number
+  dateArrived9Th?: string
+  quantityArrived9Th?: number
+  dateArrived10Th?: string
+  quantityArrived10Th?: number
   createdAt?: string
   updatedAt?: string
 }
 
 export interface SewingLineDelivery {
   id?: number
-  productID?: number | null
-  sewingLineID?: number | null
-  quantityOriginal?: number | null
-  quantitySewed?: number | null
-  expiredDate?: string | null
-  status?: ItemStatusType | null
-  product?: Product | null
-  sewingLine?: SewingLine | null
+  productID?: number
+  sewingLineID?: number
+  quantityOriginal?: number
+  quantitySewed?: number
+  expiredDate?: string
+  status?: ItemStatusType
+  product?: Product
+  sewingLine?: SewingLine
 }
 
 export interface SewingLine {
   id?: number
-  name?: string | null
-  status?: ItemStatusType | null
+  name?: string
+  status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
 }
 
 export interface Completion {
   id?: number
-  productID?: number | null
-  quantityIroned?: number | null
-  quantityCheckPassed?: number | null
-  quantityPackaged?: number | null
-  exportedDate?: string | null
-  passFIDate?: string | null
-  status?: ItemStatusType | null
-  product?: Product | null
+  productID?: number
+  quantityIroned?: number
+  quantityCheckPassed?: number
+  quantityPackaged?: number
+  exportedDate?: string
+  passFIDate?: string
+  status?: ItemStatusType
+  product?: Product
   createdAt?: string
   updatedAt?: string
 }

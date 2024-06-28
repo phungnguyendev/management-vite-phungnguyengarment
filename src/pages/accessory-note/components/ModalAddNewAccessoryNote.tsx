@@ -1,19 +1,23 @@
-import { Flex, Form, Modal } from 'antd'
+import { Form } from 'antd'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import { AccessoryNote } from '~/typing'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: AccessoryNote) => void
+export interface AccessoryNoteAddNewProps {
+  title?: string
+  summary?: string
 }
 
-const ModalAddNewAccessoryNote: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+interface Props extends SkyModalProps {
+  onAddNew: (formAddNew: AccessoryNoteAddNewProps) => void
+}
+
+const ModalAddNewAccessoryNote: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
-  async function handleOk() {
+  const handleOk = async () => {
     const row = await form.validateFields()
     onAddNew({
       title: row.title,
@@ -21,33 +25,32 @@ const ModalAddNewAccessoryNote: React.FC<Props> = ({ openModal, setOpenModal, on
     })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal title={<AddNewTitle title='Add new' />} open={openModal} onOk={handleOk} onCancel={handleCancel} centered>
-      <Form form={form} labelWrap labelCol={{ flex: '100px' }} labelAlign='left' {...props}>
-        <Flex vertical gap={10} className=''>
-          <EditableFormCell
-            isEditing={true}
-            required
-            title='Title:'
-            placeholder='Enter title'
-            subtitle='Please enter title!'
-            dataIndex='title'
-            inputType='text'
-          />
-          <EditableFormCell
-            isEditing={true}
-            title='Chi tiết:'
-            placeholder='Enter description'
-            dataIndex='desc'
-            inputType='textarea'
-          />
-        </Flex>
+    <SkyModal {...props} title='Thêm ghi chú' okText='Create' onOk={handleOk}>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Ghi chú:'
+              placeholder='Ví dụ: Chưa về'
+              dataIndex='title'
+              inputType='text'
+              required
+            />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Chi tiết:'
+              placeholder='Ví dụ: Chưa về'
+              dataIndex='summary'
+              inputType='text'
+            />
+          </SkyModalRowItem>
+        </SkyModalRow>
       </Form>
-    </Modal>
+    </SkyModal>
   )
 }
 

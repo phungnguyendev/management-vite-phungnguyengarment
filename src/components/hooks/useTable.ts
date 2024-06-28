@@ -3,10 +3,10 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
 
 type RequiredDataType = {
-  key?: string
+  key: string
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
 interface Props<T extends RequiredDataType> {
@@ -15,20 +15,20 @@ interface Props<T extends RequiredDataType> {
   scrollIndex: number
   editingKey: string
   deletingKey: string
-  setLoading: (state: boolean) => void
-  setScrollIndex: (index: number) => void
-  setEditingKey: (key: string) => void
-  setDeletingKey: (key: string) => void
-  setDataSource: (newDataSource: T[]) => void
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setScrollIndex: React.Dispatch<React.SetStateAction<number>>
+  setEditingKey: React.Dispatch<React.SetStateAction<string>>
+  setDeletingKey: React.Dispatch<React.SetStateAction<string>>
+  setDataSource: React.Dispatch<React.SetStateAction<T[]>>
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
   handleStartEditing: (key: string) => void
   handleStartDeleting: (key: string) => void
   handleStartRestore: (key: string) => void
-  handleEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
+  handleUpdate: (key: string, itemToUpdate: T) => void
   handleAddNew: (item: T) => void
-  handleDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
-  handleRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleDeleting: (key: string) => void
+  handleRestore: (key: string) => void
   handleCancelEditing: () => void
   handleCancelDeleting: () => void
   handleCancelRestore: () => void
@@ -56,24 +56,22 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     setDeletingKey(key)
   }
 
-  const handleDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleDeleting = (key: string) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
-      onDataSuccess?.(itemFound)
     }
     setLoading(false)
   }
 
-  const handleRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleRestore = (key: string) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
-      onDataSuccess?.(itemFound)
     }
     setLoading(false)
   }
@@ -90,7 +88,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     setDeletingKey('')
   }
 
-  const handleEditing = async (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
+  const handleUpdate = async (key: string, itemToUpdate: T) => {
     try {
       setLoading(true)
       const newData = [...dataSource]
@@ -103,14 +101,12 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
         })
         setDataSource(newData)
         setEditingKey('')
-        onDataSuccess?.(itemToUpdate)
         // After updated local data
         // We need to update on database
       } else {
         newData.push(itemToUpdate)
         setDataSource(newData)
         setEditingKey('')
-        onDataSuccess?.(itemToUpdate)
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
@@ -155,7 +151,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     handleStartEditing,
     handleStartDeleting,
     handleStartRestore,
-    handleEditing,
+    handleUpdate,
     handleCancelEditing,
     handleCancelDeleting,
     handleCancelRestore,

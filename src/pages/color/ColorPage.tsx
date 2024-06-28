@@ -16,6 +16,7 @@ import { ColorTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorPage: React.FC<Props> = () => {
+  useTitle('Màu | Phung Nguyen')
   const { state, action, table } = useColorViewModel()
   const {
     newRecord,
@@ -37,7 +38,6 @@ const ColorPage: React.FC<Props> = () => {
     handleSearch,
     handleSortChange
   } = action
-  useTitle('Color - Phung Nguyen')
 
   const tableColumns: ColumnsType<ColorTableDataType> = [
     {
@@ -139,13 +139,13 @@ const ColorPage: React.FC<Props> = () => {
               isShow: !showDeleted
             },
             onDeleteForever: {
-              handleClick: (record) => handleDeleteForever(record.id!),
               isShow: showDeleted
             },
             onRestore: {
               handleClick: (record) => table.handleStartRestore(record.key),
               isShow: showDeleted
             },
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
             onConfirmCancelEditing: () => table.handleCancelEditing(),
             onConfirmCancelDeleting: () => table.handleCancelDeleting(),
             onConfirmDelete: (record) => handleDelete(record),
