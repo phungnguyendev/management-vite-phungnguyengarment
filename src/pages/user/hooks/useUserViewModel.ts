@@ -5,12 +5,11 @@ import RoleAPI from '~/api/services/RoleAPI'
 import UserAPI from '~/api/services/UserAPI'
 import UserRoleAPI from '~/api/services/UserRoleAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Role, User, UserRole } from '~/typing'
 import { arrayComparator, isValidArray, textComparator } from '~/utils/helpers'
-import { UserAddNewProps } from '../components/ModalAddNewUser'
-import { UserTableDataType } from '../type'
-import define from '~/constants'
+import { UserAddNewProps, UserTableDataType } from '../type'
 
 export default function useUserViewModel() {
   const { message } = AntApp.useApp()

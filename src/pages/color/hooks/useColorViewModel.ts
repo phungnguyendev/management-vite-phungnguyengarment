@@ -7,8 +7,7 @@ import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { ColorAddNewProps } from '../components/ModalAddNewColor'
-import { ColorTableDataType } from '../type'
+import { ColorAddNewProps, ColorTableDataType } from '../type'
 
 export default function useColorViewModel() {
   const { message } = App.useApp()

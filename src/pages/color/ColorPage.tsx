@@ -8,7 +8,7 @@ import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { textValidatorDisplay } from '~/utils/helpers'
+import { colorValidatorChange, textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
 import useColorViewModel from './hooks/useColorViewModel'
 import { ColorTableDataType } from './type'
@@ -45,7 +45,7 @@ const ColorPage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+            onValueChange={(val) => setNewRecord({ ...newRecord, name: textValidatorChange(val) })}
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -67,7 +67,7 @@ const ColorPage: React.FC<Props> = () => {
             className='w-fit'
             initialValue={record.hexColor}
             value={newRecord.hexColor}
-            onValueChange={(val: AntColor) => setNewRecord({ ...newRecord, hexColor: val.toHexString() })}
+            onValueChange={(val: AntColor) => setNewRecord({ ...newRecord, hexColor: colorValidatorChange(val) })}
           >
             <ColorPicker
               disabled={true}

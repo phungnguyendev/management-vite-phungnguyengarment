@@ -8,19 +8,7 @@ import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import useAPIService from '~/hooks/useAPIService'
 import { Role } from '~/typing'
-
-export interface UserAddNewProps {
-  fullName?: string
-  email?: string
-  password?: string
-  avatar?: string
-  phone?: string
-  otp?: string
-  isAdmin?: boolean
-  workDescription?: string
-  birthday?: string
-  roleIDs?: number[]
-}
+import { UserAddNewProps } from '../type'
 
 interface Props extends SkyModalProps {
   onAddNew: (formAddNew: UserAddNewProps) => void

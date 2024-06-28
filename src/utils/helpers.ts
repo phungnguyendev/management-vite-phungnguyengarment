@@ -1,3 +1,4 @@
+import { Color } from 'antd/es/color-picker'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
@@ -57,15 +58,19 @@ export const dateTimeValidatorDisplay = (date?: string | number | Date | dayjs.D
 // Validator value change
 
 export const dateValidatorChange = (date?: string | number | dayjs.Dayjs | Date | undefined): string => {
-  return date ? dateFormatter(date, 'iso8601') : null
+  return date ? dateFormatter(date, 'iso8601') : dateFormatter(Date.now(), 'iso8601')
 }
 
-export const textValidatorChange = (text: string): string => {
-  return text ?? ''
+export const textValidatorChange = (text?: string | null | undefined): string => {
+  return text ? text.trim() : ''
 }
 
-export const numberValidatorChange = (number: number): number => {
-  return number ? (number > 0 ? number : 0) : 0
+export const numberValidatorChange = (number?: number | null | undefined): number => {
+  return number ?? 0
+}
+
+export const colorValidatorChange = (color?: Color | null | undefined): string => {
+  return color ? color.toHexString() : '#000000'
 }
 
 // Validator initial value
