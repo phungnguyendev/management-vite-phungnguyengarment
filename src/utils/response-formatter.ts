@@ -15,7 +15,7 @@ export const logError = (error: AxiosError) => {
     // Something happened in setting up the request that triggered an Error
     console.log('Error', error.message)
   }
-  console.log(error.config)
+  console.log(error.message)
 }
 
 export const throwErrorFormatter = (error: any) => {

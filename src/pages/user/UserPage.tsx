@@ -25,9 +25,9 @@ import useUserViewModel from './hooks/useUserViewModel'
 import { UserTableDataType } from './type'
 
 const UserPage = () => {
-  useTitle('Người dùng - Phung Nguyen')
+  useTitle('Users - Phung Nguyen')
   const { state, action, table } = useUserViewModel()
-  const { roles, newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted, setSearchText } = state
+  const { roles, newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
     handleAddNew,
     handleUpdate,
@@ -77,7 +77,7 @@ const UserPage = () => {
             })
           }
         >
-          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.fullName)}</SkyTableTypography>
+          <SkyTableTypography status={record.status}>{textValidatorDisplay(record.fullName)}</SkyTableTypography>
         </EditableStateCell>
       )
     },

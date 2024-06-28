@@ -55,7 +55,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       setLoading?.(true)
       return await apiService.createItem(itemNew, accessTokenStored)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -69,17 +68,11 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
   ) => {
     try {
       setLoading?.(true)
-      await apiService
-        .createItem(itemNew, accessTokenStored)
-        .then((res) => {
-          if (!res?.success) throw new Error(`${res?.message}`)
-          onDataSuccess?.(res)
-        })
-        .catch((err) => {
-          throw new Error(err)
-        })
+      await apiService.createItem(itemNew, accessTokenStored).then((res) => {
+        if (!res?.success) throw new Error(`${res?.message}`)
+        onDataSuccess?.(res)
+      })
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -91,7 +84,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       setLoading?.(true)
       return await apiService.getItemByPk(id, accessTokenStored)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -109,7 +101,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -127,7 +118,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -145,7 +135,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -161,7 +150,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       const res = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored)
       return res
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -179,7 +167,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.message) throw new Error(`${res}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -196,7 +183,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       const meta = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored)
       return meta
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -215,7 +201,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -233,7 +218,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       return res
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -252,7 +236,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -270,7 +253,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       return res
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -289,7 +271,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -302,7 +283,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       const res = await apiService.deleteItemByPk(id, accessTokenStored)
       return res
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -320,7 +300,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -337,7 +316,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       return res
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)
@@ -355,7 +333,6 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       if (!res?.success) throw new Error(`${res?.message}`)
       onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
       throw err
     } finally {
       setLoading?.(false)

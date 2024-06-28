@@ -1,4 +1,4 @@
-import { Form } from 'antd'
+import { App as AntApp, Form } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import RoleAPI from '~/api/services/RoleAPI'
 import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
@@ -27,6 +27,7 @@ interface Props extends SkyModalProps {
 }
 
 const ModalAddNewUser: React.FC<Props> = ({ onAddNew, ...props }) => {
+  const { message } = AntApp.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState<boolean>(false)
   const roleService = useAPIService<Role>(RoleAPI)
@@ -37,11 +38,15 @@ const ModalAddNewUser: React.FC<Props> = ({ onAddNew, ...props }) => {
   }, [])
 
   const loadData = async () => {
-    await roleService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
-      if (!meta?.success) throw new Error(`${meta.message}`)
-      const data = meta.data as Role[]
-      setRoles(data)
-    })
+    try {
+      await roleService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+        if (!meta?.success) throw new Error(`${meta.message}`)
+        const data = meta.data as Role[]
+        setRoles(data)
+      })
+    } catch (error: any) {
+      message.error(error.message)
+    }
   }
 
   const handleOk = async () => {

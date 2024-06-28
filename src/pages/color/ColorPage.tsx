@@ -16,18 +16,9 @@ import { ColorTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorPage: React.FC<Props> = () => {
-  useTitle('Màu | Phung Nguyen')
+  useTitle('Colors | Phung Nguyen')
   const { state, action, table } = useColorViewModel()
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    showDeleted,
-    setShowDeleted,
-    searchTextChange,
-    setSearchTextChange
-  } = state
+  const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
     handleAddNew,
     handleUpdate,
@@ -98,9 +89,7 @@ const ColorPage: React.FC<Props> = () => {
         loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
-          placeholder: 'Name color..',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          placeholder: 'Ví dụ: Black, White,..'
         }}
         sortProps={{
           onChange: handleSortChange

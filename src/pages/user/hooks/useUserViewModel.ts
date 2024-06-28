@@ -10,6 +10,7 @@ import { Role, User, UserRole } from '~/typing'
 import { arrayComparator, isValidArray, textComparator } from '~/utils/helpers'
 import { UserAddNewProps } from '../components/ModalAddNewUser'
 import { UserTableDataType } from '../type'
+import define from '~/constants'
 
 export default function useUserViewModel() {
   const { message } = AntApp.useApp()
@@ -57,7 +58,7 @@ export default function useUserViewModel() {
           roles: roles.filter((item) => userRoleIDsMapped.includes(item.id))
         } as UserTableDataType
       })
-      return [..._dataSource]
+      return _dataSource
     })
   }, [users, roles, userRoles])
 
@@ -72,7 +73,7 @@ export default function useUserViewModel() {
         },
         table.setLoading,
         (res) => {
-          if (!res.success) throw new Error(res.message)
+          if (!res.success) throw new Error(define('dataLoad_failed'))
           const data = res.data as User[]
           setUsers(data)
         }
@@ -87,14 +88,14 @@ export default function useUserViewModel() {
         },
         table.setLoading,
         (res) => {
-          if (!res.success) throw new Error(res.message)
+          if (!res.success) throw new Error(define('dataLoad_failed'))
           const data = res.data as UserRole[]
           setUserRoles(data)
         }
       )
 
       await roleService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (res) => {
-        if (!res.success) throw new Error(`${res.message}`)
+        if (!res.success) throw new Error(define('dataLoad_failed'))
         const data = res.data as Role[]
         setRoles(data)
       })
@@ -119,7 +120,7 @@ export default function useUserViewModel() {
         textComparator(newRecord.birthday, record.birthday)
       ) {
         await userService.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
+          if (!meta?.success) throw new Error(define('update_failed'))
           const dataUpdated = meta.data as User
           newItemSource = { ...dataUpdated, key: record.key, roles: record.roles }
         })
@@ -142,7 +143,7 @@ export default function useUserViewModel() {
           itemsToUpdate,
           table.setLoading,
           (res) => {
-            if (!res?.success) throw new Error(`${res.message}`)
+            if (!res?.success) throw new Error(define('update_failed'))
             const dataUpdated = res.data as UserRole[]
             newItemSource = {
               ...newItemSource,
@@ -152,7 +153,7 @@ export default function useUserViewModel() {
         )
       }
       table.handleUpdate(record.key, newItemSource)
-      message.success('Success!')
+      message.success(define('updated_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -164,7 +165,7 @@ export default function useUserViewModel() {
   const handleAddNew = async (formAddNew: UserAddNewProps) => {
     try {
       const result = await userService.createItem({ ...formAddNew }, table.setLoading)
-      if (!result.success) throw new Error(result.message)
+      if (!result.success) throw new Error(define('create_failed'))
       const data = result.data as User
       if (isValidArray(formAddNew.roleIDs)) {
         const newUserRolesResult = await userRoleService.updateItemsBy(
@@ -184,7 +185,7 @@ export default function useUserViewModel() {
       } else {
         table.handleAddNew({ ...data, key: `${data.id}` } as UserTableDataType)
       }
-      message.success('Success!')
+      message.success(define('created_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -197,9 +198,9 @@ export default function useUserViewModel() {
     try {
       table.setLoading(true)
       await userService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta.success) throw new Error(`${meta.message}`)
+        if (!meta.success) throw new Error(define('failed'))
         table.handleDeleting(record.key)
-        message.success(`Success!`)
+        message.success(define('success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -212,9 +213,9 @@ export default function useUserViewModel() {
     try {
       table.setLoading(true)
       await userService.deleteItemSync(id, table.setLoading, (meta) => {
-        if (!meta.success) throw new Error(`${meta.message}`)
+        if (!meta.success) throw new Error(`${define('delete_failed')}`)
         table.handleDeleting(`${id}`)
-        message.success(`Deleted!`)
+        message.success(define('deleted_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -227,9 +228,9 @@ export default function useUserViewModel() {
     try {
       table.setLoading(true)
       await userService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-        if (!meta.success) throw new Error(`${meta.message}`)
+        if (!meta.success) throw new Error(define('restore_failed'))
         table.handleDeleting(record.key)
-        message.success(`Success!`)
+        message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
