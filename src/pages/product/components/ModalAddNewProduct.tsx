@@ -54,7 +54,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   return (
-    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Thêm' onOk={handleOk}>
+    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
         <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
           <SkyModalRow>

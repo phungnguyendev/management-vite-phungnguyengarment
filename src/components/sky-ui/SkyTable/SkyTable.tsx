@@ -39,7 +39,7 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
   }
 
   const actionsCol: ColumnType<T> = {
-    title: 'Hành động',
+    title: 'Operation',
     width: '0.01%',
     dataIndex: 'operation',
     render: (_value: any, record: T) => {

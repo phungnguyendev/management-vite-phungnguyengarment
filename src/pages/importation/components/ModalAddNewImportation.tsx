@@ -27,7 +27,7 @@ const ModalAddNewImportation: React.FC<Props> = ({ onAddNew, ...props }) => {
     <SkyModal
       {...props}
       title={props.title ?? 'Thêm lô hàng nhập khẩu'}
-      okText={props.okText ?? 'Thêm'}
+      okText={props.okText ?? 'Create'}
       onOk={props.onOk ?? handleOk}
     >
       <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>

@@ -188,7 +188,7 @@ export default function useImportationViewModel() {
           }
         )
       }
-      message.success('Success!')
+      message.success(define('updated_success'))
     } catch (error: any) {
       message.error(error.message)
     } finally {

@@ -26,7 +26,6 @@ const SkyModal: React.FC<SkyModalProps> = ({ loading, setOpenModal, ...props }) 
         )
       }
       onCancel={handleCancel}
-      cancelText='Hủy bỏ'
       centered
       width={props.width ?? 900}
       className={cn('z-10 w-full', props.className)}

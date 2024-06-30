@@ -127,7 +127,7 @@ const ImportationPage = () => {
                 viewModel.table.handleStartAdding(`${record.productCode}`, record)
                 viewModel.state.setOpenModal(true)
               },
-              title: 'Thêm kiện',
+              title: 'New package',
               isShow: true
             },
             isShow: true

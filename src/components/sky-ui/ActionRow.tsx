@@ -57,22 +57,10 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
         {props.isEditing && props.onSave.isShow ? (
           <Flex className={cn('flex-col lg:flex-row', props.className)} gap={5}>
             <Button type={props.onSave.type ? props.onSave.type : 'primary'} onClick={props.onSave.onClick}>
-              Lưu
+              Save
             </Button>
-            <PopConfirm
-              title={`Chắc chắn hủy?`}
-              okButtonProps={{
-                size: 'middle'
-              }}
-              okText='Đồng ý'
-              cancelButtonProps={{
-                size: 'middle'
-              }}
-              cancelText='Hủy bỏ'
-              placement='topLeft'
-              onConfirm={props.onConfirmCancelEditing}
-            >
-              <Button type='dashed'>Hủy bỏ</Button>
+            <PopConfirm title={`Sure to cancel?`} placement='topLeft' onConfirm={props.onConfirmCancelEditing}>
+              <Button type='dashed'>Cancel</Button>
             </PopConfirm>
           </Flex>
         ) : (
@@ -83,7 +71,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                 disabled={props.onAdd.disabled}
                 onClick={props.onAdd.onClick}
               >
-                {props.onAdd.title ?? 'Thêm'}
+                {props.onAdd.title ?? 'Add'}
               </Button>
             )}
             {props.onEdit.isShow && (
@@ -92,12 +80,12 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                 disabled={props.onEdit.disabled}
                 onClick={props.onEdit.onClick}
               >
-                {props.onEdit.title ?? 'Sửa'}
+                {props.onEdit.title ?? 'Edit'}
               </Button>
             )}
             {props.onDelete?.isShow && (
               <PopConfirm
-                title={`Chắc chắn ${props.onDelete.title ? props.onDelete.title : 'xoá'}?`}
+                title={`Sure to ${props.onDelete.title ? props.onDelete.title : 'delete'}?`}
                 onCancel={props.onConfirmCancelDeleting}
                 onConfirm={props.onConfirmDelete}
               >
@@ -106,13 +94,13 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onDelete.disabled}
                   onClick={props.onDelete.onClick}
                 >
-                  {props.onDelete.title ?? 'Xoá'}
+                  {props.onDelete.title ?? 'Delete'}
                 </Button>
               </PopConfirm>
             )}
             {props.onRestore?.isShow && (
               <PopConfirm
-                title={`Chắc chắn ${props.onRestore.title ? props.onRestore.title : 'khôi phục'}?`}
+                title={`Sure to ${props.onRestore.title ? props.onRestore.title : 'restore'}?`}
                 onCancel={props.onConfirmCancelRestore}
                 onConfirm={props.onConfirmRestore}
               >
@@ -121,13 +109,13 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onRestore.disabled}
                   onClick={props.onRestore.onClick}
                 >
-                  {props.onRestore.title ?? 'Khôi phục'}
+                  {props.onRestore.title ?? 'Restore'}
                 </Button>
               </PopConfirm>
             )}
             {props.onDeleteForever?.isShow && (
               <PopConfirm
-                title={`Chắc chắn ${props.onDeleteForever.title ? props.onDeleteForever.title : 'xoá vĩnh viễn'}?`}
+                title={`Sure to ${props.onDeleteForever.title ? props.onDeleteForever.title : 'delete forever'}?`}
                 onCancel={props.onConfirmCancelDeleteForever}
                 onConfirm={props.onConfirmDeleteForever}
               >
@@ -136,7 +124,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onDeleteForever.disabled}
                   onClick={props.onDeleteForever.onClick}
                 >
-                  {props.onDeleteForever.title ?? 'Xoá vĩnh viễn'}
+                  {props.onDeleteForever.title ?? 'Delete forever'}
                 </Button>
               </PopConfirm>
             )}
