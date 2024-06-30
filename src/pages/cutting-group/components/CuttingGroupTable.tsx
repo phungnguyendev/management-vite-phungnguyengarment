@@ -7,6 +7,7 @@ import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   dateTimeValidatorDisplay,
@@ -113,7 +114,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
             required={true}
             initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
             value={newRecord?.quantityRealCut}
-            onValueChange={(val) => setNewRecord({ ...newRecord, quantityRealCut: numberValidatorChange(val) })}
+            onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityRealCut: numberValidatorChange(val) } })}
           >
             <SkyTableTypography status={record.status}>
               {record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)}
@@ -135,7 +136,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
             inputType='datepicker'
             required={true}
             initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
-            onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, timeCut: dateValidatorChange(val) })}
+            onValueChange={(val: Dayjs) => setNewRecord((prev) =>  { return { ...prev, timeCut: dateValidatorChange(val) } })}
           >
             <SkyTableTypography status={record.status}>
               {record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)}
@@ -298,7 +299,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                 required={true}
                 initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
                 value={newRecord && (newRecord?.quantityDeliveredBTP ?? 0)}
-                onValueChange={(val) => setNewRecord({ ...newRecord, quantityDeliveredBTP: val })}
+                onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityDeliveredBTP: val })}
               >
                 <SkyTableTypography status={record.status}>
                   {record.cuttingGroup ? record.cuttingGroup?.quantityDeliveredBTP : ''}
@@ -358,7 +359,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
                     value={newRecord?.quantityArrived1Th}
                     onValueChange={(val) =>
-                      setNewRecord({ ...newRecord, quantityArrived1Th: numberValidatorChange(val) })
+                      setNewRecord((prev) =>  { return { ...prev, quantityArrived1Th: numberValidatorChange(val) })
                     }
                   >
                     <SkyTableTypography status={record.status}>
@@ -414,7 +415,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
                       value={newRecord?.quantityArrived2Th}
                       onValueChange={(val) =>
-                        setNewRecord({ ...newRecord, quantityArrived2Th: numberValidatorChange(val) })
+                        setNewRecord((prev) =>  { return { ...prev, quantityArrived2Th: numberValidatorChange(val) })
                       }
                     >
                       <SkyTableTypography status={record.status}>
@@ -478,7 +479,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
                       value={newRecord?.quantityArrived3Th}
                       onValueChange={(val) =>
-                        setNewRecord({ ...newRecord, quantityArrived3Th: numberValidatorChange(val) })
+                        setNewRecord((prev) =>  { return { ...prev, quantityArrived3Th: numberValidatorChange(val) })
                       }
                     >
                       <SkyTableTypography status={record.status}>
@@ -535,7 +536,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
                       value={newRecord?.quantityArrived4Th}
                       onValueChange={(val) =>
-                        setNewRecord({ ...newRecord, quantityArrived4Th: numberValidatorChange(val) })
+                        setNewRecord((prev) =>  { return { ...prev, quantityArrived4Th: numberValidatorChange(val) })
                       }
                     >
                       <SkyTableTypography status={record.status}>
@@ -599,7 +600,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
                       value={newRecord?.quantityArrived5Th}
                       onValueChange={(val) =>
-                        setNewRecord({ ...newRecord, quantityArrived5Th: numberValidatorChange(val) })
+                        setNewRecord((prev) =>  { return { ...prev, quantityArrived5Th: numberValidatorChange(val) })
                       }
                     >
                       <SkyTableTypography status={record.status}>
@@ -693,7 +694,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
               return (
                 <>
                   {width < 1600 && (
-                    <Flex vertical gap={10}>
+                    <SkyTableExpandableLayout>
                       <SkyTable
                         bordered
                         loading={table.loading}
@@ -718,7 +719,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                         editingKey={table.editingKey}
                         deletingKey={table.deletingKey}
                       />
-                    </Flex>
+                    </SkyTableExpandableLayout>
                   )}
                 </>
               )

@@ -171,8 +171,8 @@ function EditableStateCell({
             {...selectProps}
             title={title}
             placeholder={placeholder}
-            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
-            // value={value ?? selectProps?.value ?? ''}
+            defaultValue={initialValue ?? selectProps?.defaultValue}
+            value={value ?? selectProps?.value}
             onChange={(val, option) => onValueChange?.(val, option)}
             disabled={disabled}
             virtual={false}

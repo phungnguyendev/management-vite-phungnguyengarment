@@ -6,7 +6,7 @@ import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { textValidatorDisplay } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
 import useSewingLineViewModel from './hooks/useSewingLineViewModel'
 import { SewingLineTableDataType } from './type'
@@ -14,7 +14,7 @@ import { SewingLineTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLinePage: React.FC<Props> = () => {
-  useTitle('Chuyền may | Phung Nguyen')
+  useTitle('Sewing Lines | Phung Nguyen')
   const { state, action, table } = useSewingLineViewModel()
   const {
     newRecord,
@@ -52,7 +52,11 @@ const SewingLinePage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+            onValueChange={(val: string) =>
+              setNewRecord((prev) => {
+                return { ...prev, name: textValidatorChange(val.trim()) }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -68,7 +72,7 @@ const SewingLinePage: React.FC<Props> = () => {
         loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
-          placeholder: 'Tên chuyền..',
+          placeholder: 'Ví dụ: Chuyền 1',
           value: searchTextChange,
           onChange: (e) => setSearchTextChange(e.target.value)
         }}
@@ -125,7 +129,14 @@ const SewingLinePage: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewSewingLine open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
+      {openModal && (
+        <ModalAddNewSewingLine
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </ProtectedLayout>
   )
 }

@@ -250,7 +250,7 @@ export default function useGarmentAccessoryViewModel() {
     // }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     // console.log(id)
     // try {
     //   await accessoryNoteService.deleteItemSync(id, table.setLoading, (res) => {

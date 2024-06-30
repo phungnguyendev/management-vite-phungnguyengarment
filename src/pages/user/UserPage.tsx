@@ -6,8 +6,8 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
@@ -350,34 +350,34 @@ const UserPage = () => {
                 <Flex vertical className='w-full lg:w-1/2'>
                   <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
                     {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Email:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Email:' isEditing={table.isEditing(record.id!)}>
                         {columns.email(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow title='Roles:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Roles:' isEditing={table.isEditing(record.id!)}>
                         {columns.role(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='Password:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Password:' isEditing={table.isEditing(record.id!)}>
                         {columns.password(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xxl) && (
-                      <ExpandableItemRow title='Phone:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Phone:' isEditing={table.isEditing(record.id!)}>
                         {columns.phone(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xxl) && (
-                      <ExpandableItemRow title='Work description:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Work description:' isEditing={table.isEditing(record.id!)}>
                         {columns.workDescription(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.xxl) && (
-                      <ExpandableItemRow title='Birthday:' isEditing={table.isEditing(record.id!)}>
+                      <SkyTableExpandableItemRow title='Birthday:' isEditing={table.isEditing(record.id!)}>
                         {columns.birthday(record)}
-                      </ExpandableItemRow>
+                      </SkyTableExpandableItemRow>
                     )}
                   </Space>
                 </Flex>

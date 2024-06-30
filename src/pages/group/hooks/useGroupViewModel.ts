@@ -50,7 +50,6 @@ export default function useGroupViewModel() {
 
   const loadData = useCallback(async () => {
     try {
-      table.setLoading(true)
       await groupService.getItemsSync(
         {
           paginator: paginator,
@@ -126,7 +125,7 @@ export default function useGroupViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     console.log(id)
     try {
       await groupService.deleteItemSync(id, table.setLoading, (res) => {

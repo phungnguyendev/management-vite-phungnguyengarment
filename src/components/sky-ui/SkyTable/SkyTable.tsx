@@ -22,6 +22,7 @@ export interface SkyTableProps<T extends SkyTableRequiredDataType> extends Table
   onPageChange?: (page: number, pageSize: number) => void
   actionProps?: ActionProps<T>
   isShowDeleted?: boolean
+  addingKey?: string
   editingKey?: string
   deletingKey?: string
   onDragStart?(event: DragStartEvent): void
@@ -38,7 +39,7 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
   }
 
   const actionsCol: ColumnType<T> = {
-    title: 'Operation',
+    title: 'Hành động',
     width: '0.01%',
     dataIndex: 'operation',
     render: (_value: any, record: T) => {

@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { SewingLine } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { SewingLineAddNewProps } from '../components/ModalAddNewSewingLine'
-import { SewingLineTableDataType } from '../type'
+import { SewingLineAddNewProps, SewingLineTableDataType } from '../type'
 
 export default function useSewingLineViewModel() {
   const { message } = AntApp.useApp()
@@ -20,20 +20,37 @@ export default function useSewingLineViewModel() {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<SewingLineAddNewProps>({})
   const [paginator, setPaginator] = useState<Paginator>({
     page: 1,
     pageSize: -1
   })
   const [shorted, setSorted] = useState<boolean>(false)
 
+  const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
+
   useEffect(() => {
     loadData()
   }, [showDeleted, shorted, paginator, searchText])
 
+  useEffect(() => {
+    mappedData()
+  }, [sewingLines])
+
+  const mappedData = useCallback(() => {
+    table.setDataSource(() => {
+      const _dataSource = sewingLines.map((self) => {
+        return {
+          ...self,
+          key: `${self.id}`
+        } as SewingLineTableDataType
+      })
+      return _dataSource
+    })
+  }, [sewingLines])
+
   const loadData = useCallback(async () => {
     try {
-      table.setLoading(true)
       await sewingLineService.getItemsSync(
         {
           paginator: paginator,
@@ -43,16 +60,9 @@ export default function useSewingLineViewModel() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
-          const sewingLines = meta.data as SewingLine[]
-          table.setDataSource(
-            sewingLines.map((item) => {
-              return {
-                ...item,
-                key: `${item.id}`
-              }
-            })
-          )
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
+          const _sewingLines = meta.data as SewingLine[]
+          setSewingLines(_sewingLines)
         }
       )
     } catch (error: any) {
@@ -63,58 +73,51 @@ export default function useSewingLineViewModel() {
   }, [showDeleted, paginator, shorted, searchText])
 
   const handleUpdate = async (record: SewingLineTableDataType) => {
-    console.log('handleUpdate')
-    // const row = (await form.validateFields()) as any
     try {
       if (textComparator(record.name, newRecord.name)) {
-        console.log('SewingLine progressing...')
         await sewingLineService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+          if (!meta?.success) throw new Error(define('update_failed'))
           const itemUpdated = meta.data as SewingLine
           table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as SewingLineTableDataType)
-          message.success('Success!')
+          message.success(define('updated_success'))
         })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       table.handleCancelEditing()
+      table.setLoading(false)
     }
   }
 
   const handleAddNew = async (formAddNew: SewingLineAddNewProps) => {
     try {
-      console.log('handleAddNew')
-      console.log(formAddNew)
-      table.setLoading(true)
       await sewingLineService.createItemSync(
         {
           name: formAddNew.name
         },
         table.setLoading,
-        async (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+        (meta) => {
+          if (!meta?.success) throw new Error(define('create_failed'))
           const newSewingLine = meta.data as SewingLine
           table.handleAddNew({ ...newSewingLine, key: `${newSewingLine.id}` })
-          message.success(meta.message)
+          message.success(define('created_success'))
         }
       )
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       setOpenModal(false)
+      table.setLoading(false)
     }
   }
 
   const handleDelete = async (record: SewingLineTableDataType) => {
-    console.log('handleDelete')
     try {
       await sewingLineService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta?.success) throw new Error(define('delete_failed'))
         table.handleDeleting(record.key)
-        message.success('Deleted!')
+        message.success(define('deleted_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -123,13 +126,12 @@ export default function useSewingLineViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
-    console.log(id)
+  const handleDeleteForever = async (id?: number) => {
     try {
       await sewingLineService.deleteItemSync(id, table.setLoading, (res) => {
-        if (!res.success) throw new Error(res.message)
+        if (!res.success) throw new Error(define('delete_failed'))
         table.handleDeleting(`${id}`)
-        message.success(`${res.message}`)
+        message.success(define('deleted_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -141,14 +143,13 @@ export default function useSewingLineViewModel() {
   const handleRestore = async (record: SewingLineTableDataType) => {
     try {
       await sewingLineService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta?.success) throw new Error(define('restore_failed'))
         table.handleDeleting(`${record.id!}`)
-        message.success('Restored!')
+        message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      loadData()
       table.setLoading(false)
     }
   }
@@ -163,7 +164,6 @@ export default function useSewingLineViewModel() {
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
-    console.log(value)
   }
 
   return {

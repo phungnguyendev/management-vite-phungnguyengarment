@@ -82,7 +82,7 @@ export default {
       })
   },
   updateItemBy: async (
-    query: CuttingGroup,
+    query: { field: string; id: number },
     itemToUpdate: CuttingGroup,
     accessToken: string
   ): Promise<ResponseDataType> => {
@@ -99,9 +99,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: CuttingGroup[], accessToken: string): Promise<ResponseDataType> => {
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: CuttingGroup[],
+    accessToken: string
+  ): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}`, itemsToUpdate, {
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }
@@ -127,7 +131,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemBy: async (query: CuttingGroup, accessToken: string): Promise<ResponseDataType> => {
+  deleteItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {

@@ -14,18 +14,9 @@ import { PrintableTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const SewingLinePage: React.FC<Props> = () => {
-  useTitle('Nơi in - Thêu | Phung Nguyen')
+  useTitle('Printable Place | Phung Nguyen')
   const { state, action, table } = usePrintableViewModel()
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    showDeleted,
-    setShowDeleted,
-    searchTextChange,
-    setSearchTextChange
-  } = state
+  const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
     handleAddNew,
     handleUpdate,
@@ -52,7 +43,11 @@ const SewingLinePage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: val })}
+            onValueChange={(val) =>
+              setNewRecord((prev) => {
+                return { ...prev, name: val }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -68,9 +63,7 @@ const SewingLinePage: React.FC<Props> = () => {
         loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
-          placeholder: 'Ví dụ: T THINH, TIẾN THẮNG',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          placeholder: 'Ví dụ: T THINH, TIẾN THẮNG'
         }}
         sortProps={{
           onChange: handleSortChange
@@ -125,7 +118,14 @@ const SewingLinePage: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewPrint open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
+      {openModal && (
+        <ModalAddNewPrint
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </ProtectedLayout>
   )
 }

@@ -160,7 +160,7 @@ export default function useCuttingGroupViewModel() {
       if (record.cuttingGroup) {
         console.log('CuttingGroup progressing: ', newRecord)
         await cuttingGroupService.updateItemBySync(
-          { productID: record.id! },
+          { field: 'productID', id: record.id! },
           {
             ...newRecord
           },

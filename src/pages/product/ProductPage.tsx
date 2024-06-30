@@ -1,12 +1,13 @@
-import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
+import { ColorPicker, Flex } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
@@ -20,13 +21,12 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import ImportationTable from '../importation/components/ImportationTable'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
-const ProductPage: React.FC = () => {
-  useTitle('Sản phẩm | Phung Nguyen')
+const ProductPage = () => {
+  useTitle('Products | Phung Nguyen')
   const { width } = useDevice()
   const { state, action, table } = useProductViewModel()
   const {
@@ -63,7 +63,11 @@ const ProductPage: React.FC = () => {
           required={true}
           initialValue={textValidatorInit(record.productCode)}
           value={newRecord.productCode}
-          onValueChange={(val) => setNewRecord({ ...newRecord, productCode: textValidatorChange(val) })}
+          onValueChange={(val: string) =>
+            setNewRecord((prev) => {
+              return { ...prev, productCode: textValidatorChange(val.trim()) }
+            })
+          }
         >
           <SkyTableTypography strong status={'active'}>
             {textValidatorDisplay(record.productCode)}
@@ -81,7 +85,11 @@ const ProductPage: React.FC = () => {
           required={true}
           initialValue={numberValidatorInit(record.quantityPO)}
           value={newRecord.quantityPO}
-          onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            setNewRecord((prev) => {
+              return { ...prev, quantityPO: numberValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
         </EditableStateCell>
@@ -94,26 +102,25 @@ const ProductPage: React.FC = () => {
           dataIndex='colorID'
           title='Màu'
           inputType='colorselector'
-          required={false}
-          onValueChange={(val: number) => setNewRecord({ ...newRecord, colorID: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            setNewRecord((prev) => {
+              return { ...prev, colorID: numberValidatorChange(val) }
+            })
+          }
+          defaultValue={record.productColor.colorID && record.productColor.colorID}
           selectProps={{
             options: colors.map((color) => {
-              return { label: color.name, value: color.id, key: color.id }
+              return { label: color.name, value: color.id, key: color.hexColor }
             }),
-            defaultValue: numberValidatorInit(record.productColor?.colorID),
-            value: newRecord.colorID,
-            onChange: (value, option) => {
-              console.log({ value, option })
-            }
+            defaultValue: record.productColor.colorID && record.productColor.colorID,
+            value: newRecord.colorID
           }}
         >
           <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
-            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor?.color?.name)}
+            <SkyTableTypography status={record.productColor.color?.status} className='w-fit'>
+              {textValidatorDisplay(record.productColor.color?.name)}
             </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
+            <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )
@@ -127,7 +134,9 @@ const ProductPage: React.FC = () => {
           inputType='select'
           required={false}
           onValueChange={(val) => {
-            setNewRecord({ ...newRecord, groupID: numberValidatorChange(val) })
+            setNewRecord((prev) => {
+              return { ...prev, groupID: numberValidatorChange(val) }
+            })
           }}
           selectProps={{
             options: groups.map((i) => {
@@ -150,7 +159,11 @@ const ProductPage: React.FC = () => {
           title='Nơi in'
           inputType='select'
           required={true}
-          onValueChange={(val: number) => setNewRecord({ ...newRecord, printID: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            setNewRecord((prev) => {
+              return { ...prev, printID: numberValidatorChange(val) }
+            })
+          }
           selectProps={{
             options: prints.map((i) => {
               return { label: i.name, value: i.id, optionData: i.id }
@@ -173,7 +186,11 @@ const ProductPage: React.FC = () => {
           inputType='datepicker'
           required={true}
           initialValue={dateValidatorInit(record.dateInputNPL)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateInputNPL: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateInputNPL: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateInputNPL)}</SkyTableTypography>
         </EditableStateCell>
@@ -188,7 +205,11 @@ const ProductPage: React.FC = () => {
           inputType='datepicker'
           required={true}
           initialValue={dateValidatorInit(record.dateOutputFCR)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateOutputFCR: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateOutputFCR)}</SkyTableTypography>
         </EditableStateCell>
@@ -208,7 +229,7 @@ const ProductPage: React.FC = () => {
     {
       title: 'Số lượng PO',
       dataIndex: 'quantityPO',
-      width: '10%',
+      width: '7%',
       responsive: ['sm'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.quantityPO(record)
@@ -226,7 +247,7 @@ const ProductPage: React.FC = () => {
     {
       title: 'Nhóm',
       dataIndex: 'groupID',
-      width: '10%',
+      width: '7%',
       responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productGroup(record)
@@ -236,7 +257,7 @@ const ProductPage: React.FC = () => {
       title: 'Nơi in',
       dataIndex: 'printID',
       width: '10%',
-      responsive: ['xl'],
+      responsive: ['xxl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.printablePlace(record)
       }
@@ -325,50 +346,62 @@ const ProductPage: React.FC = () => {
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (
-                <Flex className='overflow-hidden' vertical gap={10}>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow
-                        className='w-1/2'
-                        title='Số lượng PO:'
-                        isEditing={table.isEditing(`${record.id}`)}
-                      >
-                        {columns.quantityPO(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(`${record.id}`)}>
-                        {columns.productColor(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow className='w-1/2' title='Nhóm:' isEditing={table.isEditing(`${record.id}`)}>
-                        {columns.productGroup(record)}
-                      </ExpandableItemRow>
-                    )}
-                    <ExpandableItemRow className='w-1/2' title='Nơi in:' isEditing={table.isEditing(`${record.id}`)}>
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Số lượng PO:'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
+                      {columns.quantityPO(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Màu:'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
+                      {columns.productColor(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Nhóm:'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
+                      {columns.productGroup(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Nơi in:'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
                       {columns.printablePlace(record)}
-                    </ExpandableItemRow>
-                    {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow
-                        title='Ngày nhập NPL:'
-                        className='flex w-1/2 lg:hidden'
-                        isEditing={table.isEditing(`${record.id}`)}
-                      >
-                        {columns.dateInputNPL(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow
-                        className='w-1/2'
-                        title='Ngày xuất FCR:'
-                        isEditing={table.isEditing(`${record.id}`)}
-                      >
-                        {columns.dateInputNPL(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                  <Collapse
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <SkyTableExpandableItemRow
+                      title='Ngày nhập NPL:'
+                      className='flex w-1/2 lg:hidden'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
+                      {columns.dateInputNPL(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.lg) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày xuất FCR:'
+                      isEditing={table.isEditing(`${record.id}`)}
+                    >
+                      {columns.dateInputNPL(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {/* <Collapse
                     items={[
                       {
                         key: '1',
@@ -380,15 +413,22 @@ const ProductPage: React.FC = () => {
                         children: <ImportationTable productRecord={record} />
                       }
                     ]}
-                  />
-                </Flex>
+                  /> */}
+                </SkyTableExpandableLayout>
               )
             },
             columnWidth: '0.001%'
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewProduct open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
+      {openModal && (
+        <ModalAddNewProduct
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </>
   )
 }

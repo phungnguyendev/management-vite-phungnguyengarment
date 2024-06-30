@@ -6,7 +6,7 @@ import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { textValidatorDisplay } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewAccessoryNote from './components/ModalAddNewAccessoryNote'
 import useAccessoryNoteViewModel from './hooks/useAccessoryNoteViewModel'
 import { AccessoryNoteTableDataType } from './type'
@@ -14,18 +14,9 @@ import { AccessoryNoteTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const AccessoryNotePage: React.FC<Props> = () => {
-  useTitle('Ghi chú phụ liệu - Phung Nguyen')
+  useTitle('Accessory Note - Phung Nguyen')
   const { state, action, table } = useAccessoryNoteViewModel()
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    showDeleted,
-    setShowDeleted,
-    searchTextChange,
-    setSearchTextChange
-  } = state
+  const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
     handleAddNew,
     handleUpdate,
@@ -52,7 +43,11 @@ const AccessoryNotePage: React.FC<Props> = () => {
             required={true}
             initialValue={record.title}
             value={newRecord.title}
-            onValueChange={(val) => setNewRecord({ ...newRecord, title: val })}
+            onValueChange={(val: string) =>
+              setNewRecord((prev) => {
+                return { ...prev, title: textValidatorChange(val.trim()) }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.title)}</SkyTableTypography>
           </EditableStateCell>
@@ -73,7 +68,11 @@ const AccessoryNotePage: React.FC<Props> = () => {
             required={true}
             initialValue={record.summary}
             value={newRecord.summary}
-            onValueChange={(val) => setNewRecord({ ...newRecord, summary: val })}
+            onValueChange={(val: string) =>
+              setNewRecord((prev) => {
+                return { ...prev, summary: textValidatorChange(val.trim()) }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.summary)}</SkyTableTypography>
           </EditableStateCell>
@@ -89,9 +88,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
         loading={table.loading}
         searchProps={{
           onSearch: handleSearch,
-          placeholder: 'Ví dụ: Chưa về',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          placeholder: 'Ví dụ: Chưa về'
         }}
         sortProps={{
           onChange: handleSortChange

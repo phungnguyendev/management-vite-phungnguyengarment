@@ -1,4 +1,4 @@
-import { ColorPicker, Divider, Flex, Space } from 'antd'
+import { ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
@@ -6,8 +6,9 @@ import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
@@ -432,94 +433,100 @@ const FinishPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='w-full overflow-hidden md:w-1/2'>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productColor(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.md) && (
-                      <Flex vertical align='center' gap={10}>
-                        <SkyTableTypography strong className='w-fit'>
-                          Ủi
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={10} wrap='wrap'>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Ủi được:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.ironed.quantityIroned(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.ironed.remainingAmount(record)}
-                          </ExpandableItemRow>
-                        </Flex>
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                      {columns.productColor(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <Flex vertical align='center' gap={10}>
+                      <SkyTableTypography strong className='w-fit'>
+                        Ủi
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={10} wrap='wrap'>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Ủi được:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.ironed.quantityIroned(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Còn lại:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.ironed.remainingAmount(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <Flex vertical align='center' gap={10}>
-                        <SkyTableTypography strong className='w-fit'>
-                          Kiểm
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={10} wrap='wrap'>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Kiểm đạt:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.checkPass.quantityCheckPassed(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.checkPass.remainingAmount(record)}
-                          </ExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                  )}
+                  {!(width >= breakpoint.lg) && (
+                    <Flex vertical align='center' gap={10}>
+                      <SkyTableTypography strong className='w-fit'>
+                        Kiểm
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={10} wrap='wrap'>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Kiểm đạt:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.checkPass.quantityCheckPassed(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Còn lại:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.checkPass.remainingAmount(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <Flex vertical align='center' gap={10}>
-                        <SkyTableTypography strong className='w-fit'>
-                          Đóng gói
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={10} wrap='wrap'>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Đóng được:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.packaged.quantityPackaged(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2 pr-5'
-                            title='Còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.packaged.remainingAmount(record)}
-                          </ExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                  )}
+                  {!(width >= breakpoint.xl) && (
+                    <Flex vertical align='center' gap={10}>
+                      <SkyTableTypography strong className='w-fit'>
+                        Đóng gói
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={10} wrap='wrap'>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Đóng được:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.packaged.quantityPackaged(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2 pr-5'
+                          title='Còn lại:'
+                          isEditing={table.isEditing(record.id!)}
+                        >
+                          {columns.packaged.remainingAmount(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                    )}
-                    {!(width >= breakpoint.xxl) && (
-                      <ExpandableItemRow className='w-1/2' title='Pass FI:' isEditing={table.isEditing(record.id!)}>
-                        {columns.passFIDate(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xxl) && (
-                      <ExpandableItemRow className='w-1/2' title='Ngày xuất:' isEditing={table.isEditing(record.id!)}>
-                        {columns.exportedDate(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                </Flex>
+                    </Flex>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Pass FI:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
+                      {columns.passFIDate(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày xuất:'
+                      isEditing={table.isEditing(record.id!)}
+                    >
+                      {columns.exportedDate(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                </SkyTableExpandableLayout>
               )
             },
             columnWidth: '0.001%',

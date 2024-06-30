@@ -68,15 +68,15 @@ const BaseLayout: React.FC<Props> = ({
               )}
               <Flex gap={10} className='w-full'>
                 {sortProps && (
-                  <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sorted' defaultChecked={false} />
+                  <Switch {...sortProps} checkedChildren='Sắp xếp' unCheckedChildren='Sắp xếp' defaultChecked={false} />
                 )}
-                {deleteProps && <Switch {...deleteProps} checkedChildren='Deleted' unCheckedChildren='Deleted' />}
+                {deleteProps && <Switch {...deleteProps} checkedChildren='Đã xoá' unCheckedChildren='Đã xoá' />}
               </Flex>
             </Flex>
             <Flex gap={10} align='center' justify='flex-end' className='w-fit'>
               {addNewProps && (
                 <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
-                  New
+                  Mới
                 </Button>
               )}
             </Flex>

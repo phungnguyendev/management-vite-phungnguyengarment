@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
 import PrintAPI from '~/api/services/PrintAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Print } from '~/typing'
 import { textComparator } from '~/utils/helpers'
-import { PrintAddNewProps } from '../components/ModalAddNewPrint'
-import { PrintableTableDataType } from '../type'
+import { PrintAddNewProps, PrintableTableDataType } from '../type'
 
 export default function usePrintableViewModel() {
   const { message } = AntApp.useApp()
@@ -20,20 +20,37 @@ export default function usePrintableViewModel() {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<any>({})
+  const [newRecord, setNewRecord] = useState<PrintAddNewProps>({})
   const [paginator, setPaginator] = useState<Paginator>({
     page: 1,
     pageSize: -1
   })
   const [shorted, setSorted] = useState<boolean>(false)
 
+  const [prints, setPrints] = useState<Print[]>([])
+
   useEffect(() => {
     loadData()
   }, [showDeleted, shorted, paginator, searchText])
 
+  useEffect(() => {
+    mappedData()
+  }, [prints])
+
+  const mappedData = useCallback(() => {
+    table.setDataSource(() => {
+      const _dataSource = prints.map((self) => {
+        return {
+          ...self,
+          key: `${self.id}`
+        } as PrintableTableDataType
+      })
+      return _dataSource
+    })
+  }, [prints])
+
   const loadData = useCallback(async () => {
     try {
-      table.setLoading(true)
       await printService.getItemsSync(
         {
           paginator: paginator,
@@ -43,16 +60,9 @@ export default function usePrintableViewModel() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
-          const prints = meta.data as Print[]
-          table.setDataSource(
-            prints.map((item) => {
-              return {
-                ...item,
-                key: `${item.id}`
-              }
-            })
-          )
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
+          const _prints = meta.data as Print[]
+          setPrints(_prints)
         }
       )
     } catch (error: any) {
@@ -63,57 +73,51 @@ export default function usePrintableViewModel() {
   }, [showDeleted, paginator, shorted, searchText])
 
   const handleUpdate = async (record: PrintableTableDataType) => {
-    console.log('handleUpdate')
-    // const row = (await form.validateFields()) as any
     try {
       if (textComparator(record.name, newRecord.name)) {
-        console.log('Print progressing...')
         await printService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+          if (!meta?.success) throw new Error(define('update_failed'))
           const itemUpdated = meta.data as Print
           table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as PrintableTableDataType)
-          message.success('Success!')
+          message.success(define('updated_success'))
         })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       table.handleCancelEditing()
+      table.setLoading(false)
     }
   }
 
   const handleAddNew = async (formAddNew: PrintAddNewProps) => {
     try {
-      console.log('handleAddNew')
-      table.setLoading(true)
       await printService.createItemSync(
         {
           name: formAddNew.name
         },
         table.setLoading,
         async (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+          if (!meta?.success) throw new Error(define('create_failed'))
           const newPrint = meta.data as Print
           table.handleAddNew({ ...newPrint, key: `${newPrint.id}` })
-          message.success(meta.message)
+          message.success(define('created_success'))
         }
       )
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       setOpenModal(false)
+      table.setLoading(false)
     }
   }
 
   const handleDelete = async (record: PrintableTableDataType) => {
-    console.log('handleDelete')
     try {
       await printService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta?.success) throw new Error(define('update_failed'))
         table.handleDeleting(record.key)
-        message.success('Deleted!')
+        message.success(define('updated_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -122,13 +126,12 @@ export default function usePrintableViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
-    console.log(id)
+  const handleDeleteForever = async (id?: number) => {
     try {
       await printService.deleteItemSync(id, table.setLoading, (res) => {
-        if (!res.success) throw new Error(res.message)
+        if (!res.success) throw new Error(define('failed'))
         table.handleDeleting(`${id}`)
-        message.success(`${res.message}`)
+        message.success(`${define('success')}`)
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -140,14 +143,13 @@ export default function usePrintableViewModel() {
   const handleRestore = async (record: PrintableTableDataType) => {
     try {
       await printService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta?.success) throw new Error(define('restore_failed'))
         table.handleDeleting(`${record.id!}`)
-        message.success('Restored!')
+        message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      loadData()
       table.setLoading(false)
     }
   }
@@ -162,7 +164,6 @@ export default function usePrintableViewModel() {
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
-    console.log(value)
   }
 
   return {

@@ -4,10 +4,7 @@ import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import SkyModalRow from '~/components/sky-ui/SkyModalRow'
 import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-
-export interface SewingLineAddNewProps {
-  name?: string
-}
+import { SewingLineAddNewProps } from '../type'
 
 interface Props extends SkyModalProps {
   onAddNew: (formAddNew: SewingLineAddNewProps) => void

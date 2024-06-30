@@ -10,16 +10,7 @@ import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { dateFormatter } from '~/utils/date-formatter'
-
-export interface ProductAddNewProps {
-  productCode?: string
-  quantityPO?: number
-  colorID?: number
-  groupID?: number
-  printID?: number
-  dateInputNPL?: string
-  dateOutputFCR?: string
-}
+import { ProductAddNewProps } from '../type'
 
 interface Props extends SkyModalProps {
   onAddNew: (recordToAddNew: ProductAddNewProps, setLoading?: (enable: boolean) => void) => void
@@ -63,7 +54,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   return (
-    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Create' onOk={handleOk}>
+    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Thêm' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
         <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
           <SkyModalRow>

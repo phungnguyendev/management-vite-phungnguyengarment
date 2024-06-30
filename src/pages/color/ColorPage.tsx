@@ -45,7 +45,11 @@ const ColorPage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val) => setNewRecord({ ...newRecord, name: textValidatorChange(val) })}
+            onValueChange={(val) =>
+              setNewRecord((prev) => {
+                return { ...prev, name: textValidatorChange(val.trim()) }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -67,7 +71,11 @@ const ColorPage: React.FC<Props> = () => {
             className='w-fit'
             initialValue={record.hexColor}
             value={newRecord.hexColor}
-            onValueChange={(val: AntColor) => setNewRecord({ ...newRecord, hexColor: colorValidatorChange(val) })}
+            onValueChange={(val: AntColor) =>
+              setNewRecord((prev) => {
+                return { ...prev, hexColor: colorValidatorChange(val) }
+              })
+            }
           >
             <ColorPicker
               disabled={true}
@@ -144,7 +152,14 @@ const ColorPage: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewColor open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
+      {openModal && (
+        <ModalAddNewColor
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </ProtectedLayout>
   )
 }

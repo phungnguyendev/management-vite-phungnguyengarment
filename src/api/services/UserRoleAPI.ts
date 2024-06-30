@@ -81,7 +81,11 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (query: { field: string; id: number }, itemToUpdate: UserRole, accessToken: string): Promise<ResponseDataType> => {
+  updateItemBy: async (
+    query: { field: string; id: number },
+    itemToUpdate: UserRole,
+    accessToken: string
+  ): Promise<ResponseDataType> => {
     return client
       .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
         headers: {

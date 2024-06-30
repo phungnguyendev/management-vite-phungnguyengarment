@@ -30,20 +30,6 @@ export type InputType =
   | 'password'
   | 'email'
 
-export type ItemWithKeyAndTitleType = {
-  key?: React.Key
-  title?: string | React.ReactNode
-  desc?: string | React.ReactNode
-  editable?: boolean
-  dataIndex: string
-  initialField?: {
-    value: any
-    data?: any[]
-  }
-  inputType?: InputType
-  responsive?: Breakpoint[]
-}
-
 export type StepRound = {
   name: string
   type: StatusType

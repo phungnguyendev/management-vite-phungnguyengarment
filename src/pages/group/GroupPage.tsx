@@ -14,7 +14,7 @@ import { GroupTableDataType } from './type'
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const GroupPage: React.FC<Props> = () => {
-  useTitle('Nhóm | Phung Nguyen')
+  useTitle('Groups | Phung Nguyen')
   const { state, action, table } = useGroupViewModel()
   const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
   const {
@@ -43,7 +43,11 @@ const GroupPage: React.FC<Props> = () => {
             required={true}
             initialValue={record.name}
             value={newRecord.name}
-            onValueChange={(val: string) => setNewRecord({ ...newRecord, name: textValidatorChange(val) })}
+            onValueChange={(val: string) =>
+              setNewRecord((prev) => {
+                return { ...prev, name: textValidatorChange(val.trim()) }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>{textValidatorDisplay(record.name)}</SkyTableTypography>
           </EditableStateCell>
@@ -114,7 +118,14 @@ const GroupPage: React.FC<Props> = () => {
           }}
         />
       </BaseLayout>
-      {openModal && <ModalAddNewGroup open={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNew} />}
+      {openModal && (
+        <ModalAddNewGroup
+          okButtonProps={{ loading: table.loading }}
+          open={openModal}
+          setOpenModal={setOpenModal}
+          onAddNew={handleAddNew}
+        />
+      )}
     </ProtectedLayout>
   )
 }

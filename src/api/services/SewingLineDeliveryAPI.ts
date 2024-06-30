@@ -68,7 +68,7 @@ export default {
       })
   },
   updateItemByPk: async (
-    id: number,
+    id?: number,
     itemToUpdate: SewingLineDelivery,
     accessToken: string
   ): Promise<ResponseDataType> => {

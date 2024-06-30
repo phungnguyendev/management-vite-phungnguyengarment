@@ -25,6 +25,7 @@ export interface ActionProps<T extends { key: string }> {
   onConfirmRestore?: (record: T) => void
   onConfirmDeleteForever?: (record: T) => void
   onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onCancelAdding?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelRestore?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleteForever?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
@@ -43,6 +44,7 @@ export interface ActionRowProps<T extends { key: string }> extends HTMLAttribute
   onConfirmRestore?: (e?: React.MouseEvent<HTMLElement>) => void
   onConfirmDeleteForever?: (e?: React.MouseEvent<HTMLElement>) => void
   onConfirmCancelEditing?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
+  onCancelAdding?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleting?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelRestore?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
   onConfirmCancelDeleteForever?: (e: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void
@@ -55,20 +57,22 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
         {props.isEditing && props.onSave.isShow ? (
           <Flex className={cn('flex-col lg:flex-row', props.className)} gap={5}>
             <Button type={props.onSave.type ? props.onSave.type : 'primary'} onClick={props.onSave.onClick}>
-              Save
+              Lưu
             </Button>
             <PopConfirm
-              title={`Sure to cancel?`}
+              title={`Chắc chắn hủy?`}
               okButtonProps={{
                 size: 'middle'
               }}
+              okText='Đồng ý'
               cancelButtonProps={{
                 size: 'middle'
               }}
+              cancelText='Hủy bỏ'
               placement='topLeft'
               onConfirm={props.onConfirmCancelEditing}
             >
-              <Button type='dashed'>Cancel</Button>
+              <Button type='dashed'>Hủy bỏ</Button>
             </PopConfirm>
           </Flex>
         ) : (
@@ -79,7 +83,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                 disabled={props.onAdd.disabled}
                 onClick={props.onAdd.onClick}
               >
-                {props.onAdd.title ?? 'Add'}
+                {props.onAdd.title ?? 'Thêm'}
               </Button>
             )}
             {props.onEdit.isShow && (
@@ -88,12 +92,12 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                 disabled={props.onEdit.disabled}
                 onClick={props.onEdit.onClick}
               >
-                {props.onEdit.title ?? 'Edit'}
+                {props.onEdit.title ?? 'Sửa'}
               </Button>
             )}
             {props.onDelete?.isShow && (
               <PopConfirm
-                title={`Sure to ${props.onDelete.title ? props.onDelete.title : 'delete'}?`}
+                title={`Chắc chắn ${props.onDelete.title ? props.onDelete.title : 'xoá'}?`}
                 onCancel={props.onConfirmCancelDeleting}
                 onConfirm={props.onConfirmDelete}
               >
@@ -102,13 +106,13 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onDelete.disabled}
                   onClick={props.onDelete.onClick}
                 >
-                  {props.onDelete.title ?? 'Delete'}
+                  {props.onDelete.title ?? 'Xoá'}
                 </Button>
               </PopConfirm>
             )}
             {props.onRestore?.isShow && (
               <PopConfirm
-                title={`Sure to ${props.onRestore.title ? props.onRestore.title : 'restore'}?`}
+                title={`Chắc chắn ${props.onRestore.title ? props.onRestore.title : 'khôi phục'}?`}
                 onCancel={props.onConfirmCancelRestore}
                 onConfirm={props.onConfirmRestore}
               >
@@ -117,13 +121,13 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onRestore.disabled}
                   onClick={props.onRestore.onClick}
                 >
-                  {props.onRestore.title ?? 'Restore'}
+                  {props.onRestore.title ?? 'Khôi phục'}
                 </Button>
               </PopConfirm>
             )}
             {props.onDeleteForever?.isShow && (
               <PopConfirm
-                title={`Sure to ${props.onDeleteForever.title ? props.onDeleteForever.title : 'delete forever'}?`}
+                title={`Chắc chắn ${props.onDeleteForever.title ? props.onDeleteForever.title : 'xoá vĩnh viễn'}?`}
                 onCancel={props.onConfirmCancelDeleteForever}
                 onConfirm={props.onConfirmDeleteForever}
               >
@@ -132,7 +136,7 @@ const ActionRow = <T extends { key: string }>({ ...props }: ActionRowProps<T>) =
                   disabled={props.onDeleteForever.disabled}
                   onClick={props.onDeleteForever.onClick}
                 >
-                  {props.onDeleteForever.title ?? 'Delete forever'}
+                  {props.onDeleteForever.title ?? 'Xoá vĩnh viễn'}
                 </Button>
               </PopConfirm>
             )}

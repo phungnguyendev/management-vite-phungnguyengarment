@@ -6,7 +6,7 @@ import SkyTableTypography from './SkyTableTypography'
 
 interface Props extends EditableStateCellProps {}
 
-const ExpandableItemRow = ({ ...props }: Props) => {
+const SkyTableSkyTableExpandableItemRow = ({ ...props }: Props) => {
   return (
     <Flex className='w-full' align='center' justify='start' gap={5}>
       <SkyTableTypography strong className={cn('w-[100px]', props.className)}>
@@ -17,4 +17,4 @@ const ExpandableItemRow = ({ ...props }: Props) => {
   )
 }
 
-export default memo(ExpandableItemRow)
+export default memo(SkyTableSkyTableExpandableItemRow)

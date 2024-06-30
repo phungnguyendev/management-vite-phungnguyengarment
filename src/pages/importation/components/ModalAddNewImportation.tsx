@@ -1,18 +1,18 @@
-import { Flex, Form, Modal } from 'antd'
+import { Form } from 'antd'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import DayJS from '~/utils/date-formatter'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import DayJS, { dateFormatter } from '~/utils/date-formatter'
+import { ImportationExpandableAddNewProps } from '../type'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  loading: boolean
-  setOpenModal: (enable: boolean) => void
-  setLoading: (enable: boolean) => void
-  onAddNew: (itemToAddNew: any) => void
+interface Props extends SkyModalProps {
+  onAddNew: (recordToAddNew: ImportationExpandableAddNewProps, setLoading?: (enable: boolean) => void) => void
 }
 
-const ModalAddNewImportation: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+const ModalAddNewImportation: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
   async function handleOk() {
@@ -21,45 +21,48 @@ const ModalAddNewImportation: React.FC<Props> = ({ openModal, setOpenModal, onAd
       quantity: row.quantity,
       dateImported: row.dateImported
     })
-    setOpenModal(false)
-  }
-
-  function handleCancel() {
-    setOpenModal(false)
   }
 
   return (
-    <Modal
+    <SkyModal
       {...props}
-      title={<AddNewTitle title='Thêm mới lô nhập' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width={450}
+      title={props.title ?? 'Thêm lô hàng nhập khẩu'}
+      okText={props.okText ?? 'Thêm'}
+      onOk={props.onOk ?? handleOk}
     >
-      <Form form={form} labelCol={{ span: 7 }} labelAlign='left'>
-        <Flex vertical gap={10} className='w-full'>
-          <EditableFormCell
-            isEditing={true}
-            title='Lô nhập'
-            dataIndex='quantity'
-            placeholder='Lô nhập...'
-            inputType='number'
-            required
-          />
-          <EditableFormCell
-            isEditing={true}
-            title='Ngày nhập:'
-            dataIndex='dateImported'
-            inputType='datepicker'
-            required
-            placeholder='Ngày nhập...'
-            initialValue={DayJS(Date.now())}
-          />
-        </Flex>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Lô nhập'
+              dataIndex='quantity'
+              placeholder='Ví dụ: 500'
+              inputType='number'
+              required
+              inputNumberProps={{
+                suffix: (
+                  <SkyTableTypography className='mr-5' type='secondary'>
+                    Kiện
+                  </SkyTableTypography>
+                )
+              }}
+            />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Ngày nhập:'
+              dataIndex='dateImported'
+              inputType='datepicker'
+              required
+              placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
+              initialValue={DayJS(Date.now())}
+            />
+          </SkyModalRowItem>
+        </SkyModalRow>
       </Form>
-    </Modal>
+    </SkyModal>
   )
 }
 

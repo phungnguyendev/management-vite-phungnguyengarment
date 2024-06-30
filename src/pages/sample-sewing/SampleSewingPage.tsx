@@ -1,12 +1,13 @@
-import { ColorPicker, Divider, Flex, Space } from 'antd'
+import { ColorPicker, Flex } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
@@ -67,7 +68,11 @@ const SampleSewingPage = () => {
           inputType='datepicker'
           required={true}
           initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionNPL)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateSubmissionNPL: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateSubmissionNPL: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>
             {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL)) ?? '--/--/----'}
@@ -84,7 +89,11 @@ const SampleSewingPage = () => {
           inputType='datepicker'
           required={true}
           initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateApprovalPP: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateApprovalPP: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>
             {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalPP)) ?? '--/--/----'}
@@ -101,7 +110,11 @@ const SampleSewingPage = () => {
           inputType='datepicker'
           required={true}
           initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateApprovalSO: dateValidatorChange(val) })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateApprovalSO: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>
             {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalSO)) ?? '--/--/----'}
@@ -376,73 +389,75 @@ const SampleSewingPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='overflow-hidden'>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productColor(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow className='w-1/2' title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>
-                        {columns.dateSubmissionNPL(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow
-                        className='w-1/2'
-                        title='Ngày duyệt mẫu PP:'
-                        isEditing={table.isEditing(record.id!)}
-                      >
-                        {columns.dateApprovalPP(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow
-                        className='w-1/2'
-                        title='Ngày duyệt SO:'
-                        isEditing={table.isEditing(record.id!)}
-                      >
-                        {columns.dateApprovalSO(record)}
-                      </ExpandableItemRow>
-                    )}
-                    <ExpandableItemRow
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                      {columns.productColor(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <SkyTableExpandableItemRow
                       className='w-1/2'
-                      title='Ngày gửi mẫu lần 1:'
+                      title='NPL may mẫu:'
                       isEditing={table.isEditing(record.id!)}
                     >
-                      {expandableColumns.dateSubmissionFirstTime(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow
+                      {columns.dateSubmissionNPL(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.lg) && (
+                    <SkyTableExpandableItemRow
                       className='w-1/2'
-                      title='Ngày gửi mẫu lần 2:'
+                      title='Ngày duyệt mẫu PP:'
                       isEditing={table.isEditing(record.id!)}
                     >
-                      {expandableColumns.dateSubmissionSecondTime(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow
+                      {columns.dateApprovalPP(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow
                       className='w-1/2'
-                      title='Ngày gửi mẫu lần 3:'
+                      title='Ngày duyệt SO:'
                       isEditing={table.isEditing(record.id!)}
                     >
-                      {expandableColumns.dateSubmissionThirdTime(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày gửi mẫu lần 4:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
-                      {expandableColumns.dateSubmissionForthTime(record)}
-                    </ExpandableItemRow>
-                    <ExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày gửi mẫu lần 5:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
-                      {expandableColumns.dateSubmissionFifthTime(record)}
-                    </ExpandableItemRow>
-                  </Space>
-                </Flex>
+                      {columns.dateApprovalSO(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  <SkyTableExpandableItemRow
+                    className='w-1/2'
+                    title='Ngày gửi mẫu lần 1:'
+                    isEditing={table.isEditing(record.id!)}
+                  >
+                    {expandableColumns.dateSubmissionFirstTime(record)}
+                  </SkyTableExpandableItemRow>
+                  <SkyTableExpandableItemRow
+                    className='w-1/2'
+                    title='Ngày gửi mẫu lần 2:'
+                    isEditing={table.isEditing(record.id!)}
+                  >
+                    {expandableColumns.dateSubmissionSecondTime(record)}
+                  </SkyTableExpandableItemRow>
+                  <SkyTableExpandableItemRow
+                    className='w-1/2'
+                    title='Ngày gửi mẫu lần 3:'
+                    isEditing={table.isEditing(record.id!)}
+                  >
+                    {expandableColumns.dateSubmissionThirdTime(record)}
+                  </SkyTableExpandableItemRow>
+                  <SkyTableExpandableItemRow
+                    className='w-1/2'
+                    title='Ngày gửi mẫu lần 4:'
+                    isEditing={table.isEditing(record.id!)}
+                  >
+                    {expandableColumns.dateSubmissionForthTime(record)}
+                  </SkyTableExpandableItemRow>
+                  <SkyTableExpandableItemRow
+                    className='w-1/2'
+                    title='Ngày gửi mẫu lần 5:'
+                    isEditing={table.isEditing(record.id!)}
+                  >
+                    {expandableColumns.dateSubmissionFifthTime(record)}
+                  </SkyTableExpandableItemRow>
+                </SkyTableExpandableLayout>
               )
             },
             columnWidth: '0.001%'

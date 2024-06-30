@@ -1,12 +1,13 @@
-import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
+import { Collapse, ColorPicker, Flex, Space, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import {
@@ -334,7 +335,7 @@ const SewingLineDeliveryPage = () => {
               handleClick: (record) => table.handleStartRestore(record.key),
               isShow: showDeleted
             },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.key),
+            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
             onConfirmCancelEditing: () => table.handleCancelEditing(),
             onConfirmCancelDeleting: () => table.handleCancelDeleting(),
             onConfirmDelete: (record) => handleDelete(record),
@@ -346,100 +347,96 @@ const SewingLineDeliveryPage = () => {
             expandedRowRender: (record: SewingLineDeliveryTableDataType) => {
               return (
                 <>
-                  <Flex vertical gap={10} className='relative overflow-hidden'>
-                    <Flex vertical>
-                      <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                        {!(width >= breakpoint.sm) && (
-                          <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
-                            {columns.productColor(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.md) && (
-                          <ExpandableItemRow className='w-1/2' title='Số lượng PO:' isEditing={false}>
-                            {columns.quantityPO(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.lg) && (
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='Ngày xuất FCR:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.dateOutputFCR(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.xl) && (
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='Chuyền may:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.sewingLines(record)}
-                          </ExpandableItemRow>
-                        )}
-                        <Collapse
-                          items={[
-                            {
-                              key: '1',
-                              label: (
-                                <Typography.Title className='m-0' level={5} type='secondary'>
-                                  Danh sách chuyền may
-                                </Typography.Title>
-                              )
-                              // children: (
-                              //   <List
-                              //     // grid={{ gutter: 16, xs: 1, sm: 2, md: 4, lg: 4, xl: 6, xxl: 3 }}
-                              //     itemLayout='vertical'
-                              //     dataSource={record.sewingLineDeliveries}
-                              //     renderItem={(recordItem, index) => (
-                              //       <List.Item key={index}>
-                              //         <Flex vertical gap={20} align='center' className='w-full'>
-                              //           <SkyTableTypography className='w-fit' strong>
-                              //             {textValidatorDisplay(recordItem.sewingLine?.name)}{' '}
-                              //             {expiredDateStatus(record.dateOutputFCR, recordItem.expiredDate) ? (
-                              //               <span className='text-error'>{'(Bị bể)'}</span>
-                              //             ) : (
-                              //               ''
-                              //             )}
-                              //           </SkyTableTypography>
-                              //           <ExpandableItemRow
-                              //             className='w-1/2'
-                              //             title='SL vào chuyền:'
-                              //             isEditing={table.isEditing(recordItem.id!)}
-                              //           >
-                              //             {expandableListColumn.quantityOriginal(record, recordItem)}
-                              //           </ExpandableItemRow>
-                              //           <ExpandableItemRow
-                              //             className='w-1/2'
-                              //             title='SL may được:'
-                              //             isEditing={table.isEditing(recordItem.id!)}
-                              //           >
-                              //             {expandableListColumn.quantitySewed(record, recordItem)}
-                              //           </ExpandableItemRow>
-                              //           <ExpandableItemRow
-                              //             className='w-1/2'
-                              //             title='SL còn lại:'
-                              //             isEditing={table.isEditing(recordItem.id!)}
-                              //           >
-                              //             {expandableListColumn.amountQuantity(record, recordItem)}
-                              //           </ExpandableItemRow>
-                              //           <ExpandableItemRow
-                              //             className='w-1/2'
-                              //             title='Ngày dự kiến hoàn thành:'
-                              //             isEditing={table.isEditing(recordItem.id!)}
-                              //           >
-                              //             {expandableListColumn.expiredDate(record, recordItem)}
-                              //           </ExpandableItemRow>
-                              //         </Flex>
-                              //       </List.Item>
-                              //     )}
-                              //   />
-                              // )
-                            }
-                          ]}
-                        />
-                      </Space>
-                    </Flex>
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow className='w-1/2' title='Số lượng PO:' isEditing={false}>
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow
+                        className='w-1/2'
+                        title='Ngày xuất FCR:'
+                        isEditing={table.isEditing(record.key)}
+                      >
+                        {columns.dateOutputFCR(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow
+                        className='w-1/2'
+                        title='Chuyền may:'
+                        isEditing={table.isEditing(record.key)}
+                      >
+                        {columns.sewingLines(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    <Collapse
+                      items={[
+                        {
+                          key: '1',
+                          label: (
+                            <Typography.Title className='m-0' level={5} type='secondary'>
+                              Danh sách chuyền may
+                            </Typography.Title>
+                          )
+                          // children: (
+                          //   <List
+                          //     // grid={{ gutter: 16, xs: 1, sm: 2, md: 4, lg: 4, xl: 6, xxl: 3 }}
+                          //     itemLayout='vertical'
+                          //     dataSource={record.sewingLineDeliveries}
+                          //     renderItem={(recordItem, index) => (
+                          //       <List.Item key={index}>
+                          //         <Flex vertical gap={20} align='center' className='w-full'>
+                          //           <SkyTableTypography className='w-fit' strong>
+                          //             {textValidatorDisplay(recordItem.sewingLine?.name)}{' '}
+                          //             {expiredDateStatus(record.dateOutputFCR, recordItem.expiredDate) ? (
+                          //               <span className='text-error'>{'(Bị bể)'}</span>
+                          //             ) : (
+                          //               ''
+                          //             )}
+                          //           </SkyTableTypography>
+                          //           <SkyTableExpandableItemRow
+                          //             className='w-1/2'
+                          //             title='SL vào chuyền:'
+                          //             isEditing={table.isEditing(recordItem.id!)}
+                          //           >
+                          //             {expandableListColumn.quantityOriginal(record, recordItem)}
+                          //           </SkyTableExpandableItemRow>
+                          //           <SkyTableExpandableItemRow
+                          //             className='w-1/2'
+                          //             title='SL may được:'
+                          //             isEditing={table.isEditing(recordItem.id!)}
+                          //           >
+                          //             {expandableListColumn.quantitySewed(record, recordItem)}
+                          //           </SkyTableExpandableItemRow>
+                          //           <SkyTableExpandableItemRow
+                          //             className='w-1/2'
+                          //             title='SL còn lại:'
+                          //             isEditing={table.isEditing(recordItem.id!)}
+                          //           >
+                          //             {expandableListColumn.amountQuantity(record, recordItem)}
+                          //           </SkyTableExpandableItemRow>
+                          //           <SkyTableExpandableItemRow
+                          //             className='w-1/2'
+                          //             title='Ngày dự kiến hoàn thành:'
+                          //             isEditing={table.isEditing(recordItem.id!)}
+                          //           >
+                          //             {expandableListColumn.expiredDate(record, recordItem)}
+                          //           </SkyTableExpandableItemRow>
+                          //         </Flex>
+                          //       </List.Item>
+                          //     )}
+                          //   />
+                          // )
+                        }
+                      ]}
+                    />
 
                     {/* <Flex className='z-[999] h-[200px] scroll-smooth p-2'>
                       <SkyTable
@@ -463,7 +460,7 @@ const SewingLineDeliveryPage = () => {
                         deletingKey={table.deletingKey}
                       />
                     </Flex> */}
-                  </Flex>
+                  </SkyTableExpandableLayout>
                 </>
               )
             },

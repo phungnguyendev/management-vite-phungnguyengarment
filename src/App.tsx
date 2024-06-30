@@ -1,6 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
-
 import { Suspense } from 'react'
+import { Route, Routes } from 'react-router-dom'
 import Main from './components/layout/Main'
 import routes from './config/route.config'
 import LoginPage from './pages/auth/LoginPage'

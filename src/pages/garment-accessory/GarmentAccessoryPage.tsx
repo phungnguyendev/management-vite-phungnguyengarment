@@ -1,4 +1,4 @@
-import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
+import { Checkbox, ColorPicker, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
@@ -6,8 +6,9 @@ import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { GarmentAccessoryNote } from '~/typing'
 import {
@@ -403,44 +404,58 @@ const GarmentAccessoryPage = () => {
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='overflow-hidden'>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
-                        {columns.productColor(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.md) && (
-                      <>
-                        <ExpandableItemRow className='w-1/2' title='Cắt được:' isEditing={table.isEditing(record.key)}>
-                          {columns.garmentAccessory.amountCutting(record)}
-                        </ExpandableItemRow>
-                        <ExpandableItemRow className='w-1/2' title='Còn lại:' isEditing={table.isEditing(record.key)}>
-                          {columns.garmentAccessory.remainingAmount(record)}
-                        </ExpandableItemRow>
-                      </>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
+                      {columns.productColor(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <>
+                      <SkyTableExpandableItemRow
                         className='w-1/2'
-                        title='Ngày giao chuyền:'
+                        title='Cắt được:'
                         isEditing={table.isEditing(record.key)}
                       >
-                        {columns.garmentAccessory.passingDeliveryDate(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow className='w-1/2' title='Đồng bộ PL:' isEditing={table.isEditing(record.key)}>
-                        {columns.garmentAccessory.syncStatus(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow className='w-1/3' title='Ghi chú:' isEditing={table.isEditing(record.key)}>
-                        {columns.garmentAccessory.accessoryNotes(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                </Flex>
+                        {columns.garmentAccessory.amountCutting(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        className='w-1/2'
+                        title='Còn lại:'
+                        isEditing={table.isEditing(record.key)}
+                      >
+                        {columns.garmentAccessory.remainingAmount(record)}
+                      </SkyTableExpandableItemRow>
+                    </>
+                  )}
+                  {!(width >= breakpoint.lg) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Ngày giao chuyền:'
+                      isEditing={table.isEditing(record.key)}
+                    >
+                      {columns.garmentAccessory.passingDeliveryDate(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/2'
+                      title='Đồng bộ PL:'
+                      isEditing={table.isEditing(record.key)}
+                    >
+                      {columns.garmentAccessory.syncStatus(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow
+                      className='w-1/3'
+                      title='Ghi chú:'
+                      isEditing={table.isEditing(record.key)}
+                    >
+                      {columns.garmentAccessory.accessoryNotes(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                </SkyTableExpandableLayout>
               )
             },
             columnWidth: '0.001%',

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { AccessoryNote } from '~/typing'
 import { textComparator } from '~/utils/helpers'
@@ -27,13 +28,30 @@ export default function useAccessoryNoteViewModel() {
   })
   const [shorted, setSorted] = useState<boolean>(false)
 
+  const [accessoryNotes, setAccessoryNotes] = useState<AccessoryNote[]>([])
+
   useEffect(() => {
     loadData()
   }, [showDeleted, shorted, paginator, searchText])
 
+  useEffect(() => {
+    mappedData()
+  }, [accessoryNotes])
+
+  const mappedData = useCallback(() => {
+    table.setDataSource(() => {
+      const _dataSource = accessoryNotes.map((self) => {
+        return {
+          ...self,
+          key: `${self.id}`
+        } as AccessoryNoteTableDataType
+      })
+      return _dataSource
+    })
+  }, [accessoryNotes])
+
   const loadData = useCallback(async () => {
     try {
-      table.setLoading(true)
       await accessoryNoteService.getItemsSync(
         {
           paginator: paginator,
@@ -43,16 +61,9 @@ export default function useAccessoryNoteViewModel() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
-          const accessoryNotes = meta.data as AccessoryNote[]
-          table.setDataSource(
-            accessoryNotes.map((item) => {
-              return {
-                ...item,
-                key: `${item.id}`
-              }
-            })
-          )
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
+          const _accessoryNotes = meta.data as AccessoryNote[]
+          setAccessoryNotes(_accessoryNotes)
         }
       )
     } catch (error: any) {
@@ -63,36 +74,30 @@ export default function useAccessoryNoteViewModel() {
   }, [showDeleted, paginator, shorted, searchText])
 
   const handleUpdate = async (record: AccessoryNoteTableDataType) => {
-    console.log('handleUpdate')
-    // const row = (await form.validateFields()) as any
     try {
       if (textComparator(record.title, newRecord.title) || textComparator(record.summary, newRecord.summary)) {
-        console.log('AccessoryNote progressing...')
         await accessoryNoteService.updateItemByPkSync(record.id!, newRecord, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(`${meta.message}`)
+          if (!meta?.success) throw new Error(define('update_failed'))
           const itemUpdated = meta.data as AccessoryNote
           table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as AccessoryNoteTableDataType)
-          message.success('Success!')
+          message.success(define('updated_success'))
         })
       }
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      table.setLoading(false)
       table.handleCancelEditing()
+      table.setLoading(false)
     }
   }
 
   const handleAddNew = async (formAddNew: AccessoryNoteAddNewProps) => {
     try {
-      console.log('handleAddNew')
-      console.log(formAddNew)
-      table.setLoading(true)
       await accessoryNoteService.createItemSync(formAddNew, table.setLoading, async (meta) => {
-        if (!meta?.success) throw new Error(`${meta.message}`)
+        if (!meta.success) throw new Error(define('create_failed'))
         const newAccessoryNote = meta.data as AccessoryNote
         table.handleAddNew({ ...newAccessoryNote, key: `${newAccessoryNote.id}` })
-        message.success(meta.message)
+        message.success(define('created_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -103,12 +108,11 @@ export default function useAccessoryNoteViewModel() {
   }
 
   const handleDelete = async (record: AccessoryNoteTableDataType) => {
-    console.log('handleDelete')
     try {
       await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta.success) throw new Error(define('failed'))
         table.handleDeleting(record.key)
-        message.success('Deleted!')
+        message.success(define('success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -117,13 +121,13 @@ export default function useAccessoryNoteViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     console.log(id)
     try {
       await accessoryNoteService.deleteItemSync(id, table.setLoading, (res) => {
-        if (!res.success) throw new Error(res.message)
+        if (!res.success) throw new Error(define('delete_failed'))
         table.handleDeleting(`${id}`)
-        message.success(`${res.message}`)
+        message.success(define('deleted_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -135,9 +139,9 @@ export default function useAccessoryNoteViewModel() {
   const handleRestore = async (record: AccessoryNoteTableDataType) => {
     try {
       await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
+        if (!meta?.success) throw new Error(define('restore_failed'))
         table.handleDeleting(`${record.id!}`)
-        message.success('Restored!')
+        message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)

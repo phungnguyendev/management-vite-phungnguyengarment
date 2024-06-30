@@ -21,7 +21,7 @@ const RolePage = lazy(() => import('~/pages/role/RolePage'))
 const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
-// const ImportationPage = lazy(() => import('~/pages/importation/ImportationPage'))
+const ImportationPage = lazy(() => import('~/pages/importation/ImportationPage'))
 const SampleSewingPage = lazy(() => import('~/pages/sample-sewing/SampleSewingPage'))
 const SewingLinePage = lazy(() => import('~/pages/sewing-line/SewingLinePage'))
 const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
@@ -53,6 +53,15 @@ const routes: SideType[] = [
     component: ProductPage,
     isGroup: false,
     role: 'product_manager',
+    icon: PackageSearchIcon
+  },
+  {
+    key: '16',
+    name: 'Xuất nhập khẩu',
+    path: '/importations',
+    component: ImportationPage,
+    isGroup: false,
+    role: 'importation_manager',
     icon: PackageSearchIcon
   },
   // {

@@ -164,7 +164,7 @@ export default function useCompletionViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {}
+  const handleDeleteForever = async (id?: number) => {}
 
   const handleRestore = async (record: CompletionTableDataType) => {}
 

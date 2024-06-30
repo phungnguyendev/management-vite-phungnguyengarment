@@ -127,7 +127,7 @@ export default function useRoleViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     console.log(id)
     try {
       await roleService.deleteItemSync(id, table.setLoading, (res) => {

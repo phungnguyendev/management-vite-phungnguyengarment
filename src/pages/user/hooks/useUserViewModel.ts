@@ -208,7 +208,7 @@ export default function useUserViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     try {
       table.setLoading(true)
       await userService.deleteItemSync(id, table.setLoading, (meta) => {

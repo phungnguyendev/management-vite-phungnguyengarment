@@ -9,10 +9,12 @@ type RequiredDataType = {
   orderNumber?: number
 }
 
-interface Props<T extends RequiredDataType> {
+export interface UseTableProps<T extends RequiredDataType> {
   loading: boolean
   dataSource: T[]
   scrollIndex: number
+  addingKey: { key: string; payload?: T }
+  expandingKeys: string[]
   editingKey: string
   deletingKey: string
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
@@ -20,8 +22,11 @@ interface Props<T extends RequiredDataType> {
   setEditingKey: React.Dispatch<React.SetStateAction<string>>
   setDeletingKey: React.Dispatch<React.SetStateAction<string>>
   setDataSource: React.Dispatch<React.SetStateAction<T[]>>
+  isAdding: (key: string) => boolean
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
+  handleStartExpanding: (expanded: boolean, key: string) => void
+  handleStartAdding: (key: string, payload?: T) => void
   handleStartEditing: (key: string) => void
   handleStartDeleting: (key: string) => void
   handleStartRestore: (key: string) => void
@@ -29,20 +34,43 @@ interface Props<T extends RequiredDataType> {
   handleAddNew: (item: T) => void
   handleDeleting: (key: string) => void
   handleRestore: (key: string) => void
+  handleCloseExpanding: () => void
+  handleCancelAdding: () => void
   handleCancelEditing: () => void
   handleCancelDeleting: () => void
   handleCancelRestore: () => void
   handleDraggableEnd: (event: DragEndEvent, onSuccess?: (newDataSource: T[]) => void) => void
 }
 
-export default function useTable<T extends RequiredDataType>(initValue: T[]): Props<T> {
+export default function useTable<T extends RequiredDataType>(initValue: T[]): UseTableProps<T> {
   const [scrollIndex, setScrollIndex] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [dataSource, setDataSource] = useState<T[]>(initValue)
+  const [expandingKeys, setExpandingKeys] = useState<string[]>([])
+  const [addingKey, setAddingKey] = useState<{ key: string; payload?: T }>({ key: '' })
   const [editingKey, setEditingKey] = useState<string>('')
   const [deletingKey, setDeletingKey] = useState<string>('')
+
+  const isAdding = (key: string) => key === addingKey.key
   const isEditing = (key: string) => key === editingKey
   const isDelete = (key: string) => key === deletingKey
+
+  const handleStartExpanding = (expanded: boolean, key: string) => {
+    const newExpandingKeys = [...expandingKeys]
+    if (expanded) {
+      // Adding new item
+      newExpandingKeys.unshift(key)
+    } else {
+      // Removing item
+      const removeIndexKey = newExpandingKeys.findIndex((_key) => _key === key)
+      if (removeIndexKey !== -1) newExpandingKeys.splice(removeIndexKey, 1)
+    }
+    setExpandingKeys(newExpandingKeys)
+  }
+
+  const handleStartAdding = (key: string, payload?: T) => {
+    setAddingKey({ key, payload })
+  }
 
   const handleStartEditing = (key: string) => {
     setEditingKey(key)
@@ -74,6 +102,14 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
       setDataSource(dataSourceRemovedItem)
     }
     setLoading(false)
+  }
+
+  const handleCloseExpanding = () => {
+    setExpandingKeys([])
+  }
+
+  const handleCancelAdding = () => {
+    setAddingKey({ key: '' })
   }
 
   const handleCancelEditing = () => {
@@ -137,8 +173,11 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
   return {
     loading,
     setLoading,
-    isDelete,
+    isAdding,
     isEditing,
+    isDelete,
+    expandingKeys,
+    addingKey,
     editingKey,
     deletingKey,
     setEditingKey,
@@ -148,10 +187,14 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     dataSource,
     setDataSource,
     handleAddNew,
+    handleStartExpanding,
+    handleStartAdding,
     handleStartEditing,
     handleStartDeleting,
     handleStartRestore,
     handleUpdate,
+    handleCloseExpanding,
+    handleCancelAdding,
     handleCancelEditing,
     handleCancelDeleting,
     handleCancelRestore,

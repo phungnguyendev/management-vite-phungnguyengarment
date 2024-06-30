@@ -16,31 +16,31 @@ export type DefineType =
 const define = (type: DefineType): string => {
   switch (type) {
     case 'created_success':
-      return 'Created!'
+      return 'Thêm mới thành công!'
     case 'create_failed':
-      return 'Create failed!'
+      return 'Thêm mới thất bại!'
     case 'updated_success':
-      return 'Updated!'
+      return 'Cập nhật thành công!'
     case 'update_failed':
-      return 'Update failed!'
+      return 'Cập nhật thất bại!'
     case 'deleted_success':
-      return 'Deleted!'
+      return 'Đã xoá thành công!'
     case 'delete_failed':
-      return 'Delete failed!'
+      return 'Đã xoá thất bại!'
     case 'restored_success':
-      return 'Restored!'
+      return 'Khôi phục thành công!'
     case 'restore_failed':
-      return 'Restore failed!'
+      return 'Khôi phục thất bại!'
     case 'dataLoaded_success':
-      return 'Data loaded!'
+      return 'Tải dữ liệu thành công!'
     case 'existed':
-      return 'Data existed!'
+      return 'Dữ liệu đã tồn tại!'
     case 'failed':
-      return 'Failed!'
+      return 'Thất bại!'
     case 'success':
-      return 'Success!'
+      return 'Thành công!'
     default:
-      return 'Data load failed!'
+      return 'Tải dữ liệu thất bại!'
   }
 }
 

@@ -1,184 +1,172 @@
+import { ColorPicker, Flex } from 'antd'
+import { ColumnType } from 'antd/es/table'
+import useTitle from '~/components/hooks/useTitle'
+import BaseLayout from '~/components/layout/BaseLayout'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import ImportationTable from './components/ImportationTable'
+import ModalAddNewImportation from './components/ModalAddNewImportation'
+import useImportationViewModel from './hooks/useImportationViewModel'
+import { ImportationTableDataType } from './type'
+
 const ImportationPage = () => {
-  // const {
-  //   searchText,
-  //   setSearchText,
-  //   newRecord,
-  //   setNewRecord,
-  //   handleResetClick,
-  //   handleSortChange,
-  //   handleSearch,
-  //   handleSaveClick,
-  //   handleConfirmDelete,
-  //   handlePageChange,
-  //   productService
-  // } = useImportation(table)
-  // const { width } = useDevice()
-  // const currentUser = useSelector((state: RootState) => state.user)
+  useTitle('Importations | Phung Nguyen')
+  const viewModel = useImportationViewModel()
 
-  // const columns = {
-  //   productCode: (record: ImportationPageDataType) => {
-  //     return (
-  //       <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
-  //         <SkyTableTypography strong status={record.status}>
-  //           {textValidatorDisplay(record.productCode)}
-  //         </SkyTableTypography>
-  //       </EditableStateCell>
-  //     )
-  //   },
-  //   productColor: (record: ImportationPageDataType) => {
-  //     return (
-  //       <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-  //         <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
-  //           <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-  //             {textValidatorDisplay(record.productColor?.color?.name)}
-  //           </SkyTableTypography>
-  //           {record.productColor && (
-  //             <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-  //           )}
-  //         </Flex>
-  //       </EditableStateCell>
-  //     )
-  //   },
-  //   quantity: (record: ImportationPageDataType) => {
-  //     return (
-  //       <EditableStateCell
-  //         isEditing={table.isEditing(record.key!)}
-  //         dataIndex='quantity'
-  //         title='Lô nhập'
-  //         inputType='number'
-  //         required={true}
-  //         initialValue={record.importation && numberValidatorInit(record.importation.quantity)}
-  //         onValueChange={(val: number) => setNewRecord({ ...newRecord, quantity: numberValidatorChange(val) })}
-  //       >
-  //         <SkyTableTypography status={record.status}>
-  //           {record.importation && numberValidatorDisplay(record.importation.quantity)}
-  //         </SkyTableTypography>
-  //       </EditableStateCell>
-  //     )
-  //   },
-  //   dateImported: (record: ImportationPageDataType) => {
-  //     return (
-  //       <EditableStateCell
-  //         isEditing={table.isEditing(record.key!)}
-  //         dataIndex='dateImported'
-  //         title='Ngày nhập'
-  //         inputType='datepicker'
-  //         required={true}
-  //         initialValue={record.importation && dateValidatorInit(record.importation.dateImported)}
-  //         onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateImported: dateValidatorChange(val) })}
-  //       >
-  //         <SkyTableTypography status={record.status}>
-  //           {record.importation && dateValidatorDisplay(record.importation.dateImported)}
-  //         </SkyTableTypography>
-  //       </EditableStateCell>
-  //     )
-  //   }
-  // }
+  const columns = {
+    productCode: (record: ImportationTableDataType) => {
+      return (
+        <SkyTableTypography strong status={record.status}>
+          {textValidatorDisplay(record.productCode)}
+        </SkyTableTypography>
+      )
+    },
+    quantityPO: (record: ImportationTableDataType) => {
+      return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+    },
+    productColor: (record: ImportationTableDataType) => {
+      return (
+        <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
+          <SkyTableTypography status={record.productColor.color?.status} className='w-fit'>
+            {textValidatorDisplay(record.productColor.color?.name)}
+          </SkyTableTypography>
+          <ColorPicker size='middle' format='hex' value={record.productColor.color?.hexColor} disabled />
+        </Flex>
+      )
+    },
+    productGroup: (record: ImportationTableDataType) => {
+      return (
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
+      )
+    },
+    printablePlace: (record: ImportationTableDataType) => {
+      return (
+        <SkyTableTypography status={record.printablePlace?.print?.status}>
+          {textValidatorDisplay(record.printablePlace?.print?.name)}
+        </SkyTableTypography>
+      )
+    }
+  }
 
-  // const tableColumns: ColumnsType<ImportationPageDataType> = [
-  //   {
-  //     title: 'Mã hàng',
-  //     dataIndex: 'productCode',
-  //     width: '15%',
-  //     render: (_value: any, record: ImportationPageDataType) => {
-  //       return columns.productCode(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Màu',
-  //     dataIndex: 'colorID',
-  //     width: '10%',
-  //     render: (_value: any, record: ImportationPageDataType) => {
-  //       return columns.productColor(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Lô nhập',
-  //     dataIndex: 'quantity',
-  //     width: '15%',
-  //     responsive: ['md'],
-  //     render: (_value: any, record: ImportationPageDataType) => {
-  //       return columns.quantity(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Ngày nhập',
-  //     dataIndex: 'dateImported',
-  //     width: '15%',
-  //     responsive: ['lg'],
-  //     render: (_value: any, record: ImportationPageDataType) => {
-  //       return columns.dateImported(record)
-  //     }
-  //   }
-  // ]
+  const tableColumns: ColumnType<ImportationTableDataType>[] = [
+    {
+      title: 'Mã hàng',
+      dataIndex: 'productCode',
+      width: '10%',
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.productCode(record)
+      }
+    },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '7%',
+      responsive: ['sm'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.quantityPO(record)
+      }
+    },
+    {
+      title: 'Màu',
+      dataIndex: 'colorID',
+      width: '10%',
+      responsive: ['sm'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.productColor(record)
+      }
+    },
+    {
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
+      responsive: ['xl'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.productGroup(record)
+      }
+    },
+    {
+      title: 'Nơi in',
+      dataIndex: 'printID',
+      width: '10%',
+      responsive: ['xxl'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.printablePlace(record)
+      }
+    }
+  ]
 
   return (
     <>
-      {/* <BaseLayout
-        searchPlaceHolder='Mã hàng...'
-        searchValue={searchText}
-        onDeletedRecordStateChange={(enable) => table.setDeletedRecordState(enable)}
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick()
+      <BaseLayout
+        title='Xuất nhập khẩu'
+        loading={viewModel.table.loading}
+        searchProps={{
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
+        }}
+        sortProps={{
+          onChange: (checked) => viewModel.action.handleSortChange(checked)
         }}
       >
         <SkyTable
           bordered
-          loading={table.loading}
+          loading={viewModel.table.loading}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          dataSource={viewModel.table.dataSource}
           rowClassName='editable-row'
-          metaData={productService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({
-                  ...record?.importation
-                })
-                table.handleStartEditing(record!.key!)
-              }
+          onPageChange={viewModel.action.handlePageChange}
+          isShowDeleted={viewModel.state.showDeleted}
+          actionProps={{
+            onAdd: {
+              handleClick: (record) => {
+                viewModel.table.handleStartAdding(`${record.productCode}`, record)
+                viewModel.state.setOpenModal(true)
+              },
+              title: 'Thêm kiện',
+              isShow: true
             },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
-            },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin')
+            isShow: true
           }}
           expandable={{
-            expandedRowRender: (record) => {
+            expandedRowRender: (record: ImportationTableDataType) => {
               return (
-                <Flex vertical className='w-full md:w-1/2'>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='Lô nhập:' isEditing={table.isEditing(record.id!)}>
-                        {columns.quantity(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow title='Ngày nhập:' isEditing={table.isEditing(record.id!)}>
-                        {columns.dateImported(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                </Flex>
+                <ImportationTable
+                  productRecord={record}
+                  viewModelProps={{
+                    tableProps: viewModel.table,
+                    showDeleted: viewModel.state.showDeleted,
+                    newRecord: viewModel.state.newRecord,
+                    setNewRecord: viewModel.state.setNewRecord,
+                    handleUpdate: viewModel.action.handleUpdate,
+                    handleDelete: viewModel.action.handleDelete,
+                    handleDeleteForever: viewModel.action.handleDeleteForever,
+                    handleRestore: viewModel.action.handleRestore,
+                    handlePageChange: viewModel.action.handlePageChange
+                  }}
+                />
               )
             },
-            columnWidth: '0.001%'
+            columnWidth: '0.001%',
+            onExpand: (expanded, record: ImportationTableDataType) =>
+              viewModel.table.handleStartExpanding(expanded, record.key),
+            expandedRowKeys: viewModel.table.expandingKeys
           }}
         />
-      </BaseLayout> */}
+      </BaseLayout>
+      {viewModel.state.openModal && (
+        <ModalAddNewImportation
+          title={`Thêm lô nhập mã hàng: ${viewModel.table.addingKey.key}`}
+          okButtonProps={{ loading: viewModel.table.loading }}
+          open={viewModel.state.openModal}
+          setOpenModal={viewModel.state.setOpenModal}
+          onAddNew={viewModel.action.handleAddNew}
+        />
+      )}
     </>
   )
 }

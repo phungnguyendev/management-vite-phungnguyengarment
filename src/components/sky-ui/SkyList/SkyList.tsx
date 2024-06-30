@@ -2,8 +2,7 @@ import { List, ListProps } from 'antd'
 import { ResponseDataType } from '~/api/client'
 import { ActionProps } from '../ActionRow'
 
-export interface SkyListProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
-  extends ListProps<T> {
+export interface SkyListProps<T extends { key: string; createdAt?: string; updatedAt?: string }> extends ListProps<T> {
   metaData: ResponseDataType | undefined
   onPageChange?: (page: number, pageSize: number) => void
   isShowDeleted?: boolean
@@ -13,9 +12,7 @@ export interface SkyListProps<T extends { key?: React.Key; createdAt?: string; u
   scrollTo?: number
 }
 
-const SkyList = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
-  ...props
-}: SkyListProps<T>) => {
+const SkyList = <T extends { key: string; createdAt?: string; updatedAt?: string }>({ ...props }: SkyListProps<T>) => {
   return (
     <List
       className={props.className}

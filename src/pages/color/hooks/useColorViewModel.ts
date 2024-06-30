@@ -132,7 +132,7 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id: number) => {
+  const handleDeleteForever = async (id?: number) => {
     try {
       await colorService.deleteItemSync(id, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('delete_failed'))

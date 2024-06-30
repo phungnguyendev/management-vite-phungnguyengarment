@@ -1,12 +1,13 @@
-import { ColorPicker, Divider, Flex, Progress, Space, Typography } from 'antd'
+import { ColorPicker, Flex, Progress, Typography } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Check } from 'lucide-react'
 import useDevice from '~/components/hooks/useDevice'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { breakpoint, numberValidatorCalc, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import StatisticSlide from './components/StatisticSlide'
@@ -230,35 +231,33 @@ const Dashboard = () => {
               expandable={{
                 expandedRowRender: (record: DashboardTableDataType) => {
                   return (
-                    <Flex vertical className='w-full md:w-1/2'>
-                      <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                        {/* {!(width >= breakpoint.sm) && (
-                        <ExpandableItemRow title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
+                    <SkyTableExpandableLayout>
+                      {/* {!(width >= breakpoint.sm) && (
+                        <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
                           {columns.quantityPO(record)}
-                        </ExpandableItemRow>
+                        </SkyTableExpandableItemRow>
                       )} */}
-                        {!(width >= breakpoint.sm) && (
-                          <ExpandableItemRow title='May:' isEditing={table.isEditing(record.id!)}>
-                            {columns.sewing(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.md) && (
-                          <ExpandableItemRow title='Ủi:' isEditing={table.isEditing(record.id!)}>
-                            {columns.ironed(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.lg) && (
-                          <ExpandableItemRow title='Kiểm:' isEditing={table.isEditing(record.id!)}>
-                            {columns.checkPass(record)}
-                          </ExpandableItemRow>
-                        )}
-                        {!(width >= breakpoint.xl) && (
-                          <ExpandableItemRow title='Đóng gói:' isEditing={table.isEditing(record.id!)}>
-                            {columns.package(record)}
-                          </ExpandableItemRow>
-                        )}
-                      </Space>
-                    </Flex>
+                      {!(width >= breakpoint.sm) && (
+                        <SkyTableExpandableItemRow title='May:' isEditing={table.isEditing(record.id!)}>
+                          {columns.sewing(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.md) && (
+                        <SkyTableExpandableItemRow title='Ủi:' isEditing={table.isEditing(record.id!)}>
+                          {columns.ironed(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.lg) && (
+                        <SkyTableExpandableItemRow title='Kiểm:' isEditing={table.isEditing(record.id!)}>
+                          {columns.checkPass(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.xl) && (
+                        <SkyTableExpandableItemRow title='Đóng gói:' isEditing={table.isEditing(record.id!)}>
+                          {columns.package(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                    </SkyTableExpandableLayout>
                   )
                 },
                 columnWidth: '0.001%',
