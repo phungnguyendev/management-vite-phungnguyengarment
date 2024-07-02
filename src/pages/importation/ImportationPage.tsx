@@ -28,10 +28,10 @@ const ImportationPage = () => {
     productColor: (record: ImportationTableDataType) => {
       return (
         <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
-          <SkyTableTypography status={record.productColor.color?.status} className='w-fit'>
-            {textValidatorDisplay(record.productColor.color?.name)}
+          <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
+            {textValidatorDisplay(record.productColor?.color?.name)}
           </SkyTableTypography>
-          <ColorPicker size='middle' format='hex' value={record.productColor.color?.hexColor} disabled />
+          <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
         </Flex>
       )
     },
@@ -104,11 +104,17 @@ const ImportationPage = () => {
         title='Xuất nhập khẩu'
         loading={viewModel.table.loading}
         searchProps={{
+          // Search Input
           onSearch: viewModel.action.handleSearch,
           placeholder: 'Mã hàng..'
         }}
         sortProps={{
-          onChange: (checked) => viewModel.action.handleSortChange(checked)
+          // Sort Switch Button
+          onChange: viewModel.action.handleSwitchSortChange
+        }}
+        deleteProps={{
+          // Show delete list Switch Button
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
       >
         <SkyTable

@@ -30,108 +30,112 @@ export default function useImportationViewModel() {
     page: 1,
     pageSize: -1
   })
-  const [shorted, setSorted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ImportationExpandableAddNewProps>({})
 
   // List
-  const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [importations, setImportations] = useState<Importation[]>([])
 
   useEffect(() => {
-    loadData()
+    initialize()
   }, [])
 
-  useEffect(() => {
-    loadData()
-  }, [showDeleted, shorted, paginator, searchText])
+  console.log('object')
 
-  useEffect(() => {
-    mappedData()
-  }, [products, productColors, productGroups, printablePlaces, importations])
-
-  const mappedData = useCallback(() => {
-    table.setDataSource(() => {
-      const dataSource = products.map((product) => {
-        return {
-          ...product,
-          key: `${product.id}`,
-          productColor: productColors.find((item) => item.productID === product.id),
-          productGroup: productGroups.find((item) => item.productID === product.id),
-          printablePlace: printablePlaces.find((item) => item.productID === product.id),
-          expandableImportationTableDataTypes: importations
-            .filter((item) => item.productID === product.id)
-            .map((item) => {
-              return { ...item, key: `${item.id}` }
-            })
-        } as ImportationTableDataType
-      })
-      return dataSource
+  /**
+   * Function convert data list of model to dataSource of table and other attributes
+   */
+  const dataMapped = (
+    products: Product[],
+    productColors: ProductColor[],
+    productGroups: ProductGroup[],
+    printablePlaces: PrintablePlace[],
+    importations: Importation[]
+  ) => {
+    console.log('dataMapped')
+    const newDataSource = products.map((product) => {
+      return {
+        ...product,
+        key: `${product.id}`,
+        productColor: productColors.find((item) => item.productID === product.id),
+        productGroup: productGroups.find((item) => item.productID === product.id),
+        printablePlace: printablePlaces.find((item) => item.productID === product.id),
+        expandableImportationTableDataTypes: importations
+          .filter((item) => item.productID === product.id)
+          .map((item) => {
+            return { ...item, key: `${item.id}` }
+          })
+      } as ImportationTableDataType
     })
-  }, [products, productColors, productGroups, printablePlaces, importations])
+    table.setDataSource(newDataSource)
+  }
 
-  const loadData = async () => {
+  /**
+   * Initialize function
+   */
+  const initialize = useCallback(async () => {
+    try {
+      console.log('initialize')
+      const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      const newProducts = productsResult.data as Product[]
+
+      const productColorsResult = await productColorService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductColors = productColorsResult.data as ProductColor[]
+      setProductColors(newProductColors)
+
+      const productGroupsResult = await productGroupService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductGroups = productGroupsResult.data as ProductGroup[]
+      setProductGroups(newProductGroups)
+
+      const printablePlacesResult = await printablePlaceService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
+      setPrintablePlaces(newPrintablePlaces)
+
+      const importationsResult = await importationService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newImportations = importationsResult.data as Importation[]
+      setImportations(newImportations)
+
+      dataMapped(newProducts, newProductColors, newProductGroups, newPrintablePlaces, newImportations)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }, [])
+
+  /**
+   * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
+   */
+  const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
+    console.log('load data')
     try {
       await productService.getItemsSync(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'title', term: searchText }
+          paginator: query.paginator,
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading,
         (meta) => {
           if (!meta.success) throw new Error(define('dataLoad_failed'))
-          setProducts(meta.data as Product[])
-        }
-      )
-
-      await productColorService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta.success) throw new Error(define('dataLoad_failed'))
-          setProductColors(meta.data as ProductColor[])
-        }
-      )
-
-      await productGroupService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta.success) throw new Error(define('dataLoad_failed'))
-          setProductGroups(meta.data as ProductGroup[])
-        }
-      )
-
-      await printablePlaceService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta.success) throw new Error(define('dataLoad_failed'))
-          setPrintablePlaces(meta.data as PrintablePlace[])
-        }
-      )
-
-      await importationService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 },
-          sorting: { column: 'id', direction: 'desc' }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta.success) throw new Error(define('dataLoad_failed'))
-          setImportations(meta.data as Importation[])
+          const newProducts = meta.data as Product[]
+          dataMapped(newProducts, productColors, productGroups, printablePlaces, importations)
         }
       )
     } catch (error: any) {
@@ -169,6 +173,9 @@ export default function useImportationViewModel() {
     table.handleUpdate(productRecord.key, newImportationTableDataSourceItem)
   }
 
+  /**
+   * Function update record
+   */
   const handleUpdate = async (productRecord: ImportationTableDataType, record: ImportationExpandableTableDataType) => {
     try {
       if (
@@ -197,6 +204,9 @@ export default function useImportationViewModel() {
     }
   }
 
+  /**
+   * Function add new record
+   */
   const handleAddNew = async (formAddNew: ImportationExpandableAddNewProps) => {
     console.log(formAddNew)
     try {
@@ -208,19 +218,21 @@ export default function useImportationViewModel() {
         table.setLoading,
         (meta) => {
           if (!meta.success) throw new Error(define('create_failed'))
-          const importation = meta.data as Importation
+          const newImportation = meta.data as Importation
+
           const prevDataSourceItem = table.dataSource.find((item) => item.key === table.addingKey.payload?.key)
           if (prevDataSourceItem) {
             const newImportationExpandableDataSource = prevDataSourceItem.expandableImportationTableDataTypes
             newImportationExpandableDataSource.unshift({
-              ...importation,
-              key: `${importation.id}`
+              ...newImportation,
+              key: `${newImportation.id}`
             })
-            table.handleAddNew({
-              ...prevDataSourceItem,
-              key: `${formAddNew.productID}`,
-              expandableImportationTableDataTypes: newImportationExpandableDataSource
-            })
+            console.log(newImportationExpandableDataSource)
+            // table.handleAddNew({
+            //   ...prevDataSourceItem,
+            //   key: `${formAddNew.productID}`,
+            //   expandableImportationTableDataTypes: newImportationExpandableDataSource
+            // })
           }
         }
       )
@@ -233,13 +245,16 @@ export default function useImportationViewModel() {
     }
   }
 
+  /**
+   * Function delete (update status => 'deleted') record
+   */
   const handleDelete = async (productRecord: ImportationTableDataType, record: ImportationExpandableTableDataType) => {
     try {
       await importationService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
         if (!meta.success) throw new Error(define('failed'))
         handleDeleteImportationExpandableRow(productRecord, record)
-        message.success(define('success'))
       })
+      message.success(define('success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -248,6 +263,9 @@ export default function useImportationViewModel() {
     }
   }
 
+  /**
+   * Function delete record forever
+   */
   const handleDeleteForever = async (
     productRecord: ImportationTableDataType,
     record: ImportationExpandableTableDataType
@@ -266,6 +284,9 @@ export default function useImportationViewModel() {
     }
   }
 
+  /**
+   * Function restore record
+   */
   const handleRestore = async (record: ImportationExpandableAddNewProps) => {
     try {
       await importationService.updateItemBySync(
@@ -285,16 +306,39 @@ export default function useImportationViewModel() {
     }
   }
 
+  /**
+   * Function query paginator (page and pageSize)
+   */
   const handlePageChange = (page: number, pageSize: number) => {
     setPaginator({ page, pageSize })
+    loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
   }
 
-  const handleSortChange = (checked: boolean) => {
-    setSorted(checked)
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ paginator, isDeleted: checked, searchTerm: searchText })
+  }
+
+  /**
+   * Function handle search button
+   */
   const handleSearch = (value: string) => {
     setSearchText(value)
+    loadData({ paginator, isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -323,7 +367,8 @@ export default function useImportationViewModel() {
       loadData,
       handleAddNew,
       handleUpdate,
-      handleSortChange,
+      handleSwitchSortChange,
+      handleSwitchDeleteChange,
       handleSearch,
       handlePageChange,
       handleDelete,

@@ -6,9 +6,9 @@ export interface ImportationExpandableTableDataType extends Importation {
 
 export interface ImportationTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  productGroup: ProductGroup
-  printablePlace: PrintablePlace
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  printablePlace?: PrintablePlace
   expandableImportationTableDataTypes: ImportationExpandableTableDataType[]
 }
 

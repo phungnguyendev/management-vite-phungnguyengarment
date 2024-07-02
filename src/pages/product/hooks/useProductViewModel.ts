@@ -330,6 +330,9 @@ export default function useProductViewModel() {
     }
   }
 
+  /**
+   * Function restore record
+   */
   const handleRestore = async (record: ProductTableDataType) => {
     try {
       await productService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {

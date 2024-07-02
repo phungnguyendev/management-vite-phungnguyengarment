@@ -116,6 +116,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
         rowClassName='editable-row'
         onPageChange={handlePageChange}
         isShowDeleted={showDeleted}
+        pagination={{ pageSize: 5 }}
         actionProps={{
           onEdit: {
             handleClick: (record) => {
