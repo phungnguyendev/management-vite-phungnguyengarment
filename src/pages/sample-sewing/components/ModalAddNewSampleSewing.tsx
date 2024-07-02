@@ -4,18 +4,7 @@ import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import SkyModalRow from '~/components/sky-ui/SkyModalRow'
 import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-
-export interface SampleSewingAddNewProps {
-  productID?: number
-  dateSubmissionNPL?: string
-  dateApprovalSO?: string
-  dateApprovalPP?: string
-  dateSubmissionFirstTime?: string
-  dateSubmissionSecondTime?: string
-  dateSubmissionThirdTime?: string
-  dateSubmissionForthTime?: string
-  dateSubmissionFifthTime?: string
-}
+import { SampleSewingAddNewProps } from '../type'
 
 interface Props extends SkyModalProps {
   onAddNew: (formAddNew: SampleSewingAddNewProps) => void

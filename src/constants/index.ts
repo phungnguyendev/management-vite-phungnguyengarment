@@ -12,6 +12,7 @@ export type DefineType =
   | 'existed'
   | 'failed'
   | 'success'
+  | 'error_valid_form'
 
 const define = (type: DefineType): string => {
   switch (type) {
@@ -39,6 +40,8 @@ const define = (type: DefineType): string => {
       return 'Failed!'
     case 'success':
       return 'Success!'
+    case 'error_valid_form':
+      return 'Error valid form!'
     default:
       return 'Data load failed!'
   }

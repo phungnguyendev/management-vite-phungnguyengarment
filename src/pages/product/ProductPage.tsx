@@ -28,48 +28,26 @@ import { ProductTableDataType } from './type'
 const ProductPage = () => {
   useTitle('Products | Phung Nguyen')
   const { width } = useDevice()
-  const { state, action, table } = useProductViewModel()
-  const {
-    showDeleted,
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    colors,
-    groups,
-    prints,
-    searchText,
-    setSearchText
-  } = state
-  const {
-    handleAddNew,
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useProductViewModel()
 
   const columns = {
     title: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='productCode'
           title='Mã hàng'
           inputType='text'
-          required={true}
+          required
           initialValue={textValidatorInit(record.productCode)}
-          value={newRecord.productCode}
+          value={viewModel.state.newRecord.productCode}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
-              return { ...prev, productCode: textValidatorChange(val.trim()) }
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, productCode: textValidatorChange(val) }
             })
           }
         >
-          <SkyTableTypography strong status={'active'}>
+          <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -78,15 +56,15 @@ const ProductPage = () => {
     quantityPO: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='quantityPO'
           title='Số lượng PO'
           inputType='number'
-          required={true}
+          required
           initialValue={numberValidatorInit(record.quantityPO)}
-          value={newRecord.quantityPO}
+          value={viewModel.state.newRecord.quantityPO}
           onValueChange={(val: number) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, quantityPO: numberValidatorChange(val) }
             })
           }
@@ -98,27 +76,26 @@ const ProductPage = () => {
     productColor: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='colorID'
           title='Màu'
+          required
           inputType='colorselector'
           onValueChange={(val: number) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, colorID: numberValidatorChange(val) }
             })
           }
-          defaultValue={record.productColor.colorID && record.productColor.colorID}
+          defaultValue={numberValidatorInit(record.productColor?.colorID)}
           selectProps={{
-            options: colors.map((color) => {
+            options: viewModel.state.colors.map((color) => {
               return { label: color.name, value: color.id, key: color.hexColor }
-            }),
-            defaultValue: record.productColor.colorID && record.productColor.colorID,
-            value: newRecord.colorID
+            })
           }}
         >
-          <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
-            <SkyTableTypography status={record.productColor.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor.color?.name)}
+          <Flex wrap='wrap' justify='space-between' align='center' gap={10}>
+            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
+              {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
             <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
           </Flex>
@@ -128,21 +105,21 @@ const ProductPage = () => {
     productGroup: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='groupID'
           title='Nhóm'
+          required
           inputType='select'
-          required={false}
           onValueChange={(val) => {
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, groupID: numberValidatorChange(val) }
             })
           }}
+          defaultValue={numberValidatorInit(record.productGroup?.groupID)}
           selectProps={{
-            options: groups.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            }),
-            defaultValue: textValidatorInit(record.productGroup?.group?.name)
+            options: viewModel.state.groups.map((i) => {
+              return { label: i.name, value: i.id }
+            })
           }}
         >
           <SkyTableTypography status={record.productGroup?.group?.status}>
@@ -154,21 +131,20 @@ const ProductPage = () => {
     printablePlace: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='printID'
           title='Nơi in'
           inputType='select'
-          required={true}
           onValueChange={(val: number) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, printID: numberValidatorChange(val) }
             })
           }
+          defaultValue={numberValidatorInit(record.printablePlace?.printID)}
           selectProps={{
-            options: prints.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            }),
-            defaultValue: textValidatorInit(record.printablePlace?.print?.name)
+            options: viewModel.state.prints.map((i) => {
+              return { label: i.name, value: i.id }
+            })
           }}
         >
           <SkyTableTypography status={record.printablePlace?.print?.status}>
@@ -180,14 +156,14 @@ const ProductPage = () => {
     dateInputNPL: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='dateInputNPL'
           title='NPL'
           inputType='datepicker'
-          required={true}
+          required
           initialValue={dateValidatorInit(record.dateInputNPL)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, dateInputNPL: dateValidatorChange(val) }
             })
           }
@@ -199,14 +175,14 @@ const ProductPage = () => {
     dateOutputFCR: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='dateOutputFCR'
           title='FCR'
           inputType='datepicker'
-          required={true}
+          required
           initialValue={dateValidatorInit(record.dateOutputFCR)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, dateOutputFCR: dateValidatorChange(val) }
             })
           }
@@ -286,61 +262,75 @@ const ProductPage = () => {
     <>
       <BaseLayout
         title='Danh sách sản phẩm'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
-          placeholder: 'Mã hàng..',
-          value: searchText,
-          onChange: (e) => setSearchText(e.target.value)
+          // Search Input
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
         }}
         sortProps={{
-          onChange: (checked) => handleSortChange(checked)
+          // Sort Switch Button
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: () => {}
+          // Show delete list Switch Button
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
         addNewProps={{
-          onClick: () => setOpenModal(true)
+          // Add new Button
+          onClick: () => viewModel.state.setOpenModal(true)
         }}
       >
         <SkyTable
           bordered
-          loading={table.loading}
+          loading={viewModel.table.loading}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          dataSource={viewModel.table.dataSource}
           rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
+          onPageChange={viewModel.action.handlePageChange}
+          isShowDeleted={viewModel.state.showDeleted}
           actionProps={{
             onEdit: {
+              // Start editing
               handleClick: (record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record.key)
+                viewModel.state.setNewRecord({ ...record })
+                viewModel.table.handleStartEditing(record.key)
               },
-              isShow: !showDeleted
+              isShow: !viewModel.state.showDeleted
             },
             onSave: {
-              handleClick: (record) => handleUpdate(record!)
+              // Save
+              handleClick: (record) => viewModel.action.handleUpdate(record!)
             },
+            // Start delete
             onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
+              handleClick: (record) => viewModel.table.handleStartDeleting(record.key),
+              isShow: !viewModel.state.showDeleted
             },
+            // Start delete forever
             onDeleteForever: {
-              handleClick: (record) => handleDeleteForever(record!.id!),
-              isShow: showDeleted
+              handleClick: () => {},
+              isShow: viewModel.state.showDeleted
             },
+            // Start restore
             onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
+              handleClick: (record) => viewModel.table.handleStartRestore(record.key),
+              isShow: viewModel.state.showDeleted
             },
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
+            // Delete forever
+            onConfirmDeleteForever: (record) => viewModel.action.handleDeleteForever(record),
+            // Cancel editing
+            onConfirmCancelEditing: () => viewModel.table.handleCancelEditing(),
+            // Cancel delete
+            onConfirmCancelDeleting: () => viewModel.table.handleCancelDeleting(),
+            // Delete (update status record => 'deleted')
+            onConfirmDelete: (record) => viewModel.action.handleDelete(record),
+            // Cancel restore
+            onConfirmCancelRestore: () => viewModel.table.handleCancelRestore(),
+            // Restore
+            onConfirmRestore: (record) => viewModel.action.handleRestore(record),
             isShow: true
           }}
           expandable={{
@@ -351,7 +341,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Số lượng PO:'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.quantityPO(record)}
                     </SkyTableExpandableItemRow>
@@ -360,7 +350,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Màu:'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.productColor(record)}
                     </SkyTableExpandableItemRow>
@@ -369,7 +359,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Nhóm:'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.productGroup(record)}
                     </SkyTableExpandableItemRow>
@@ -378,7 +368,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Nơi in:'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.printablePlace(record)}
                     </SkyTableExpandableItemRow>
@@ -387,7 +377,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       title='Ngày nhập NPL:'
                       className='flex w-1/2 lg:hidden'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
@@ -396,37 +386,25 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Ngày xuất FCR:'
-                      isEditing={table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(`${record.id}`)}
                     >
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
                   )}
-                  {/* <Collapse
-                    items={[
-                      {
-                        key: '1',
-                        label: (
-                          <Typography.Title className='m-0' level={5} type='secondary'>
-                            Nhập khẩu
-                          </Typography.Title>
-                        ),
-                        children: <ImportationTable productRecord={record} />
-                      }
-                    ]}
-                  /> */}
                 </SkyTableExpandableLayout>
               )
             },
-            columnWidth: '0.001%'
+            columnWidth: '0.001%',
+            showExpandColumn: true
           }}
         />
       </BaseLayout>
-      {openModal && (
+      {viewModel.state.openModal && (
         <ModalAddNewProduct
-          okButtonProps={{ loading: table.loading }}
-          open={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNew}
+          okButtonProps={{ loading: viewModel.table.loading }}
+          open={viewModel.state.openModal}
+          setOpenModal={viewModel.state.setOpenModal}
+          onAddNew={viewModel.action.handleAddNew}
         />
       )}
     </>

@@ -8,7 +8,7 @@ export const defaultRequestBody: RequestBodyType = {
   },
   paginator: {
     page: 1,
-    pageSize: 5
+    pageSize: 10
   },
   search: {
     field: 'id',
@@ -16,7 +16,7 @@ export const defaultRequestBody: RequestBodyType = {
   },
   sorting: {
     column: 'id',
-    direction: 'asc'
+    direction: 'desc'
   }
 }
 

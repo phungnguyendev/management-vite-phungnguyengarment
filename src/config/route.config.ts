@@ -8,6 +8,7 @@ import {
   PackageSearchIcon,
   PackageSuccessIcon,
   PrintIcon,
+  SewingMachineIcon,
   UserIcon
 } from '~/assets/icons'
 import { UserRoleType } from '~/typing'
@@ -64,15 +65,15 @@ const routes: SideType[] = [
     role: 'importation_manager',
     icon: PackageSearchIcon
   },
-  // {
-  //   key: '2',
-  //   name: 'May mẫu',
-  //   path: 'sample-sewing',
-  //   component: SampleSewingPage,
-  //   isGroup: false,
-  //   role: 'sample_sewing_manager',
-  //   icon: SewingMachineIcon
-  // },
+  {
+    key: '2',
+    name: 'May mẫu',
+    path: 'sample-sewing',
+    component: SampleSewingPage,
+    isGroup: false,
+    role: 'sample_sewing_manager',
+    icon: SewingMachineIcon
+  },
   // {
   //   key: '3',
   //   name: 'Phụ liệu',

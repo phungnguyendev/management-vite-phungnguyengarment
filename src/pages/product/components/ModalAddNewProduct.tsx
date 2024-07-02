@@ -1,4 +1,4 @@
-import { Form, Spin } from 'antd'
+import { App, Form, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
@@ -7,6 +7,7 @@ import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import SkyModalRow from '~/components/sky-ui/SkyModalRow'
 import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
 import DayJS, { dateFormatter } from '~/utils/date-formatter'
@@ -17,6 +18,7 @@ interface Props extends SkyModalProps {
 }
 
 const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState<boolean>(false)
   const colorService = useAPIService<Color>(ColorAPI)
@@ -49,8 +51,18 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
   }
 
   async function handleOk() {
-    const row = await form.validateFields()
-    onAddNew(row)
+    await form
+      .validateFields()
+      .then((values) => {
+        onAddNew({
+          ...values,
+          dateInputNPL: dateFormatter(values.dateInputNPL, 'iso8601'),
+          dateOutputFCR: dateFormatter(values.dateOutputFCR, 'iso8601')
+        })
+      })
+      .catch(() => {
+        message.error(define('error_valid_form'))
+      })
   }
 
   return (
@@ -82,6 +94,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Mã màu:'
+                required
                 dataIndex='colorID'
                 inputType='colorselector'
                 placeholder='Ví dụ: Black'
@@ -100,6 +113,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Nhóm:'
+                required
                 dataIndex='groupID'
                 inputType='select'
                 placeholder='Ví dụ: G1-4'

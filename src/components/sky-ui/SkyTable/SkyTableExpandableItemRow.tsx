@@ -9,7 +9,7 @@ interface Props extends EditableStateCellProps {}
 const SkyTableSkyTableExpandableItemRow = ({ ...props }: Props) => {
   return (
     <Flex className='w-full' align='center' justify='start' gap={5}>
-      <SkyTableTypography strong className={cn('w-[100px]', props.className)}>
+      <SkyTableTypography strong className={cn('', props.className)}>
         {props.title}
       </SkyTableTypography>
       {props.children}

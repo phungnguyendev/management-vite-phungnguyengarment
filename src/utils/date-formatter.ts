@@ -1,16 +1,16 @@
 import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import plugin from 'dayjs/plugin/localizedFormat'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+//tiếng việt
+import 'dayjs/locale/vi'
 import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
+import utc from 'dayjs/plugin/utc' // dependent on utc plugin
 
-dayjs.extend(relativeTime)
-dayjs.extend(plugin)
-dayjs.extend(customParseFormat)
+dayjs.extend(localizedFormat)
+dayjs.locale('vi') // use locale globally
+//timezone
 dayjs.extend(utc)
 dayjs.extend(timezone)
-dayjs.tz.setDefault('Asia/Ho_Chi_Minh')
+dayjs.tz.setDefault(dayjs.tz.guess())
 // Set the output to "1.9.2018 18:01:36.386 GMT+02:00 (CEST)"
 
 export type DateFormatType = 'dateOnly' | 'dateTime' | 'timeOnly' | 'iso8601'

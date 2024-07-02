@@ -9,6 +9,7 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorChange,
@@ -16,13 +17,12 @@ import {
   dateValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
-import { SampleSewingAddNewProps } from './components/ModalAddNewSampleSewing'
-import useSampleSewing from './hooks/useSampleSewing'
+import useSampleSewingViewModel from './hooks/useSampleSewingViewModel'
 import { SampleSewingTableDataType } from './type'
 
 const SampleSewingPage = () => {
-  useTitle('May mẫu | Phung Nguyen')
-  const { state, action, table } = useSampleSewing()
+  useTitle('Sample Sewing | Phung Nguyen')
+  const { state, action, table } = useSampleSewingViewModel()
   const { newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } = state
   const {
     handleUpdate,
@@ -70,12 +70,12 @@ const SampleSewingPage = () => {
           initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionNPL)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
-              return { ...prev, dateSubmissionNPL: dateValidatorChange(val) }
+              return { ...prev, dateSubmissionNPL: dateFormatter(val, 'iso8601') }
             })
           }
         >
           <SkyTableTypography status={record.status}>
-            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL)) ?? '--/--/----'}
+            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL) : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -88,7 +88,7 @@ const SampleSewingPage = () => {
           title='Ngày duyệt mẫu PP'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
+          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateApprovalPP: dateValidatorChange(val) }
@@ -96,7 +96,7 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalPP)) ?? '--/--/----'}
+            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateApprovalPP) : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -109,7 +109,7 @@ const SampleSewingPage = () => {
           title='Ngày duyệt SO'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
+          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateApprovalSO: dateValidatorChange(val) }
@@ -117,7 +117,7 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {(record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateApprovalSO)) ?? '--/--/----'}
+            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateApprovalSO) : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -180,7 +180,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 1'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFirstTime)}
+          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFirstTime)}
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -189,7 +189,9 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionFirstTime)}
+            {record.sampleSewing
+              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionSecondTime)
+              : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -202,7 +204,11 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 2'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionSecondTime)}
+          // initialValue={
+          //   record.sampleSewing
+          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionSecondTime)
+          //     : dateValidatorDisplay()
+          // }
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -211,7 +217,9 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionSecondTime)}
+            {record.sampleSewing
+              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionSecondTime)
+              : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -224,7 +232,11 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 3'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionThirdTime)}
+          // initialValue={
+          //   record.sampleSewing
+          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionThirdTime)
+          //     : dateValidatorDisplay()
+          // }
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -233,7 +245,9 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionThirdTime)}
+            {record.sampleSewing
+              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionThirdTime)
+              : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -246,7 +260,11 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 4'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionForthTime)}
+          // initialValue={
+          //   record.sampleSewing
+          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionForthTime)
+          //     : dateValidatorDisplay()
+          // }
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -255,7 +273,9 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionForthTime)}
+            {record.sampleSewing
+              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionForthTime)
+              : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -268,7 +288,11 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 5'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFifthTime)}
+          // initialValue={
+          //   record.sampleSewing
+          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionFifthTime)
+          //     : dateValidatorDisplay()
+          // }
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -277,7 +301,9 @@ const SampleSewingPage = () => {
           }
         >
           <SkyTableTypography status={record.status}>
-            {record.sampleSewing && dateValidatorDisplay(record.sampleSewing.dateSubmissionFifthTime)}
+            {record.sampleSewing
+              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionFifthTime)
+              : dateValidatorDisplay()}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -358,7 +384,17 @@ const SampleSewingPage = () => {
           actionProps={{
             onEdit: {
               handleClick: (record) => {
-                setNewRecord({ ...record } as SampleSewingAddNewProps)
+                if (record.sampleSewing)
+                  setNewRecord({
+                    dateApprovalPP: record.sampleSewing.dateApprovalPP,
+                    dateApprovalSO: record.sampleSewing.dateApprovalSO,
+                    dateSubmissionNPL: record.sampleSewing.dateSubmissionNPL,
+                    dateSubmissionFirstTime: record.sampleSewing.dateSubmissionFirstTime,
+                    dateSubmissionSecondTime: record.sampleSewing.dateSubmissionSecondTime,
+                    dateSubmissionThirdTime: record.sampleSewing.dateSubmissionThirdTime,
+                    dateSubmissionForthTime: record.sampleSewing.dateSubmissionForthTime,
+                    dateSubmissionFifthTime: record.sampleSewing.dateSubmissionFifthTime
+                  })
                 table.handleStartEditing(record.key)
               },
               isShow: !showDeleted
@@ -391,70 +427,38 @@ const SampleSewingPage = () => {
               return (
                 <SkyTableExpandableLayout>
                   {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                    <SkyTableExpandableItemRow title='Màu:' isEditing={table.isEditing(record.id!)}>
                       {columns.productColor(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='NPL may mẫu:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
+                    <SkyTableExpandableItemRow title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>
                       {columns.dateSubmissionNPL(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.lg) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày duyệt mẫu PP:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
+                    <SkyTableExpandableItemRow title='Ngày duyệt mẫu PP:' isEditing={table.isEditing(record.id!)}>
                       {columns.dateApprovalPP(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.xl) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày duyệt SO:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
+                    <SkyTableExpandableItemRow title='Ngày duyệt SO:' isEditing={table.isEditing(record.id!)}>
                       {columns.dateApprovalSO(record)}
                     </SkyTableExpandableItemRow>
                   )}
-                  <SkyTableExpandableItemRow
-                    className='w-1/2'
-                    title='Ngày gửi mẫu lần 1:'
-                    isEditing={table.isEditing(record.id!)}
-                  >
+                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 1:' isEditing={table.isEditing(record.id!)}>
                     {expandableColumns.dateSubmissionFirstTime(record)}
                   </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow
-                    className='w-1/2'
-                    title='Ngày gửi mẫu lần 2:'
-                    isEditing={table.isEditing(record.id!)}
-                  >
+                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 2:' isEditing={table.isEditing(record.id!)}>
                     {expandableColumns.dateSubmissionSecondTime(record)}
                   </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow
-                    className='w-1/2'
-                    title='Ngày gửi mẫu lần 3:'
-                    isEditing={table.isEditing(record.id!)}
-                  >
+                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 3:' isEditing={table.isEditing(record.id!)}>
                     {expandableColumns.dateSubmissionThirdTime(record)}
                   </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow
-                    className='w-1/2'
-                    title='Ngày gửi mẫu lần 4:'
-                    isEditing={table.isEditing(record.id!)}
-                  >
+                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 4:' isEditing={table.isEditing(record.id!)}>
                     {expandableColumns.dateSubmissionForthTime(record)}
                   </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow
-                    className='w-1/2'
-                    title='Ngày gửi mẫu lần 5:'
-                    isEditing={table.isEditing(record.id!)}
-                  >
+                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 5:' isEditing={table.isEditing(record.id!)}>
                     {expandableColumns.dateSubmissionFifthTime(record)}
                   </SkyTableExpandableItemRow>
                 </SkyTableExpandableLayout>

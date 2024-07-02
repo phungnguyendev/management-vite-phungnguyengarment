@@ -5,12 +5,13 @@ import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import SampleSewingAPI from '~/api/services/SampleSewingAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Product, ProductColor, SampleSewing } from '~/typing'
-import { SampleSewingAddNewProps } from '../components/ModalAddNewSampleSewing'
-import { SampleSewingTableDataType } from '../type'
+import { dateComparator } from '~/utils/helpers'
+import { SampleSewingAddNewProps, SampleSewingTableDataType } from '../type'
 
-export default function useSampleSewing() {
+export default function useSampleSewingViewModel() {
   const { message } = AntApp.useApp()
   const table = useTable<SampleSewingTableDataType>([])
 
@@ -53,11 +54,11 @@ export default function useSampleSewing() {
         return {
           ...self,
           key: `${self.id}`,
-          productColor: productColors.find((item) => item.productID === item.id),
-          sampleSewing: sampleSewings.find((item) => item.productID === item.id)
+          productColor: productColors.find((item) => item.productID === self.id),
+          sampleSewing: sampleSewings.find((item) => item.productID === self.id)
         } as SampleSewingTableDataType
       })
-      return [...dataSource]
+      return dataSource
     })
   }, [products, productColors, sampleSewings])
 
@@ -72,7 +73,7 @@ export default function useSampleSewing() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
           setProducts(meta.data as Product[])
         }
       )
@@ -82,7 +83,7 @@ export default function useSampleSewing() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
           setProductColors(meta.data as ProductColor[])
         }
       )
@@ -92,7 +93,7 @@ export default function useSampleSewing() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
+          if (!meta?.success) throw new Error(define('dataLoad_failed'))
           setSampleSewings(meta.data as SampleSewing[])
         }
       )
@@ -104,29 +105,41 @@ export default function useSampleSewing() {
   }
 
   const handleUpdate = async (record: SampleSewingTableDataType) => {
-    // const row = (await form.validateFields()) as any
-    console.log({ old: record, new: newRecord })
     try {
-      table.setLoading(true)
-      if (newRecord && record.sampleSewing) {
-        console.log('SampleSewing progressing: ', newRecord)
-        await sampleSewingService.updateItemBySync(
-          { productID: record.id },
-          {
-            ...newRecord
-          },
-          table.setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error(meta.message)
-          }
-        )
+      console.log({ record, newRecord })
+      if (
+        record.sampleSewing &&
+        (dateComparator(newRecord.dateSubmissionNPL, record.sampleSewing.dateSubmissionNPL) ||
+          dateComparator(newRecord.dateApprovalSO, record.sampleSewing.dateApprovalSO) ||
+          dateComparator(newRecord.dateApprovalPP, record.sampleSewing.dateApprovalPP) ||
+          dateComparator(newRecord.dateSubmissionFirstTime, record.sampleSewing.dateSubmissionFirstTime) ||
+          dateComparator(newRecord.dateSubmissionSecondTime, record.sampleSewing.dateSubmissionSecondTime) ||
+          dateComparator(newRecord.dateSubmissionThirdTime, record.sampleSewing.dateSubmissionThirdTime) ||
+          dateComparator(newRecord.dateSubmissionForthTime, record.sampleSewing.dateSubmissionForthTime) ||
+          dateComparator(newRecord.dateSubmissionFifthTime, record.sampleSewing.dateSubmissionFifthTime))
+      ) {
+        console.log('Update..')
+        // await sampleSewingService.updateItemBySync(
+        //   { field: 'productID', id: record.id! },
+        //   {
+        //     ...newRecord
+        //   },
+        //   table.setLoading,
+        //   (meta) => {
+        //     if (!meta?.success) throw new Error(define('update_failed'))
+        //     const itemUpdated = meta.data as SampleSewing
+        //     console.log(itemUpdated)
+        //   }
+        // )
       } else {
-        console.log('add new')
         await sampleSewingService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
+          if (!meta.success) throw new Error(`${meta.message}`)
+          const newItem = meta.data as SampleSewing
+          console.log(newItem)
+          // table.handleUpdate(record.key, { ...record, ...newItem, key: record.key } as SampleSewingTableDataType)
         })
       }
-      message.success('Success!')
+      message.success(define('updated_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -135,9 +148,9 @@ export default function useSampleSewing() {
     }
   }
 
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNew = async (formAddNew: SampleSewingAddNewProps) => {
     // try {
-    //   console.log(formAddNew)
+    // console.log(formAddNew)
     //   table.setLoading(true)
     //   await sampleSewingService.createNewItem(
     //     {
@@ -306,6 +319,7 @@ export default function useSampleSewing() {
     },
     action: {
       loadData,
+      handleAddNew,
       handleUpdate,
       handleSortChange,
       handleSearch,

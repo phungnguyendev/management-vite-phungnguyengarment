@@ -131,10 +131,10 @@ export interface PrintablePlace {
   printID?: number
   productID?: number
   status?: ItemStatusType
-  product?: Product
-  print?: Print
   createdAt?: string
   updatedAt?: string
+  product?: Product
+  print?: Print
 }
 
 export interface ProductGroup {

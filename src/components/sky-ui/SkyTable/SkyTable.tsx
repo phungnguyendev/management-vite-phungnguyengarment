@@ -6,6 +6,7 @@ import type { TableProps } from 'antd'
 import { Table } from 'antd'
 import { ColumnType, ColumnsType } from 'antd/es/table'
 import { useState } from 'react'
+import { defaultRequestBody } from '~/hooks/useAPIService'
 import ActionRow, { ActionProps } from '../ActionRow'
 import SkyTableRow from './SkyTableRow'
 
@@ -121,7 +122,18 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
               row: SkyTableRow
             }
           }}
-          pagination={props.pagination ?? { pageSize: 5 }}
+          // expandable={{
+          //   ...props.expandable,
+          //   expandIcon: props.expandable?.showExpandColumn
+          //     ? ({ expanded, onExpand, record }) =>
+          //         expanded ? (
+          //           <MinusCircleTwoTone onClick={(e) => onExpand(record, e)} />
+          //         ) : (
+          //           <PlusCircleTwoTone onClick={(e) => onExpand(record, e)} />
+          //         )
+          //     : undefined
+          // }}
+          pagination={props.pagination ?? { pageSize: defaultRequestBody.paginator?.pageSize ?? 5 }}
           className='z-0'
           rowKey='key'
           dataSource={props.dataSource}

@@ -5,3 +5,14 @@ export interface SampleSewingTableDataType extends Product {
   productColor: ProductColor
   sampleSewing: SampleSewing
 }
+
+export interface SampleSewingAddNewProps {
+  dateSubmissionNPL?: string
+  dateApprovalSO?: string
+  dateApprovalPP?: string
+  dateSubmissionFirstTime?: string
+  dateSubmissionSecondTime?: string
+  dateSubmissionThirdTime?: string
+  dateSubmissionForthTime?: string
+  dateSubmissionFifthTime?: string
+}

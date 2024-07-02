@@ -80,7 +80,11 @@ const SampleSewingPage = () => {
           required
           initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
           value={newRecord?.quantityRealCut}
-          onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityRealCut: numberValidatorChange(val) } })}
+          onValueChange={(val) =>
+            setNewRecord((prev) => {
+              return { ...prev, quantityRealCut: numberValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>
             {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)) ?? '-'}
@@ -97,7 +101,11 @@ const SampleSewingPage = () => {
           inputType='datepicker'
           required
           initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
-          onValueChange={(val: Dayjs) => setNewRecord((prev) =>  { return { ...prev, timeCut: dateValidatorChange(val) } })}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, timeCut: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>
             {(record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)) ?? '--/--/----'}
@@ -215,7 +223,11 @@ const SampleSewingPage = () => {
             required
             initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
             value={newRecord && numberValidatorCalc(newRecord?.quantityDeliveredBTP)}
-            onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityDeliveredBTP: val })}
+            onValueChange={(val) =>
+              setNewRecord((prev) => {
+                return { ...prev, quantityDeliveredBTP: val }
+              })
+            }
           >
             <SkyTableTypography status={record.status}>
               {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)) ?? '-'}
@@ -251,7 +263,11 @@ const SampleSewingPage = () => {
               required
               initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
               value={newRecord?.quantityArrived1Th}
-              onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityArrived1Th: numberValidatorChange(val) } })}
+              onValueChange={(val) =>
+                setNewRecord((prev) => {
+                  return { ...prev, quantityArrived1Th: numberValidatorChange(val) }
+                })
+              }
             >
               <SkyTableTypography status={record.status}>
                 {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)) ?? '-'}
@@ -293,7 +309,11 @@ const SampleSewingPage = () => {
               required
               initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
               value={newRecord?.quantityArrived2Th}
-              onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityArrived2Th: numberValidatorChange(val) } })}
+              onValueChange={(val) =>
+                setNewRecord((prev) => {
+                  return { ...prev, quantityArrived2Th: numberValidatorChange(val) }
+                })
+              }
             >
               <SkyTableTypography status={record.status}>
                 {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)) ?? '-'}
@@ -335,7 +355,11 @@ const SampleSewingPage = () => {
               required
               initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
               value={newRecord?.quantityArrived3Th}
-              onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityArrived3Th: numberValidatorChange(val) } })}
+              onValueChange={(val) =>
+                setNewRecord((prev) => {
+                  return { ...prev, quantityArrived3Th: numberValidatorChange(val) }
+                })
+              }
             >
               <SkyTableTypography status={record.status}>
                 {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)) ?? '-'}
@@ -377,7 +401,11 @@ const SampleSewingPage = () => {
               required
               initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
               value={newRecord?.quantityArrived4Th}
-              onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityArrived4Th: numberValidatorChange(val) } })}
+              onValueChange={(val) =>
+                setNewRecord((prev) => {
+                  return { ...prev, quantityArrived4Th: numberValidatorChange(val) }
+                })
+              }
             >
               <SkyTableTypography status={record.status}>
                 {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)) ?? '-'}
@@ -419,7 +447,11 @@ const SampleSewingPage = () => {
               required
               initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
               value={newRecord?.quantityArrived5Th}
-              onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityArrived5Th: numberValidatorChange(val) } })}
+              onValueChange={(val) =>
+                setNewRecord((prev) => {
+                  return { ...prev, quantityArrived5Th: numberValidatorChange(val) }
+                })
+              }
             >
               <SkyTableTypography status={record.status}>
                 {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)) ?? '-'}
@@ -606,199 +638,199 @@ const SampleSewingPage = () => {
             expandedRowRender: (record) => {
               return (
                 <Flex gap={30} vertical className='overflow-hidden'>
-                    <SkyTableExpandableLayout>
-                      {!(width >= breakpoint.sm) && (
-                        <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
-                          {columns.productColor(record)}
-                        </SkyTableExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.md) && (
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow
+                        className='w-1/2'
+                        title='Số lượng PO:'
+                        isEditing={table.isEditing(record.key)}
+                      >
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.lg) && (
+                      <>
                         <SkyTableExpandableItemRow
                           className='w-1/2'
-                          title='Số lượng PO:'
+                          title='SL thực cắt:'
                           isEditing={table.isEditing(record.key)}
                         >
-                          {columns.quantityPO(record)}
+                          {columns.quantityRealCut(record)}
                         </SkyTableExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.lg) && (
-                        <>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='SL thực cắt:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.quantityRealCut(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='SL còn lại:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.remainingAmount(record)}
-                          </SkyTableExpandableItemRow>
-                        </>
-                      )}
-                      {!(width >= breakpoint.xl) && (
                         <SkyTableExpandableItemRow
                           className='w-1/2'
-                          title='Ngày giờ cắt:'
+                          title='SL còn lại:'
                           isEditing={table.isEditing(record.key)}
                         >
-                          {columns.timeCut(record)}
+                          {columns.remainingAmount(record)}
                         </SkyTableExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.xxl) && (
-                        <>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='Ngày gửi in thêu:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroidered.dateSendEmbroidered(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='SL còn lại:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroidered.amountQuantityEmbroidered(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='In thêu?:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroidered.syncStatus(record)}
-                          </SkyTableExpandableItemRow>
-                        </>
-                      )}
-                      {!(width >= breakpoint.xxl) && (
-                        <>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='SL Giao BTP:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.btp.quantityDeliveredBTP(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-1/2'
-                            title='Số lượng BTP còn lại:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.btp.amountQuantityDeliveredBTP(record)}
-                          </SkyTableExpandableItemRow>
-                        </>
-                      )}
-                    </SkyTableExpandableLayout>
-                    <SkyTableExpandableLayout>
-                      <Flex justify='center' align='center' className='max-w-screen flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 1:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th1.quantityArrived(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th1.dateArrived(record)}
-                          </SkyTableExpandableItemRow>
-                        </Flex>
+                      </>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow
+                        className='w-1/2'
+                        title='Ngày giờ cắt:'
+                        isEditing={table.isEditing(record.key)}
+                      >
+                        {columns.timeCut(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2'
+                          title='Ngày gửi in thêu:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroidered.dateSendEmbroidered(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2'
+                          title='SL còn lại:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroidered.amountQuantityEmbroidered(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2'
+                          title='In thêu?:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroidered.syncStatus(record)}
+                        </SkyTableExpandableItemRow>
+                      </>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2'
+                          title='SL Giao BTP:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.btp.quantityDeliveredBTP(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-1/2'
+                          title='Số lượng BTP còn lại:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.btp.amountQuantityDeliveredBTP(record)}
+                        </SkyTableExpandableItemRow>
+                      </>
+                    )}
+                  </SkyTableExpandableLayout>
+                  <SkyTableExpandableLayout>
+                    <Flex justify='center' align='center' className='max-w-screen flex-col md:flex-row' gap={10}>
+                      <SkyTableTypography code strong className='w-fit'>
+                        Lần 1:
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={20}>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='SL về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th1.quantityArrived(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='Ngày về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th1.dateArrived(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 2:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th2.quantityArrived(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th2.dateArrived(record)}
-                          </SkyTableExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                    <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                      <SkyTableTypography code strong className='w-fit'>
+                        Lần 2:
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={20}>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='SL về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th2.quantityArrived(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='Ngày về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th2.dateArrived(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 3:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th3.quantityArrived(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th3.dateArrived(record)}
-                          </SkyTableExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                    <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                      <SkyTableTypography code strong className='w-fit'>
+                        Lần 3:
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={20}>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='SL về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th3.quantityArrived(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='Ngày về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th3.dateArrived(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 4:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th4.quantityArrived(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th4.dateArrived(record)}
-                          </SkyTableExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                    <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                      <SkyTableTypography code strong className='w-fit'>
+                        Lần 4:
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={20}>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='SL về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th4.quantityArrived(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='Ngày về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th4.dateArrived(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 5:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th5.quantityArrived(record)}
-                          </SkyTableExpandableItemRow>
-                          <SkyTableExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.key)}
-                          >
-                            {columns.embroideringArrived.th5.dateArrived(record)}
-                          </SkyTableExpandableItemRow>
-                        </Flex>
+                    </Flex>
+                    <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
+                      <SkyTableTypography code strong className='w-fit'>
+                        Lần 5:
+                      </SkyTableTypography>
+                      <Flex className='w-full' gap={20}>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='SL về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th5.quantityArrived(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          className='w-fit pr-5'
+                          title='Ngày về:'
+                          isEditing={table.isEditing(record.key)}
+                        >
+                          {columns.embroideringArrived.th5.dateArrived(record)}
+                        </SkyTableExpandableItemRow>
                       </Flex>
-                    </SkyTableExpandableLayout>
+                    </Flex>
+                  </SkyTableExpandableLayout>
                 </Flex>
               )
             },
