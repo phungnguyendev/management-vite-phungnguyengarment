@@ -69,9 +69,12 @@ export interface User {
   phone?: string
   otp?: string
   isAdmin?: boolean
+  accessKey?: string
   workDescription?: string
   birthday?: string
   status?: ItemStatusType
+  accessToken?: string
+  refreshToken?: string
   createdAt?: string
   updatedAt?: string
 }

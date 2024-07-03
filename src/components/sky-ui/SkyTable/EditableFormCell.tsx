@@ -24,7 +24,7 @@ function EditableFormCell({
   textAreaProps,
   inputProps,
   selectProps,
-  initialValue,
+  defaultValue,
   onValueChange,
   required,
   inputType,
@@ -204,7 +204,7 @@ function EditableFormCell({
         <Form.Item
           name={dataIndex}
           className={cn('w-full', restProps.className)}
-          initialValue={initialValue}
+          defaultValue={defaultValue}
           required={required}
           label={title}
           validateTrigger='onBlur'

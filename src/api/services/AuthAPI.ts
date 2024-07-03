@@ -14,6 +14,16 @@ export default {
         throwErrorFormatter(error)
       })
   },
+  refreshAccessToken: async (refreshToken: string): Promise<ResponseDataType> => {
+    return await client
+      .post(`${NAMESPACE}/refresh-token`, refreshToken)
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
   userInfoFromAccessToken: async (accessToken: string): Promise<ResponseDataType> => {
     return await client
       .get(`${NAMESPACE}/user-info`, {
@@ -40,7 +50,23 @@ export default {
   },
   verifyOTPCode: async (emailToVerify: string, otp: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}/verify-otp/${emailToVerify}`, otp)
+      .post(`${NAMESPACE}/verify-otp/${emailToVerify}`, { otp })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  resetPasswordWithAccessKey: async (
+    email: string,
+    data: {
+      newPassword: string
+      accessKey: string
+    }
+  ): Promise<ResponseDataType> => {
+    return await client
+      .post(`${NAMESPACE}/reset-password/${email}`, { newPassword: data.newPassword, accessKey: data.accessKey })
       .then((res) => {
         return responseFormatter(res)
       })

@@ -2,7 +2,7 @@ import { createReducer } from '@reduxjs/toolkit'
 import { setLanguage, setLoading } from '../actions-creator'
 
 interface AppState {
-  loading?: boolean
+  loading: boolean
   language?: 'vi' | 'en'
 }
 

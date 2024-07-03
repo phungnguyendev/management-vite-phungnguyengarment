@@ -51,7 +51,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
           title='Lô nhập'
           inputType='number'
           required
-          initialValue={numberValidatorInit(record.quantity)}
+          defaultValue={numberValidatorInit(record.quantity)}
           value={newRecord.quantity}
           onValueChange={(val: number) =>
             setNewRecord((prev) => {
@@ -73,7 +73,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
           title='Ngày nhập'
           inputType='datepicker'
           required
-          initialValue={dateValidatorInit(record.dateImported)}
+          defaultValue={dateValidatorInit(record.dateImported)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateImported: dateValidatorChange(val) }

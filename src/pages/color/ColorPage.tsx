@@ -43,7 +43,7 @@ const ColorPage: React.FC<Props> = () => {
             title='Tên màu'
             inputType='text'
             required={true}
-            initialValue={record.name}
+            defaultValue={record.name}
             value={newRecord.name}
             onValueChange={(val) =>
               setNewRecord((prev) => {
@@ -69,7 +69,7 @@ const ColorPage: React.FC<Props> = () => {
             inputType='colorpicker'
             required={true}
             className='w-fit'
-            initialValue={record.hexColor}
+            defaultValue={record.hexColor}
             value={newRecord.hexColor}
             onValueChange={(val: AntColor) =>
               setNewRecord((prev) => {

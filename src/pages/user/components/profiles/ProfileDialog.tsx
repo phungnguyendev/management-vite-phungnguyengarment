@@ -140,16 +140,16 @@ function ProfileDialog({ open, setOpen }: Props) {
               Account Details
             </Typography.Title>
             <Flex vertical className='w-full'>
-              <Form.Item label='Full name' required name='fullNameProfile' initialValue={currentUser.user.fullName}>
+              <Form.Item label='Full name' required name='fullNameProfile' defaultValue={currentUser.user.fullName}>
                 <Input placeholder='Nguyen Van A' required className='w-full' name='fullName' />
               </Form.Item>
-              <Form.Item label='Phone' name='phoneProfile' required initialValue={currentUser.user.phone}>
+              <Form.Item label='Phone' name='phoneProfile' required defaultValue={currentUser.user.phone}>
                 <InputNumber placeholder='123456789' required name='phone' className='w-full' />
               </Form.Item>
               <Form.Item
                 label='Birthday'
                 name='birthdayProfile'
-                initialValue={currentUser.user.birthday ? dayjs(currentUser.user.birthday) : undefined}
+                defaultValue={currentUser.user.birthday ? dayjs(currentUser.user.birthday) : undefined}
               >
                 <DatePicker className='w-full' name='birthday' format={'DD/MM/YYYY'} />
               </Form.Item>

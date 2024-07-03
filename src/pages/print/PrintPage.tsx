@@ -41,7 +41,7 @@ const SewingLinePage: React.FC<Props> = () => {
             title='Sewing line name'
             inputType='text'
             required={true}
-            initialValue={record.name}
+            defaultValue={record.name}
             value={newRecord.name}
             onValueChange={(val) =>
               setNewRecord((prev) => {

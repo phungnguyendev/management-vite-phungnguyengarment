@@ -109,14 +109,13 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
 
   const getItemBy = async (
     query: { field: string; id: number },
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (res: ResponseDataType) => void
-  ) => {
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
       const res = await apiService.getItemBy?.(query, accessTokenStored)
       if (!res?.success) throw new Error(`${res?.message}`)
-      onDataSuccess?.(res)
+      return res
     } catch (err) {
       throw err
     } finally {

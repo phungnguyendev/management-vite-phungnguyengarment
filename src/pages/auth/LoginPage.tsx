@@ -1,11 +1,14 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { App as AntApp, Button, Flex, Form, Input } from 'antd'
-import React, { HTMLAttributes, useState } from 'react'
+import React, { HTMLAttributes, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
 import useTitle from '~/components/hooks/useTitle'
 import AuthLayout from '~/components/layout/AuthLayout'
+import define from '~/constants'
 import useAuthService from '~/hooks/useAuthService'
+import useLocalStorage from '~/hooks/useLocalStorage'
+import { User } from '~/typing'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
@@ -16,10 +19,21 @@ const LoginPage: React.FC<Props> = () => {
   const [form] = Form.useForm()
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
+  const [, setAccessToken] = useLocalStorage<string>('accessToken', '')
+  const [, setRefreshToken] = useLocalStorage<string>('refreshToken', '')
   const [loading, setLoading] = useState<boolean>(false)
   const authService = useAuthService(AuthAPI)
   const [user, setUser] = useState<{ email?: string; password?: string }>({})
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
+
+  useEffect(() => {
+    initialize()
+  }, [])
+
+  const initialize = () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+  }
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
     setFormLayout(layout)
@@ -29,12 +43,15 @@ const LoginPage: React.FC<Props> = () => {
     try {
       setLoading(true)
       // Create a new request to login user
-      await authService.login(user.email, user.password, setLoading).then(() => {
-        message.success('Success!')
+      await authService.login(user.email, user.password, setLoading).then((res) => {
+        const userLogged = res.data as User
+        setAccessToken(`Bearer ${userLogged.accessToken}`)
+        setRefreshToken(userLogged.refreshToken ?? '')
+        message.success(define('login_success'))
         navigate('/')
       })
     } catch (error: any) {
-      message.error(`${error}`)
+      message.error(`${error.message}`)
     } finally {
       setLoading(false)
     }

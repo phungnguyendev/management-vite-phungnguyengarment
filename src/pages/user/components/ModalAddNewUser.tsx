@@ -122,7 +122,7 @@ const ModalAddNewUser: React.FC<Props> = ({ onAddNew, ...props }) => {
               dataIndex='birthday'
               inputType='datepicker'
               placeholder='Ví dụ: 01/01/1990'
-              // initialValue={DayJS(Date.now())}
+              // defaultValue={DayJS(Date.now())}
             />
           </SkyModalRowItem>
         </SkyModalRow>

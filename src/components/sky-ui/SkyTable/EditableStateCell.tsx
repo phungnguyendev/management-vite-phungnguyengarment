@@ -27,7 +27,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   dataIndex?: string
   value?: any
   setLoading?: (enable: boolean) => void
-  initialValue?: any
+  defaultValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectProps?: SelectProps
   colorPickerProps?: ColorPickerProps
@@ -63,7 +63,7 @@ function EditableStateCell({
   textAreaProps,
   selectProps,
   inputProps,
-  initialValue,
+  defaultValue,
   onValueChange,
   required,
   inputType,
@@ -82,7 +82,7 @@ function EditableStateCell({
             {...colorPickerProps}
             onChange={(val, hex) => onValueChange?.(val, hex)}
             defaultFormat='hex'
-            defaultValue={initialValue ?? colorPickerProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? colorPickerProps?.defaultValue ?? ''}
             value={value ?? colorPickerProps?.value ?? ''}
             showText
             disabled={disabled}
@@ -96,8 +96,8 @@ function EditableStateCell({
             required={required}
             title={title}
             name={dataIndex}
-            // defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? undefined}
-            checked={value ?? checkboxProps?.value ?? initialValue ?? checkboxProps?.defaultChecked ?? undefined}
+            // defaultChecked={defaultValue ?? checkboxProps?.defaultChecked ?? undefined}
+            checked={value ?? checkboxProps?.value ?? defaultValue ?? checkboxProps?.defaultChecked ?? undefined}
             disabled={disabled}
             onChange={(val) => onValueChange?.(val.target.checked)}
             className={cn('w-full', restProps.className)}
@@ -116,7 +116,7 @@ function EditableStateCell({
             disabled={disabled}
             readOnly={readonly}
             onChange={(val) => onValueChange?.(val)}
-            defaultValue={initialValue ?? inputNumberProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? inputNumberProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -132,7 +132,7 @@ function EditableStateCell({
             readOnly={readonly}
             required={required}
             onChange={(val) => onValueChange?.(val.target.value)}
-            defaultValue={initialValue ?? textAreaProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? textAreaProps?.defaultValue ?? ''}
             className={cn('w-full', restProps.className)}
           />
         )
@@ -142,8 +142,8 @@ function EditableStateCell({
             {...selectProps}
             title={title}
             placeholder={placeholder}
-            defaultValue={initialValue ?? selectProps?.defaultValue}
-            // value={value ?? selectProps?.value ?? ''}
+            defaultValue={defaultValue ?? selectProps?.defaultValue}
+            value={value ?? selectProps?.value}
             onChange={(val, option) => onValueChange?.(val, option)}
             disabled={disabled}
             virtual={false}
@@ -158,7 +158,7 @@ function EditableStateCell({
             placeholder={placeholder}
             mode='multiple'
             virtual={false}
-            defaultValue={initialValue ?? selectProps?.defaultValue}
+            defaultValue={defaultValue ?? selectProps?.defaultValue}
             // value={value ?? selectProps?.value ?? ''}
             disabled={disabled}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
@@ -171,7 +171,7 @@ function EditableStateCell({
             {...selectProps}
             title={title}
             placeholder={placeholder}
-            defaultValue={initialValue ?? selectProps?.defaultValue}
+            defaultValue={defaultValue ?? selectProps?.defaultValue}
             value={value ?? selectProps?.value}
             onChange={(val, option) => onValueChange?.(val, option)}
             disabled={disabled}
@@ -205,7 +205,7 @@ function EditableStateCell({
             onChange={(val) => val && onValueChange?.(val)}
             disabled={disabled}
             value={value}
-            defaultValue={initialValue}
+            defaultValue={defaultValue}
             format={datePickerProps?.format ?? 'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
           />
@@ -219,7 +219,7 @@ function EditableStateCell({
             name={dataIndex}
             type={visible ? 'text' : 'password'}
             onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? inputProps?.defaultValue ?? ''}
             value={value ?? inputProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}
@@ -246,7 +246,7 @@ function EditableStateCell({
             autoComplete='give-text'
             allowClear={allowClear}
             onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? inputProps?.defaultValue ?? ''}
             value={value ?? inputProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}
@@ -264,7 +264,7 @@ function EditableStateCell({
             autoComplete='give-text'
             allowClear={allowClear}
             onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
+            defaultValue={defaultValue ?? inputProps?.defaultValue ?? ''}
             value={value ?? inputProps?.value ?? ''}
             disabled={disabled}
             readOnly={readonly}

@@ -112,7 +112,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
             title='Thực cắt'
             inputType='number'
             required={true}
-            initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
+            defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
             value={newRecord?.quantityRealCut}
             onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityRealCut: numberValidatorChange(val) } })}
           >
@@ -135,7 +135,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
             title='Ngày giờ cắt'
             inputType='datepicker'
             required={true}
-            initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
+            defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
             onValueChange={(val: Dayjs) => setNewRecord((prev) =>  { return { ...prev, timeCut: dateValidatorChange(val) } })}
           >
             <SkyTableTypography status={record.status}>
@@ -192,7 +192,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                 inputType='datepicker'
                 required={true}
                 disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
-                initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
+                defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
                 onValueChange={(val: Dayjs) =>
                   setNewRecord({
                     ...newRecord,
@@ -237,7 +237,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                   </SkyTableTypography>
                 }
                 disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
-                initialValue={total}
+                defaultValue={total}
                 inputType='number'
               >
                 <SkyTableTypography
@@ -262,7 +262,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                 title='Option'
                 inputType='checkbox'
                 required={true}
-                initialValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
+                defaultValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
                 value={newRecord.syncStatus}
                 onValueChange={(val: boolean) =>
                   setNewRecord({
@@ -297,7 +297,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                 title='SL Giao'
                 inputType='number'
                 required={true}
-                initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
+                defaultValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
                 value={newRecord && (newRecord?.quantityDeliveredBTP ?? 0)}
                 onValueChange={(val) => setNewRecord((prev) =>  { return { ...prev, quantityDeliveredBTP: val })}
               >
@@ -356,7 +356,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Thực cắt'
                     inputType='number'
                     required={true}
-                    initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
+                    defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
                     value={newRecord?.quantityArrived1Th}
                     onValueChange={(val) =>
                       setNewRecord((prev) =>  { return { ...prev, quantityArrived1Th: numberValidatorChange(val) })
@@ -380,7 +380,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Ngày về'
                     inputType='datepicker'
                     required={true}
-                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
+                    defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
                     onValueChange={(val: Dayjs) =>
                       setNewRecord({
                         ...newRecord,
@@ -412,7 +412,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       title='Thực cắt'
                       inputType='number'
                       required={true}
-                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
+                      defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
                       value={newRecord?.quantityArrived2Th}
                       onValueChange={(val) =>
                         setNewRecord((prev) =>  { return { ...prev, quantityArrived2Th: numberValidatorChange(val) })
@@ -437,7 +437,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Ngày về'
                     inputType='datepicker'
                     required={true}
-                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
+                    defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
                     onValueChange={(val: Dayjs) =>
                       setNewRecord({
                         ...newRecord,
@@ -476,7 +476,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       title='Thực cắt'
                       inputType='number'
                       required={true}
-                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
+                      defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
                       value={newRecord?.quantityArrived3Th}
                       onValueChange={(val) =>
                         setNewRecord((prev) =>  { return { ...prev, quantityArrived3Th: numberValidatorChange(val) })
@@ -501,7 +501,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Ngày về'
                     inputType='datepicker'
                     required={true}
-                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
+                    defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
                     onValueChange={(val: Dayjs) =>
                       setNewRecord({
                         ...newRecord,
@@ -533,7 +533,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       title='Thực cắt'
                       inputType='number'
                       required={true}
-                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
+                      defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
                       value={newRecord?.quantityArrived4Th}
                       onValueChange={(val) =>
                         setNewRecord((prev) =>  { return { ...prev, quantityArrived4Th: numberValidatorChange(val) })
@@ -558,7 +558,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Ngày về'
                     inputType='datepicker'
                     required={true}
-                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
+                    defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
                     onValueChange={(val: Dayjs) =>
                       setNewRecord({
                         ...newRecord,
@@ -597,7 +597,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                       title='Thực cắt'
                       inputType='number'
                       required={true}
-                      initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
+                      defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
                       value={newRecord?.quantityArrived5Th}
                       onValueChange={(val) =>
                         setNewRecord((prev) =>  { return { ...prev, quantityArrived5Th: numberValidatorChange(val) })
@@ -622,7 +622,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
                     title='Ngày về'
                     inputType='datepicker'
                     required={true}
-                    initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
+                    defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
                     onValueChange={(val: Dayjs) =>
                       setNewRecord({
                         ...newRecord,

@@ -41,7 +41,7 @@ const GroupPage: React.FC<Props> = () => {
             title='Group name'
             inputType='text'
             required={true}
-            initialValue={record.name}
+            defaultValue={record.name}
             value={newRecord.name}
             onValueChange={(val: string) =>
               setNewRecord((prev) => {

@@ -3,8 +3,8 @@ import { User, UserRoleType } from '~/typing'
 import { setUser, setUserRole } from '../actions-creator'
 
 interface UserState {
-  user?: User
-  role?: UserRoleType[]
+  user?: User | null
+  role?: UserRoleType[] | null
 }
 
 const initialState: UserState = {

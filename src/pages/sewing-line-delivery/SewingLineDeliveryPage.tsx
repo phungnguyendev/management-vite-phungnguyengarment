@@ -199,7 +199,7 @@ const SewingLineDeliveryPage = () => {
           title='SL Vào chuyền'
           inputType='number'
           required
-          initialValue={item.quantityOriginal && numberValidatorDisplay(item.quantityOriginal)}
+          defaultValue={item.quantityOriginal && numberValidatorDisplay(item.quantityOriginal)}
           value={
             newRecord && numberValidator(newRecord.find((i) => i.sewingLineID === item.sewingLineID)?.quantityOriginal)
           }
@@ -225,7 +225,7 @@ const SewingLineDeliveryPage = () => {
           title='May được'
           inputType='number'
           required
-          initialValue={item.quantitySewed && numberValidatorDisplay(item.quantitySewed)}
+          defaultValue={item.quantitySewed && numberValidatorDisplay(item.quantitySewed)}
           value={
             newRecord && numberValidator(newRecord.find((i) => i.sewingLineID === item.sewingLine?.id)?.quantitySewed)
           }
@@ -260,7 +260,7 @@ const SewingLineDeliveryPage = () => {
           title='Ngày dự kiến hoàn thành'
           inputType='datepicker'
           required
-          initialValue={item.expiredDate && dayjs(item.expiredDate)}
+          defaultValue={item.expiredDate && dayjs(item.expiredDate)}
           datePickerProps={{
             format: 'DD/MM/YYYY'
           }}

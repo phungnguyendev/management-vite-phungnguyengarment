@@ -2,7 +2,7 @@ import { CaretDownOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { App as AntApp, Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
 import { Bell, Menu } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
@@ -23,56 +23,41 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const { message } = AntApp.useApp()
-  const [loadingLocal, setLoadingLocal] = useState<boolean>(false)
   const [openProfile, setOpenProfile] = useState<boolean>(false)
-  const [, setAccessTokenStored] = useLocalStorage('accessToken', '')
-  const [refreshTokenStored, setRefreshTokenStored] = useLocalStorage('refreshToken', '')
+  const [refreshTokenStored] = useLocalStorage('refreshToken', '')
   const { isHidden, offsetY } = useScroll()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const authService = useAuthService(AuthAPI)
   const userState = useSelector((state: RootState) => state.user)
 
-  useEffect(() => {
-    dispatch(setLoading(loadingLocal))
-  }, [loadingLocal])
-
   const items: MenuProps['items'] = [
     {
       label: <a onClick={() => setOpenProfile(true)}>View your profile</a>,
       key: '0'
     },
-    // {
-    //   label: <a>Change password</a>,
-    //   key: '1'
-    // },
     {
       type: 'divider'
     },
     {
       label: 'Log out',
       key: '3',
-      onClick: async () => {
-        try {
-          if (refreshTokenStored) {
-            await authService
-              .logout(refreshTokenStored, setLoadingLocal)
-              .then(() => {
-                setAccessTokenStored(null)
-                setRefreshTokenStored(null)
-                navigate('/login')
-              })
-              .catch((error: any) => {
-                message.error(`${error.message}`)
-              })
-          }
-        } catch (error: any) {
-          message.error(`${error.message}`)
-        }
-        // navigate('/login')
-      }
+      onClick: () => handleLogout()
     }
   ]
+
+  const handleLogout = async () => {
+    try {
+      if (!refreshTokenStored || refreshTokenStored.length <= 0) throw new Error(`Refresh token unavailable!`)
+      await authService.logout(refreshTokenStored, (loading) => dispatch(setLoading(loading)))
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('userTemp')
+      navigate('/login')
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    }
+  }
 
   return (
     <AntHeader>

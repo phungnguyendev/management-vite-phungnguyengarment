@@ -97,7 +97,7 @@ const FinishPage = () => {
             title='SL ủi được'
             inputType='number'
             required={true}
-            initialValue={record.completion && numberValidatorInit(record.completion.quantityIroned)}
+            defaultValue={record.completion && numberValidatorInit(record.completion.quantityIroned)}
             value={newRecord?.quantityIroned}
             onValueChange={(val: number) =>
               setNewRecord((prev) => {
@@ -122,7 +122,7 @@ const FinishPage = () => {
             title='Còn lại'
             isEditing={table.isEditing(record.key)}
             editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
-            initialValue={amount}
+            defaultValue={amount}
             inputType='number'
           >
             <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
@@ -139,7 +139,7 @@ const FinishPage = () => {
             title='SL kiểm đạt'
             inputType='number'
             required={true}
-            initialValue={record.completion && numberValidatorInit(record.completion.quantityCheckPassed)}
+            defaultValue={record.completion && numberValidatorInit(record.completion.quantityCheckPassed)}
             value={newRecord?.quantityCheckPassed}
             onValueChange={(val: number) =>
               setNewRecord((prev) => {
@@ -163,7 +163,7 @@ const FinishPage = () => {
             title='Còn lại'
             isEditing={table.isEditing(record.key)}
             editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
-            initialValue={amount}
+            defaultValue={amount}
             inputType='number'
           >
             <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
@@ -180,7 +180,7 @@ const FinishPage = () => {
             title='SL kiểm đạt'
             inputType='number'
             required={true}
-            initialValue={record.completion && numberValidatorInit(record.completion.quantityPackaged)}
+            defaultValue={record.completion && numberValidatorInit(record.completion.quantityPackaged)}
             value={newRecord?.quantityPackaged}
             onValueChange={(val: number) =>
               setNewRecord((prev) => {
@@ -204,7 +204,7 @@ const FinishPage = () => {
             title='Còn lại'
             isEditing={table.isEditing(record.key)}
             editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
-            initialValue={amount}
+            defaultValue={amount}
             inputType='number'
           >
             <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
@@ -220,7 +220,7 @@ const FinishPage = () => {
           title='Ngày xuất hàng'
           inputType='datepicker'
           required={true}
-          initialValue={record.completion && dateValidatorInit(record.completion.exportedDate)}
+          defaultValue={record.completion && dateValidatorInit(record.completion.exportedDate)}
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -242,7 +242,7 @@ const FinishPage = () => {
           title='Pass FI'
           inputType='datepicker'
           required={true}
-          initialValue={record.completion && dateValidatorInit(record.completion.passFIDate)}
+          defaultValue={record.completion && dateValidatorInit(record.completion.passFIDate)}
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,

@@ -67,7 +67,7 @@ const SampleSewingPage = () => {
           title='NPL may mẫu'
           inputType='datepicker'
           required={true}
-          initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionNPL)}
+          defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionNPL)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateSubmissionNPL: dateFormatter(val, 'iso8601') }
@@ -88,7 +88,7 @@ const SampleSewingPage = () => {
           title='Ngày duyệt mẫu PP'
           inputType='datepicker'
           required={true}
-          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
+          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateApprovalPP: dateValidatorChange(val) }
@@ -109,7 +109,7 @@ const SampleSewingPage = () => {
           title='Ngày duyệt SO'
           inputType='datepicker'
           required={true}
-          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
+          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, dateApprovalSO: dateValidatorChange(val) }
@@ -180,7 +180,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 1'
           inputType='datepicker'
           required={true}
-          // initialValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFirstTime)}
+          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFirstTime)}
           onValueChange={(val: Dayjs) =>
             setNewRecord({
               ...newRecord,
@@ -204,7 +204,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 2'
           inputType='datepicker'
           required={true}
-          // initialValue={
+          // defaultValue={
           //   record.sampleSewing
           //     ? dateValidatorInit(record.sampleSewing.dateSubmissionSecondTime)
           //     : dateValidatorDisplay()
@@ -232,7 +232,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 3'
           inputType='datepicker'
           required={true}
-          // initialValue={
+          // defaultValue={
           //   record.sampleSewing
           //     ? dateValidatorInit(record.sampleSewing.dateSubmissionThirdTime)
           //     : dateValidatorDisplay()
@@ -260,7 +260,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 4'
           inputType='datepicker'
           required={true}
-          // initialValue={
+          // defaultValue={
           //   record.sampleSewing
           //     ? dateValidatorInit(record.sampleSewing.dateSubmissionForthTime)
           //     : dateValidatorDisplay()
@@ -288,7 +288,7 @@ const SampleSewingPage = () => {
           title='Ngày gửi mẫu lần 5'
           inputType='datepicker'
           required={true}
-          // initialValue={
+          // defaultValue={
           //   record.sampleSewing
           //     ? dateValidatorInit(record.sampleSewing.dateSubmissionFifthTime)
           //     : dateValidatorDisplay()

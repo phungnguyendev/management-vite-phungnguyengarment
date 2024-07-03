@@ -103,7 +103,7 @@ const GarmentAccessoryPage = () => {
             inputType='number'
             required={true}
             disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
-            initialValue={record.garmentAccessory && numberValidatorInit(record.garmentAccessory.amountCutting)}
+            defaultValue={record.garmentAccessory && numberValidatorInit(record.garmentAccessory.amountCutting)}
             value={newRecord.amountCutting}
             onValueChange={(val: number) =>
               setNewRecord({
@@ -139,7 +139,7 @@ const GarmentAccessoryPage = () => {
               </SkyTableTypography>
             }
             disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
-            initialValue={amount}
+            defaultValue={amount}
             inputType='number'
           >
             <SkyTableTypography
@@ -160,7 +160,7 @@ const GarmentAccessoryPage = () => {
             inputType='datepicker'
             required={true}
             disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
-            initialValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
+            defaultValue={record.garmentAccessory && dateValidatorInit(record.garmentAccessory.passingDeliveryDate)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
@@ -186,7 +186,7 @@ const GarmentAccessoryPage = () => {
             title='Đồng bộ PL'
             inputType='checkbox'
             required={true}
-            initialValue={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined}
+            defaultValue={(record.garmentAccessory && record.garmentAccessory.syncStatus) ?? undefined}
             value={newRecord.syncStatus}
             onValueChange={(val: boolean) =>
               setNewRecord({

@@ -1,5 +1,4 @@
 import { AxiosError, AxiosResponse } from 'axios'
-import { ResponseDataType } from '~/api/client'
 
 export const logError = (error: AxiosError) => {
   if (error.response) {
@@ -26,8 +25,5 @@ export const throwErrorFormatter = (error: any) => {
 }
 
 export const responseFormatter = (res: AxiosResponse<any, any>) => {
-  if (res.data) {
-    return res.data as ResponseDataType
-  }
   return res.data
 }

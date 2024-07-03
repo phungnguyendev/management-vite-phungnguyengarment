@@ -13,6 +13,13 @@ export type DefineType =
   | 'failed'
   | 'success'
   | 'error_valid_form'
+  | 'login_session_expired'
+  | 'error_verify_email'
+  | 'error_verify_otp'
+  | 'password_not_match'
+  | 'password_reset_successful'
+  | 'login_success'
+  | 'login_failed'
 
 const define = (type: DefineType): string => {
   switch (type) {
@@ -42,6 +49,20 @@ const define = (type: DefineType): string => {
       return 'Success!'
     case 'error_valid_form':
       return 'Error valid form!'
+    case 'error_verify_email':
+      return 'Error verify your email!'
+    case 'error_verify_otp':
+      return 'Error verify otp!'
+    case 'password_not_match':
+      return 'Mật khẩu không trùng khớp!'
+    case 'password_reset_successful':
+      return 'Mật khẩu đã đổi thành công!'
+    case 'login_failed':
+      return 'Đăng nhập thất bại!'
+    case 'login_success':
+      return 'Đăng nhập thành công!'
+    case 'login_session_expired':
+      return 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!'
     default:
       return 'Data load failed!'
   }

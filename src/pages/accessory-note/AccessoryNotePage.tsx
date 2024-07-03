@@ -41,7 +41,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
             title='Sewing line title'
             inputType='text'
             required={true}
-            initialValue={record.title}
+            defaultValue={record.title}
             value={newRecord.title}
             onValueChange={(val: string) =>
               setNewRecord((prev) => {
@@ -66,7 +66,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
             title='Summary'
             inputType='text'
             required={true}
-            initialValue={record.summary}
+            defaultValue={record.summary}
             value={newRecord.summary}
             onValueChange={(val: string) =>
               setNewRecord((prev) => {

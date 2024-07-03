@@ -1,27 +1,26 @@
 import { ResponseDataType } from '~/api/client'
-import useLocalStorage from './useLocalStorage'
 
 export interface AuthService {
   login: (email: string, password: string) => Promise<ResponseDataType>
   userInfoFromAccessToken: (accessToken: string) => Promise<ResponseDataType>
   verifyEmailAndSendOTP: (sendToEmail: string) => Promise<ResponseDataType>
   verifyOTPCode: (email: string, otp: string) => Promise<ResponseDataType>
+  resetPasswordWithAccessKey: (
+    email: string,
+    data: { newPassword: string; accessKey: string }
+  ) => Promise<ResponseDataType>
   logout: (refreshToken: string) => Promise<ResponseDataType>
 }
 
 export default function useAuthService(authService: AuthService) {
-  const [, setAccessToken] = useLocalStorage('accessToken', '')
-  const [, setRefreshToken] = useLocalStorage('refreshToken', '')
-
   const login = async (email: string, password: string, setLoading?: (enable: boolean) => void) => {
     try {
       setLoading?.(true)
       const result = await authService.login(email, password)
-      setAccessToken(`Bearer ${result.data.accessToken}`)
-      setRefreshToken(result.data.refreshToken)
       return result
     } catch (err: any) {
-      throw err.data.message
+      console.log(err.data)
+      throw err.data
     } finally {
       setLoading?.(false)
     }
@@ -32,7 +31,7 @@ export default function useAuthService(authService: AuthService) {
       setLoading?.(true)
       return await authService.userInfoFromAccessToken(accessToken)
     } catch (err: any) {
-      throw `${err}`
+      throw err.data
     } finally {
       setLoading?.(false)
     }
@@ -43,7 +42,7 @@ export default function useAuthService(authService: AuthService) {
       setLoading?.(true)
       return await authService.verifyEmailAndSendOTP(emailToVerify)
     } catch (err: any) {
-      throw `${err}`
+      throw err.data
     } finally {
       setLoading?.(false)
     }
@@ -54,7 +53,26 @@ export default function useAuthService(authService: AuthService) {
       setLoading?.(true)
       return await authService.verifyOTPCode(emailToVerify, otp)
     } catch (err: any) {
-      throw `${err}`
+      console.log(err)
+      throw err.data
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const resetPasswordWithAccesskey = async (
+    email: string,
+    data: {
+      newPassword: string
+      accessKey: string
+    },
+    setLoading?: (enable: boolean) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      return await authService.resetPasswordWithAccessKey(email, data)
+    } catch (err: any) {
+      throw err.data
     } finally {
       setLoading?.(false)
     }
@@ -65,7 +83,7 @@ export default function useAuthService(authService: AuthService) {
       setLoading?.(true)
       return await authService.logout(refreshToken)
     } catch (err: any) {
-      throw `${err}`
+      throw err.data
     } finally {
       setLoading?.(false)
     }
@@ -76,6 +94,7 @@ export default function useAuthService(authService: AuthService) {
     logout,
     userInfoFromAccessToken,
     verifyEmailAndSendOTP,
-    verifyOTPCode
+    verifyOTPCode,
+    resetPasswordWithAccesskey
   }
 }

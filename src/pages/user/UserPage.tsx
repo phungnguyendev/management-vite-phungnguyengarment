@@ -49,7 +49,7 @@ const UserPage = () => {
           title='Email'
           inputType='text'
           required
-          initialValue={textValidatorInit(record.email)}
+          defaultValue={textValidatorInit(record.email)}
           value={newRecord.email}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -69,7 +69,7 @@ const UserPage = () => {
           title='Full name'
           inputType='text'
           required
-          initialValue={textValidatorInit(record.fullName)}
+          defaultValue={textValidatorInit(record.fullName)}
           value={newRecord.fullName}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -89,7 +89,7 @@ const UserPage = () => {
           title='Password'
           inputType='password'
           required
-          initialValue={textValidatorInit(record.password)}
+          defaultValue={textValidatorInit(record.password)}
           value={newRecord.password}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -109,7 +109,7 @@ const UserPage = () => {
           title='Phone'
           inputType='text'
           required
-          initialValue={textValidatorInit(record.phone)}
+          defaultValue={textValidatorInit(record.phone)}
           value={newRecord.phone}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -132,7 +132,7 @@ const UserPage = () => {
           inputType='textarea'
           required
           placeholder='Ví dụ: Quản lý sản phẩm, Quản lý xuất nhập khẩu,...'
-          initialValue={textValidatorInit(record.workDescription)}
+          defaultValue={textValidatorInit(record.workDescription)}
           value={newRecord.workDescription}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -152,7 +152,7 @@ const UserPage = () => {
           title='Birthday'
           inputType='datepicker'
           required
-          initialValue={dateValidatorInit(record.birthday)}
+          defaultValue={dateValidatorInit(record.birthday)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, birthday: dateFormatter(val.toDate(), 'iso8601') }

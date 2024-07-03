@@ -164,6 +164,7 @@ export default function useProductViewModel() {
    */
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
+      let updatedProduct: ProductTableDataType = record
       if (
         textComparator(newRecord.productCode, record.productCode) ||
         numberComparator(newRecord.quantityPO, record.quantityPO) ||
@@ -181,6 +182,11 @@ export default function useProductViewModel() {
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
+            const newProduct = meta.data as Product
+            updatedProduct = {
+              ...newProduct,
+              key: `${newProduct.id}`
+            }
           }
         )
       }
@@ -191,6 +197,11 @@ export default function useProductViewModel() {
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
+            const newProductColor = meta.data as ProductColor
+            updatedProduct = {
+              ...updatedProduct,
+              productColor: newProductColor
+            }
           }
         )
       }
@@ -201,6 +212,11 @@ export default function useProductViewModel() {
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
+            const newProductGroup = meta.data as ProductGroup
+            updatedProduct = {
+              ...updatedProduct,
+              productGroup: newProductGroup
+            }
           }
         )
       }
@@ -211,9 +227,18 @@ export default function useProductViewModel() {
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
+            const newPrintablePlace = meta.data as PrintablePlace
+            updatedProduct = {
+              ...updatedProduct,
+              printablePlace: newPrintablePlace
+            }
           }
         )
       }
+
+      console.log(updatedProduct)
+      // Update record with newRecord
+      table.handleUpdate(record.key, updatedProduct)
       message.success(define('updated_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -322,6 +347,7 @@ export default function useProductViewModel() {
       await productService.deleteItemSync(record.id!, table.setLoading, (meta) => {
         if (!meta.success) throw new Error(define('delete_failed'))
       })
+      table.handleDeleting(record.key)
       message.success(define('deleted_success'))
     } catch (error: any) {
       message.error(`${error.message}`)

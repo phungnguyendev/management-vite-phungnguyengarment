@@ -57,7 +57,7 @@ const ModalAddNewImportation: React.FC<Props> = ({ onAddNew, ...props }) => {
               inputType='datepicker'
               required
               placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
-              initialValue={DayJS(Date.now())}
+              defaultValue={DayJS(Date.now())}
             />
           </SkyModalRowItem>
         </SkyModalRow>

@@ -78,7 +78,7 @@ const SampleSewingPage = () => {
           title='Thực cắt'
           inputType='number'
           required
-          initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
+          defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
           value={newRecord?.quantityRealCut}
           onValueChange={(val) =>
             setNewRecord((prev) => {
@@ -100,7 +100,7 @@ const SampleSewingPage = () => {
           title='Ngày giờ cắt'
           inputType='datepicker'
           required
-          initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
+          defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
           onValueChange={(val: Dayjs) =>
             setNewRecord((prev) => {
               return { ...prev, timeCut: dateValidatorChange(val) }
@@ -134,7 +134,7 @@ const SampleSewingPage = () => {
             inputType='datepicker'
             required
             disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
-            initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
+            defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
             onValueChange={(val: Dayjs) =>
               setNewRecord({
                 ...newRecord,
@@ -174,7 +174,7 @@ const SampleSewingPage = () => {
               </SkyTableTypography>
             }
             disabled={(newRecord.syncStatus && table.isEditing(record.key)) ?? false}
-            initialValue={total}
+            defaultValue={total}
             inputType='number'
           >
             <SkyTableTypography
@@ -194,7 +194,7 @@ const SampleSewingPage = () => {
             title='Option'
             inputType='checkbox'
             required
-            initialValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
+            defaultValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
             value={newRecord.syncStatus}
             onValueChange={(val: boolean) =>
               setNewRecord({
@@ -221,7 +221,7 @@ const SampleSewingPage = () => {
             title='SL Giao BTP'
             inputType='number'
             required
-            initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
+            defaultValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
             value={newRecord && numberValidatorCalc(newRecord?.quantityDeliveredBTP)}
             onValueChange={(val) =>
               setNewRecord((prev) => {
@@ -261,7 +261,7 @@ const SampleSewingPage = () => {
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
+              defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
               value={newRecord?.quantityArrived1Th}
               onValueChange={(val) =>
                 setNewRecord((prev) => {
@@ -283,7 +283,7 @@ const SampleSewingPage = () => {
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
+              defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
               onValueChange={(val: Dayjs) =>
                 setNewRecord({
                   ...newRecord,
@@ -307,7 +307,7 @@ const SampleSewingPage = () => {
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
+              defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
               value={newRecord?.quantityArrived2Th}
               onValueChange={(val) =>
                 setNewRecord((prev) => {
@@ -329,7 +329,7 @@ const SampleSewingPage = () => {
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
+              defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
               onValueChange={(val: Dayjs) =>
                 setNewRecord({
                   ...newRecord,
@@ -353,7 +353,7 @@ const SampleSewingPage = () => {
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
+              defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
               value={newRecord?.quantityArrived3Th}
               onValueChange={(val) =>
                 setNewRecord((prev) => {
@@ -375,7 +375,7 @@ const SampleSewingPage = () => {
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
+              defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
               onValueChange={(val: Dayjs) =>
                 setNewRecord({
                   ...newRecord,
@@ -399,7 +399,7 @@ const SampleSewingPage = () => {
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
+              defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
               value={newRecord?.quantityArrived4Th}
               onValueChange={(val) =>
                 setNewRecord((prev) => {
@@ -421,7 +421,7 @@ const SampleSewingPage = () => {
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
+              defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
               onValueChange={(val: Dayjs) =>
                 setNewRecord({
                   ...newRecord,
@@ -445,7 +445,7 @@ const SampleSewingPage = () => {
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
+              defaultValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
               value={newRecord?.quantityArrived5Th}
               onValueChange={(val) =>
                 setNewRecord((prev) => {
@@ -467,7 +467,7 @@ const SampleSewingPage = () => {
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
+              defaultValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
               onValueChange={(val: Dayjs) =>
                 setNewRecord({
                   ...newRecord,

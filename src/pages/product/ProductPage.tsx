@@ -39,7 +39,7 @@ const ProductPage = () => {
           title='Mã hàng'
           inputType='text'
           required
-          initialValue={textValidatorInit(record.productCode)}
+          defaultValue={textValidatorInit(record.productCode)}
           value={viewModel.state.newRecord.productCode}
           onValueChange={(val: string) =>
             viewModel.state.setNewRecord((prev) => {
@@ -61,7 +61,7 @@ const ProductPage = () => {
           title='Số lượng PO'
           inputType='number'
           required
-          initialValue={numberValidatorInit(record.quantityPO)}
+          defaultValue={numberValidatorInit(record.quantityPO)}
           value={viewModel.state.newRecord.quantityPO}
           onValueChange={(val: number) =>
             viewModel.state.setNewRecord((prev) => {
@@ -161,7 +161,7 @@ const ProductPage = () => {
           title='NPL'
           inputType='datepicker'
           required
-          initialValue={dateValidatorInit(record.dateInputNPL)}
+          defaultValue={dateValidatorInit(record.dateInputNPL)}
           onValueChange={(val: Dayjs) =>
             viewModel.state.setNewRecord((prev) => {
               return { ...prev, dateInputNPL: dateValidatorChange(val) }
@@ -180,7 +180,7 @@ const ProductPage = () => {
           title='FCR'
           inputType='datepicker'
           required
-          initialValue={dateValidatorInit(record.dateOutputFCR)}
+          defaultValue={dateValidatorInit(record.dateOutputFCR)}
           onValueChange={(val: Dayjs) =>
             viewModel.state.setNewRecord((prev) => {
               return { ...prev, dateOutputFCR: dateValidatorChange(val) }

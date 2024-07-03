@@ -3,12 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
-import RoleAPI from '~/api/services/RoleAPI'
-import useAPIService from '~/hooks/useAPIService'
 import useAuthService from '~/hooks/useAuthService'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import { setUser, setUserRole } from '~/store/actions-creator'
-import { Role, User, UserRole } from '~/typing'
+import { User, UserRole, UserRoleType } from '~/typing'
 import Footer from './Footer'
 import Header from './Header'
 import SideNav from './sidenav/SideNav'
@@ -17,57 +15,46 @@ const { Sider, Content } = Layout
 
 const Main: React.FC = () => {
   const { message } = AntApp.useApp()
+  const [loading, setLoading] = useState(false)
   const [openDrawer, setOpenDrawer] = useState(false)
   const [accessToken] = useLocalStorage<string>('accessToken', '')
   const [refreshToken] = useLocalStorage<string>('refreshToken', '')
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const authService = useAuthService(AuthAPI)
-  const roleService = useAPIService(RoleAPI)
 
   useEffect(() => {
     initialize()
   }, [])
 
   const initialize = async () => {
-    // Gọi thông tin người dùng từ accessToken và lưu nó vào redux
+    setLoading(true)
+    // Kiểm tra accessToken và refreshToken có tồn tại hay không (Chỉ tổn tại khi người dùng đã đăng nhập)
     try {
-      if (accessToken) {
-        const result = await authService.userInfoFromAccessToken(accessToken)
-        const user = result.data.user as User
-        const userRoles = result.data.userRoles as UserRole[]
-        await roleService
-          .getItems({
-            filter: {
-              field: 'id',
-              items: userRoles.map((item) => {
-                return item.id!
-              }),
-              status: 'active'
-            }
+      if (
+        !accessToken ||
+        !refreshToken ||
+        (accessToken && accessToken.length <= 0) ||
+        (refreshToken && refreshToken.length <= 0)
+      )
+        throw new Error(`Token stored unavailable!`)
+      // Gọi thông tin người dùng từ accessToken và lưu nó vào redux (app state)
+      const result = await authService.userInfoFromAccessToken(accessToken, setLoading)
+      const data = result.data as { user: User; userRoles: UserRole[] }
+      dispatch(setUser(data.user))
+      dispatch(
+        setUserRole(
+          data.userRoles.map((item) => {
+            return item.role!.role as UserRoleType
           })
-          .then((result) => {
-            if (result) {
-              // console.log(result)
-              const roles = result.data as Role[]
-              dispatch(
-                setUserRole(
-                  roles.map((item) => {
-                    return item.role!
-                  })
-                )
-              )
-            }
-          })
-        dispatch(setUser(user))
-      } else {
-        navigate('/login')
-      }
+        )
+      )
     } catch (error: any) {
-      await authService.logout(refreshToken).then(() => {
-        navigate('/login')
-        message.error(`${error.message ?? 'Login session has expired, please log in again!'}`)
-      })
+      message.error(`${error.message}`)
+      navigate('/login')
+      await authService.logout(refreshToken)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -107,9 +94,7 @@ const Main: React.FC = () => {
       </Sider> */}
       <Layout>
         <Header onMenuClick={() => setOpenDrawer(!openDrawer)} />
-        <Content className='min-h-screen bg-background p-5'>
-          <Outlet />
-        </Content>
+        <Content className='min-h-screen bg-background p-5'>{!loading && <Outlet />}</Content>
         <Footer className=''>Ant Design ©2023 Created by Ant UED</Footer>
       </Layout>
     </Layout>

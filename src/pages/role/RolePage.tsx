@@ -44,7 +44,7 @@ const RolePage = () => {
           title='Role'
           inputType='text'
           required={true}
-          initialValue={textValidatorInit(record.role)}
+          defaultValue={textValidatorInit(record.role)}
           value={newRecord.role}
           onValueChange={(val: UserRoleType) =>
             setNewRecord((prev) => {
@@ -66,7 +66,7 @@ const RolePage = () => {
           title='Short name'
           inputType='text'
           required={true}
-          initialValue={textValidatorInit(record.shortName)}
+          defaultValue={textValidatorInit(record.shortName)}
           value={newRecord.shortName}
           onValueChange={(val: string) =>
             setNewRecord((prev) => {
@@ -86,7 +86,7 @@ const RolePage = () => {
           title='Description'
           inputType='textarea'
           required={true}
-          initialValue={textValidatorInit(record.desc)}
+          defaultValue={textValidatorInit(record.desc)}
           value={newRecord.desc}
           onValueChange={(val) =>
             setNewRecord((prev) => {

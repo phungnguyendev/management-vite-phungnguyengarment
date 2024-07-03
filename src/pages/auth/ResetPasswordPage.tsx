@@ -4,41 +4,39 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
-import UserAPI from '~/api/services/UserAPI'
 import useTitle from '~/components/hooks/useTitle'
 import AuthLayout from '~/components/layout/AuthLayout'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
-import useAPIService from '~/hooks/useAPIService'
+import define from '~/constants'
 import useAuthService from '~/hooks/useAuthService'
+import useLocalStorage from '~/hooks/useLocalStorage'
 import { setUser } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { User } from '~/typing'
 
 const ResetPasswordPage = () => {
-  useTitle('Reset Password')
-  // const [emailStored, setEmailStored] = useLocalStorage('email-stored', '')
-  // const [otpVerified, setOtpVerified] = useLocalStorage('otp-stored', '')
+  useTitle('Reset Password | Phung Nguyen')
+  const [userStored, setUserStored] = useLocalStorage('userTemp', {
+    email: '',
+    accessKey: ''
+  })
+  const [otp, setOtp] = useState<string>('')
   const { message } = AntApp.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState<boolean>(false)
   const [state, setState] = useState<'verify_email' | 'verify_otp' | 'reset_password'>('verify_email')
   const authService = useAuthService(AuthAPI)
-  const userService = useAPIService<User>(UserAPI)
-  // // const [password, setPassword] = useState<string>('')
-  // // const [passwordConfirm, setPasswordConfirm] = useState<string>('')
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const currentUser = useSelector((state: RootState) => state.user)
 
-  // useEffect(() => {
-  //   if (!emailStored && !otpVerified) navigate('/')
-  // }, [emailStored, otpVerified])
-
   const handleVerifyEmail = async (user: { email: string }) => {
     try {
       await authService.verifyEmailAndSendOTP(user.email, setLoading).then((result) => {
-        const data = result.data
-        dispatch(setUser(data.user))
+        if (!result.success) throw new Error(define('error_verify_email'))
+        const resultUser = result.data as User
+        console.log(resultUser)
+        setUserStored({ email: resultUser.email!, accessKey: '' })
         message.success(`The OTP code has been sent to your mailbox!`)
         setState('verify_otp')
       })
@@ -49,45 +47,52 @@ const ResetPasswordPage = () => {
     }
   }
 
+  const handleVerifyOTP = async (user: { otp: string[] }) => {
+    try {
+      await authService.verifyOTPCode(userStored.email, user.otp.join(''), setLoading).then((result) => {
+        console.log(result)
+        if (!result.success) throw new Error(define('error_verify_otp'))
+        const userResult = result.data as User
+        dispatch(setUser(userResult))
+        setUserStored({ email: userResult.email!, accessKey: userResult.accessKey! })
+        setState('reset_password')
+      })
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleResetPassword = async (user: { password: string; passwordConfirm: string }) => {
-    try {
-      setLoading(true)
-      if (currentUser.user) {
-        await userService.updateItemByPk(currentUser.user.id!, { password: user.password }).then((result) => {
-          if (!result?.success) throw new Error(`${result?.message}`)
-          dispatch(setUser(result.data as User))
-        })
-      }
-    } catch (error: any) {
-      message.error(`${error.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleVerifyOTP = async (user: { otp: string }) => {
-    try {
-      if (currentUser.user) {
-        await authService.verifyOTPCode(currentUser.user.email!, user.otp).then((result) => {
-          if (!result?.success) throw new Error(`${result?.message}`)
-          dispatch(setUser(result.data as User))
-        })
-      }
-    } catch (error: any) {
-      message.error(`${error.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const onValueChange = (values: string[]) => {
-    for (let i = values.length - 1; i >= 0; i--) {
-      if (values[i] === '') {
-        values.splice(i, 1)
+    if (user.password.trim() !== user.passwordConfirm.trim()) {
+      message.error(define('password_not_match'))
+    } else {
+      try {
+        if (currentUser.user) {
+          await authService
+            .resetPasswordWithAccesskey(
+              userStored.email,
+              { newPassword: user.password, accessKey: userStored.accessKey },
+              setLoading
+            )
+            .then((result) => {
+              console.log(result)
+              if (!result.success) throw new Error(`${result.message}`)
+              dispatch(setUser(null))
+              message.success(define('password_reset_successful'))
+              navigate('/login')
+            })
+            .finally(() => {
+              localStorage.removeItem('userTemp')
+            })
+        }
+      } catch (error: any) {
+        message.error(`${error.message}`)
+      } finally {
+        setLoading(false)
       }
     }
-    // setOtpValues(value)
-    console.log(values)
   }
 
   return (
@@ -119,7 +124,6 @@ const ResetPasswordPage = () => {
                 dataIndex='password'
                 required
                 inputType='password'
-                subtitle='Please enter your password!'
               />
             )}
 
@@ -131,7 +135,6 @@ const ResetPasswordPage = () => {
                 dataIndex='passwordConfirm'
                 required
                 inputType='password'
-                subtitle='Please confirm your password!'
               />
             )}
 
@@ -143,35 +146,48 @@ const ResetPasswordPage = () => {
                 dataIndex='email'
                 required
                 inputType='email'
-                subtitle='Please confirm your email!'
               />
             )}
 
             {state === 'verify_otp' && (
-              <InputOTP
-                inputType='numeric'
-                // Regex below is for all input except numeric
-                onChange={onValueChange}
-                // value={otpValues}
-                inputClassName='rounded-lg'
-              />
+              <Form.Item name='otp'>
+                <InputOTP
+                  inputType='numeric'
+                  onChange={(values) => setOtp(values.join(''))}
+                  inputClassName='rounded-lg'
+                />
+              </Form.Item>
             )}
 
             <Form.Item className='w-full'>
-              <Button htmlType='submit' className='w-full' type='primary' loading={loading}>
+              <Button
+                htmlType='submit'
+                className='w-full'
+                type='primary'
+                loading={loading}
+                disabled={state === 'verify_otp' && otp.length !== 6}
+              >
                 {state === 'verify_email' || state === 'verify_otp' ? 'Submit' : 'Change password'}
               </Button>
             </Form.Item>
 
-            <Flex className='w-full' align='center' justify='center'>
+            <Flex className='w-full' align='center' justify='space-evenly'>
               <Button
                 onClick={() => {
                   navigate('/login')
                 }}
                 type='link'
               >
-                Back to login ?
+                <Flex gap={4}>
+                  {/* <ChevronLeft /> */}
+                  Back to Login?
+                </Flex>
               </Button>
+              {/* {emailStored.length > 0 && state === 'verify_otp' && (
+                <Button onClick={handleResendOTPCode} type='link' disabled={!isActiveResendOTP}>
+                  Resent OTP code?
+                </Button>
+              )} */}
             </Flex>
           </Flex>
         </Form>
