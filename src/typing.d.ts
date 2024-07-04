@@ -9,6 +9,8 @@ export type UserRoleType =
   | 'sewing_line_manager'
   | 'staff'
 
+export type StatusType = 'not_activated' | 'activated' | 'fixing' | 'completed' | 'deleted'
+
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
 export type SortDirection = 'asc' | 'desc'

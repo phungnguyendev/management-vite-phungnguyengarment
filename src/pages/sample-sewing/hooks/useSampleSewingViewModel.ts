@@ -1,13 +1,15 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
+import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
+import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import SampleSewingAPI from '~/api/services/SampleSewingAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductColor, SampleSewing } from '~/typing'
+import { PrintablePlace, Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
 import { dateComparator } from '~/utils/helpers'
 import { SampleSewingAddNewProps, SampleSewingTableDataType } from '../type'
 
@@ -18,83 +20,115 @@ export default function useSampleSewingViewModel() {
   // Services
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
+  const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const sampleSewingService = useAPIService<SampleSewing>(SampleSewingAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
+  const [paginator, setPaginator] = useState<Paginator>({ page: 1, pageSize: -1 })
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<SampleSewingAddNewProps>({})
 
   // List
-  const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
+  const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
+  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [sampleSewings, setSampleSewings] = useState<SampleSewing[]>([])
 
-  // New
-  const [sampleSewingNew, setSampleSewingNew] = useState<SampleSewing | undefined>(undefined)
+  useEffect(() => {
+    initialize()
+  }, [])
 
   useEffect(() => {
-    loadData()
-  }, [sampleSewingNew, showDeleted])
+    loadDataEditingChange()
+  }, [table.editingKey])
 
-  useEffect(() => {
-    mappedData()
-  }, [products, productColors, sampleSewings])
-
-  const mappedData = useCallback(() => {
-    table.setDataSource(() => {
-      const dataSource = products.map((self) => {
-        return {
-          ...self,
-          key: `${self.id}`,
-          productColor: productColors.find((item) => item.productID === self.id),
-          sampleSewing: sampleSewings.find((item) => item.productID === self.id)
-        } as SampleSewingTableDataType
-      })
-      return dataSource
+  /**
+   * Function convert data list of model to dataSource of table and other attributes
+   */
+  const dataMapped = (
+    products: Product[],
+    productColors: ProductColor[],
+    productGroups: ProductGroup[],
+    printablePlaces: PrintablePlace[],
+    sampleSewings: SampleSewing[]
+  ) => {
+    const newDataSource = products.map((product) => {
+      return {
+        ...product,
+        key: `${product.id}`,
+        productColor: productColors.find((item) => item.productID === product.id),
+        productGroup: productGroups.find((item) => item.productID === product.id),
+        printablePlace: printablePlaces.find((item) => item.productID === product.id),
+        sampleSewing: sampleSewings.find((item) => item.productID === product.id)
+      } as SampleSewingTableDataType
     })
-  }, [products, productColors, sampleSewings])
+    table.setDataSource(newDataSource)
+  }
 
-  const loadData = async () => {
+  /**
+   * Initialize function
+   */
+  const initialize = useCallback(async () => {
+    try {
+      const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      const newProducts = productsResult.data as Product[]
+
+      const productColorsResult = await productColorService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductColors = productColorsResult.data as ProductColor[]
+      setProductColors(newProductColors)
+
+      const productGroupsResult = await productGroupService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductGroups = productGroupsResult.data as ProductGroup[]
+      setProductGroups(newProductGroups)
+
+      const printablePlacesResult = await printablePlaceService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
+      setPrintablePlaces(newPrintablePlaces)
+
+      const sampleSewingResult = await sampleSewingService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newSampleSewing = sampleSewingResult.data as SampleSewing[]
+      setSampleSewings(newSampleSewing)
+
+      dataMapped(newProducts, newProductColors, newProductGroups, newPrintablePlaces, newSampleSewing)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }, [])
+
+  /**
+   * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
+   */
+  const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
     try {
       await productService.getItemsSync(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'title', term: searchText }
+          paginator: query.paginator,
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          setProducts(meta.data as Product[])
-        }
-      )
-      await productColorService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          setProductColors(meta.data as ProductColor[])
-        }
-      )
-      await sampleSewingService.getItemsSync(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          setSampleSewings(meta.data as SampleSewing[])
+          if (!meta.success) throw new Error(define('dataLoad_failed'))
+          const newProducts = meta.data as Product[]
+          dataMapped(newProducts, productColors, productGroups, printablePlaces, sampleSewings)
         }
       )
     } catch (error: any) {
@@ -104,200 +138,139 @@ export default function useSampleSewingViewModel() {
     }
   }
 
+  /**
+   * Function will be load data whenever edit button clicked
+   */
+  const loadDataEditingChange = async () => {}
+
+  /**
+   * Function update record
+   */
   const handleUpdate = async (record: SampleSewingTableDataType) => {
     try {
-      console.log({ record, newRecord })
+      let updatedRecord: SampleSewingTableDataType = record
       if (
         record.sampleSewing &&
-        (dateComparator(newRecord.dateSubmissionNPL, record.sampleSewing.dateSubmissionNPL) ||
+        (!record.sampleSewing.dateSubmissionNPL ||
+          dateComparator(newRecord.dateSubmissionNPL, record.sampleSewing.dateSubmissionNPL) ||
+          !record.sampleSewing.dateApprovalSO ||
           dateComparator(newRecord.dateApprovalSO, record.sampleSewing.dateApprovalSO) ||
+          !record.sampleSewing.dateApprovalPP ||
           dateComparator(newRecord.dateApprovalPP, record.sampleSewing.dateApprovalPP) ||
+          !record.sampleSewing.dateSubmissionFirstTime ||
           dateComparator(newRecord.dateSubmissionFirstTime, record.sampleSewing.dateSubmissionFirstTime) ||
+          !record.sampleSewing.dateSubmissionSecondTime ||
           dateComparator(newRecord.dateSubmissionSecondTime, record.sampleSewing.dateSubmissionSecondTime) ||
+          !record.sampleSewing.dateSubmissionThirdTime ||
           dateComparator(newRecord.dateSubmissionThirdTime, record.sampleSewing.dateSubmissionThirdTime) ||
+          !record.sampleSewing.dateSubmissionForthTime ||
           dateComparator(newRecord.dateSubmissionForthTime, record.sampleSewing.dateSubmissionForthTime) ||
+          !record.sampleSewing.dateSubmissionFifthTime ||
           dateComparator(newRecord.dateSubmissionFifthTime, record.sampleSewing.dateSubmissionFifthTime))
       ) {
-        console.log('Update..')
-        // await sampleSewingService.updateItemBySync(
-        //   { field: 'productID', id: record.id! },
-        //   {
-        //     ...newRecord
-        //   },
-        //   table.setLoading,
-        //   (meta) => {
-        //     if (!meta?.success) throw new Error(define('update_failed'))
-        //     const itemUpdated = meta.data as SampleSewing
-        //     console.log(itemUpdated)
-        //   }
-        // )
+        console.log('Update')
+        await sampleSewingService.updateItemBySync(
+          { field: 'productID', id: record.id! },
+          {
+            ...newRecord
+          },
+          table.setLoading,
+          (meta) => {
+            if (!meta?.success) throw new Error(define('update_failed'))
+            const updatedItem = meta.data as SampleSewing
+            console.log(updatedItem)
+            updatedRecord = { ...updatedRecord, sampleSewing: updatedItem }
+          }
+        )
       } else {
+        console.log('Create')
         await sampleSewingService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta.success) throw new Error(`${meta.message}`)
+          if (!meta.success) throw new Error(define('create_failed'))
           const newItem = meta.data as SampleSewing
           console.log(newItem)
-          // table.handleUpdate(record.key, { ...record, ...newItem, key: record.key } as SampleSewingTableDataType)
+          updatedRecord = { ...updatedRecord, sampleSewing: newItem }
         })
       }
+      console.log(updatedRecord)
+      table.handleUpdate(record.key, updatedRecord)
       message.success(define('updated_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
+      setNewRecord({})
       table.handleCancelEditing()
       table.setLoading(false)
     }
   }
 
-  const handleAddNew = async (formAddNew: SampleSewingAddNewProps) => {
-    // try {
-    // console.log(formAddNew)
-    //   table.setLoading(true)
-    //   await sampleSewingService.createNewItem(
-    //     {
-    //       productID: formAddNew.productID,
-    //       dateSubmissionNPL: formAddNew.dateSubmissionNPL,
-    //       dateApprovalPP: formAddNew.dateApprovalPP,
-    //       dateApprovalSO: formAddNew.dateApprovalSO,
-    //       dateSubmissionFirstTime: formAddNew.dateSubmissionFirstTime,
-    //       dateSubmissionSecondTime: formAddNew.dateSubmissionSecondTime,
-    //       dateSubmissionThirdTime: formAddNew.dateSubmissionThirdTime,
-    //       dateSubmissionForthTime: formAddNew.dateSubmissionForthTime,
-    //       dateSubmissionFifthTime: formAddNew.dateSubmissionFifthTime
-    //     },
-    //     table.setLoading,
-    //     async (meta, msg) => {
-    //       if (!meta?.success) throw new Error(`${msg}`)
-    //       setSampleSewingNew(meta.data as SampleSewing)
-    //       message.success(msg)
-    //     }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   setOpenModal(false)
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function add new record
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleAddNew = async (_formAddNew: SampleSewingAddNewProps) => {}
+
+  /**
+   * Function delete (update status => 'deleted') record
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDelete = async (_record: SampleSewingTableDataType) => {}
+
+  /**
+   * Function delete record forever
+   */
+  const handleDeleteForever = async (record: SampleSewingTableDataType) => {
+    try {
+      await sampleSewingService.deleteItemBySync({ field: 'productID', id: record.id! }, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('delete_failed'))
+      })
+      table.handleUpdate(record.key, { ...record, sampleSewing: {} })
+      message.success(define('deleted_success'))
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
   }
 
-  const handleDelete = async (record: SampleSewingTableDataType) => {
-    // try {
-    //   table.setLoading(true)
-    //   if (record.sampleSewing) {
-    //     await sampleSewingService.deleteItemByPk(record.sampleSewing.id!, table.setLoading, (meta, msg) => {
-    //       if (!meta?.success) throw new Error(msg)
-    //       message.success(msg)
-    //       onDataSuccess?.(meta)
-    //     })
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   loadData()
-    //   table.setLoading(false)
-    //   setOpenModal(false)
-    // }
+  /**
+   * Function restore record
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleRestore = async (_record: SampleSewingTableDataType) => {}
+
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageChange = (page: number, pageSize: number) => {
+    setPaginator({ page, pageSize })
+    loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
   }
 
-  const handleDeleteForever = async (id?: number) => {
-    // console.log(id)
-    // try {
-    //   await accessoryNoteService.deleteItemSync(id, table.setLoading, (res) => {
-    //     if (!res.success) throw new Error(res.message)
-    //     table.handleDeleting(`${id}`)
-    //     message.success(`${res.message}`)
-    //   })
-    // } catch (error: any) {
-    //   message.error(`${error.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ paginator, isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleRestore = async (record: SampleSewingTableDataType) => {
-    // try {
-    //   await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-    //     if (!meta?.success) throw new Error(meta?.message)
-    //     table.handleDeleting(`${record.id!}`)
-    //     message.success('Restored!')
-    //   })
-    // } catch (error: any) {
-    //   message.error(`${error.message}`)
-    // } finally {
-    //   loadData()
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
-  const handlePageChange = async (_page: number) => {
-    // try {
-    //   table.setLoading(true)
-    //   await productService.pageChange(
-    //     _page,
-    //     table.setLoading,
-    //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
-    //     },
-    //     { field: 'productCode', term: searchText }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
-  }
-
-  const handleSortChange = async (checked: boolean) => {
-    // try {
-    //   table.setLoading(true)
-    //   await productService.sortedListItems(
-    //     checked ? 'asc' : 'desc',
-    //     table.setLoading,
-    //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
-    //     },
-    //     { field: 'productCode', term: searchText }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
-  }
-
-  const handleSearch = async (value: string) => {
-    // try {
-    //   table.setLoading(true)
-    //   if (value.length > 0) {
-    //     await productService.getItemsSync(
-    //       {
-    //         ...defaultRequestBody,
-    //         search: {
-    //           field: 'productCode',
-    //           term: value
-    //         }
-    //       },
-    //       table.setLoading,
-    //       (meta) => {
-    //         if (meta?.success) {
-    //           selfConvertDataSource(meta?.data as Product[])
-    //         }
-    //       }
-    //     )
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function handle search button
+   */
+  const handleSearch = (value: string) => {
+    setSearchText(value)
+    loadData({ paginator, isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -321,7 +294,8 @@ export default function useSampleSewingViewModel() {
       loadData,
       handleAddNew,
       handleUpdate,
-      handleSortChange,
+      handleSwitchDeleteChange,
+      handleSwitchSortChange,
       handleSearch,
       handlePageChange,
       handleDelete,

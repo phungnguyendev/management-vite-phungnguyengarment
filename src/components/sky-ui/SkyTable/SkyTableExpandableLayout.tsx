@@ -5,8 +5,8 @@ interface Props extends FlexProps {}
 
 const SkyTableExpandableLayout: React.FC<Props> = ({ ...props }) => {
   return (
-    <Flex vertical className='xl-1/2 w-full overflow-hidden lg:w-2/3'>
-      <Space direction='vertical' size={10} split={<Divider className='' />}>
+    <Flex vertical className='w-full'>
+      <Space direction='vertical' className='w-full' size={10} split={<Divider className='my-2' />}>
         {props.children}
       </Space>
     </Flex>

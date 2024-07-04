@@ -1,15 +1,15 @@
-import { Importation, ItemStatusType, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
-
-export interface ImportationExpandableTableDataType extends Importation {
-  key: string
-}
+import { Importation, ItemStatusType, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface ImportationTableDataType extends Product {
   key: string
   productColor?: ProductColor
   productGroup?: ProductGroup
-  printablePlace?: PrintablePlace
+  // printablePlace?: PrintablePlace
   expandableImportationTableDataTypes: ImportationExpandableTableDataType[]
+}
+
+export interface ImportationExpandableTableDataType extends Importation {
+  key: string
 }
 
 export interface ImportationExpandableAddNewProps {

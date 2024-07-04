@@ -111,7 +111,6 @@ export default function useProductViewModel() {
    * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
    */
   const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
-    console.log('load data')
     try {
       await productService.getItemsSync(
         {

@@ -58,6 +58,9 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
               return { ...prev, quantity: numberValidatorChange(val) }
             })
           }
+          inputNumberProps={{
+            addonAfter: 'Kiện'
+          }}
         >
           <SkyTableTypography status={record.status}>
             {numberValidatorDisplay(record.quantity)} (Kiện)
@@ -132,16 +135,12 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
             handleClick: (record) => tableProps.handleStartDeleting(record.key),
             isShow: !showDeleted
           },
-          onRestore: {
-            handleClick: (record) => tableProps.handleStartRestore(record.key),
-            isShow: showDeleted
-          },
           onConfirmCancelEditing: () => tableProps.handleCancelEditing(),
           onConfirmCancelDeleting: () => tableProps.handleCancelDeleting(),
           onConfirmDelete: (record) => handleDeleteForever(productRecord, record),
           onConfirmCancelRestore: () => tableProps.handleCancelRestore(),
           onConfirmRestore: (record) => handleRestore(record),
-          isShow: true
+          isShow: !showDeleted
         }}
       />
     </>

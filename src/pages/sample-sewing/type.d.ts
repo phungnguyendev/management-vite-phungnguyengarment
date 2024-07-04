@@ -1,9 +1,11 @@
-import { Product, ProductColor, SampleSewing } from '~/typing'
+import { PrintablePlace, Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
 
 export interface SampleSewingTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  sampleSewing: SampleSewing
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  printablePlace?: PrintablePlace
+  sampleSewing?: SampleSewing
 }
 
 export interface SampleSewingAddNewProps {

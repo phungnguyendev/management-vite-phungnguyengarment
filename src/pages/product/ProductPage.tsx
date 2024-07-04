@@ -34,7 +34,7 @@ const ProductPage = () => {
     title: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='productCode'
           title='Mã hàng'
           inputType='text'
@@ -56,7 +56,7 @@ const ProductPage = () => {
     quantityPO: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='quantityPO'
           title='Số lượng PO'
           inputType='number'
@@ -76,7 +76,7 @@ const ProductPage = () => {
     productColor: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='colorID'
           title='Màu'
           required
@@ -105,7 +105,7 @@ const ProductPage = () => {
     productGroup: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='groupID'
           title='Nhóm'
           required
@@ -131,7 +131,7 @@ const ProductPage = () => {
     printablePlace: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='printID'
           title='Nơi in'
           inputType='select'
@@ -156,7 +156,7 @@ const ProductPage = () => {
     dateInputNPL: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateInputNPL'
           title='NPL'
           inputType='datepicker'
@@ -175,7 +175,7 @@ const ProductPage = () => {
     dateOutputFCR: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateOutputFCR'
           title='FCR'
           inputType='datepicker'
@@ -331,6 +331,7 @@ const ProductPage = () => {
             onConfirmCancelRestore: () => viewModel.table.handleCancelRestore(),
             // Restore
             onConfirmRestore: (record) => viewModel.action.handleRestore(record),
+            // Show hide action col
             isShow: true
           }}
           expandable={{
@@ -341,7 +342,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Số lượng PO:'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.quantityPO(record)}
                     </SkyTableExpandableItemRow>
@@ -350,7 +351,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Màu:'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.productColor(record)}
                     </SkyTableExpandableItemRow>
@@ -359,7 +360,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Nhóm:'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.productGroup(record)}
                     </SkyTableExpandableItemRow>
@@ -368,7 +369,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Nơi in:'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.printablePlace(record)}
                     </SkyTableExpandableItemRow>
@@ -377,7 +378,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       title='Ngày nhập NPL:'
                       className='flex w-1/2 lg:hidden'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
@@ -386,7 +387,7 @@ const ProductPage = () => {
                     <SkyTableExpandableItemRow
                       className='w-1/2'
                       title='Ngày xuất FCR:'
-                      isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      isEditing={viewModel.table.isEditing(record.key)}
                     >
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
@@ -395,7 +396,9 @@ const ProductPage = () => {
               )
             },
             columnWidth: '0.001%',
-            showExpandColumn: true
+            onExpand: (expanded, record: ProductTableDataType) =>
+              viewModel.table.handleStartExpanding(expanded, record.key),
+            expandedRowKeys: viewModel.table.expandingKeys
           }}
         />
       </BaseLayout>

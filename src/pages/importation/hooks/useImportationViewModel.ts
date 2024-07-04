@@ -2,14 +2,13 @@ import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { Paginator } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
-import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Importation, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
+import { Importation, Product, ProductColor, ProductGroup } from '~/typing'
 import { dateComparator, numberComparator } from '~/utils/helpers'
 import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
@@ -21,7 +20,7 @@ export default function useImportationViewModel() {
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
-  const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
+  // const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const importationService = useAPIService<Importation>(ImportationAPI)
 
   // State changes
@@ -37,14 +36,12 @@ export default function useImportationViewModel() {
   // List
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
-  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
+  // const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [importations, setImportations] = useState<Importation[]>([])
 
   useEffect(() => {
     initialize()
   }, [])
-
-  console.log('object')
 
   /**
    * Function convert data list of model to dataSource of table and other attributes
@@ -53,17 +50,16 @@ export default function useImportationViewModel() {
     products: Product[],
     productColors: ProductColor[],
     productGroups: ProductGroup[],
-    printablePlaces: PrintablePlace[],
+    // printablePlaces: PrintablePlace[],
     importations: Importation[]
   ) => {
-    console.log('dataMapped')
     const newDataSource = products.map((product) => {
       return {
         ...product,
         key: `${product.id}`,
         productColor: productColors.find((item) => item.productID === product.id),
         productGroup: productGroups.find((item) => item.productID === product.id),
-        printablePlace: printablePlaces.find((item) => item.productID === product.id),
+        // printablePlace: printablePlaces.find((item) => item.productID === product.id),
         expandableImportationTableDataTypes: importations
           .filter((item) => item.productID === product.id)
           .map((item) => {
@@ -79,7 +75,6 @@ export default function useImportationViewModel() {
    */
   const initialize = useCallback(async () => {
     try {
-      console.log('initialize')
       const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
       const newProducts = productsResult.data as Product[]
 
@@ -97,12 +92,12 @@ export default function useImportationViewModel() {
       const newProductGroups = productGroupsResult.data as ProductGroup[]
       setProductGroups(newProductGroups)
 
-      const printablePlacesResult = await printablePlaceService.getItems(
-        { paginator: { page: 1, pageSize: -1 } },
-        table.setLoading
-      )
-      const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
-      setPrintablePlaces(newPrintablePlaces)
+      // const printablePlacesResult = await printablePlaceService.getItems(
+      //   { paginator: { page: 1, pageSize: -1 } },
+      //   table.setLoading
+      // )
+      // const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
+      // setPrintablePlaces(newPrintablePlaces)
 
       const importationsResult = await importationService.getItems(
         { paginator: { page: 1, pageSize: -1 } },
@@ -111,7 +106,7 @@ export default function useImportationViewModel() {
       const newImportations = importationsResult.data as Importation[]
       setImportations(newImportations)
 
-      dataMapped(newProducts, newProductColors, newProductGroups, newPrintablePlaces, newImportations)
+      dataMapped(newProducts, newProductColors, newProductGroups, newImportations)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -123,7 +118,6 @@ export default function useImportationViewModel() {
    * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
    */
   const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
-    console.log('load data')
     try {
       await productService.getItemsSync(
         {
@@ -135,7 +129,7 @@ export default function useImportationViewModel() {
         (meta) => {
           if (!meta.success) throw new Error(define('dataLoad_failed'))
           const newProducts = meta.data as Product[]
-          dataMapped(newProducts, productColors, productGroups, printablePlaces, importations)
+          dataMapped(newProducts, productColors, productGroups, importations)
         }
       )
     } catch (error: any) {
@@ -208,7 +202,6 @@ export default function useImportationViewModel() {
    * Function add new record
    */
   const handleAddNew = async (formAddNew: ImportationExpandableAddNewProps) => {
-    console.log(formAddNew)
     try {
       await importationService.createItemSync(
         {
@@ -344,7 +337,7 @@ export default function useImportationViewModel() {
   return {
     state: {
       productColors,
-      printablePlaces,
+      // printablePlaces,
       productGroups,
       importations,
       showDeleted,
@@ -359,7 +352,7 @@ export default function useImportationViewModel() {
     service: {
       productService,
       productColorService,
-      printablePlaceService,
+      // printablePlaceService,
       productGroupService,
       importationService
     },

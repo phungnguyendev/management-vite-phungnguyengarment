@@ -204,7 +204,7 @@ function EditableFormCell({
         <Form.Item
           name={dataIndex}
           className={cn('w-full', restProps.className)}
-          defaultValue={defaultValue}
+          initialValue={defaultValue}
           required={required}
           label={title}
           validateTrigger='onBlur'

@@ -1,10 +1,13 @@
 import { ColorPicker, Flex } from 'antd'
 import { ColumnType } from 'antd/es/table'
+import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import { breakpoint, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import ImportationTable from './components/ImportationTable'
 import ModalAddNewImportation from './components/ModalAddNewImportation'
 import useImportationViewModel from './hooks/useImportationViewModel'
@@ -13,6 +16,7 @@ import { ImportationTableDataType } from './type'
 const ImportationPage = () => {
   useTitle('Importations | Phung Nguyen')
   const viewModel = useImportationViewModel()
+  const { width } = useDevice()
 
   const columns = {
     productCode: (record: ImportationTableDataType) => {
@@ -41,14 +45,14 @@ const ImportationPage = () => {
           {textValidatorDisplay(record.productGroup?.group?.name)}
         </SkyTableTypography>
       )
-    },
-    printablePlace: (record: ImportationTableDataType) => {
-      return (
-        <SkyTableTypography status={record.printablePlace?.print?.status}>
-          {textValidatorDisplay(record.printablePlace?.print?.name)}
-        </SkyTableTypography>
-      )
     }
+    // printablePlace: (record: ImportationTableDataType) => {
+    //   return (
+    //     <SkyTableTypography status={record.printablePlace?.print?.status}>
+    //       {textValidatorDisplay(record.printablePlace?.print?.name)}
+    //     </SkyTableTypography>
+    //   )
+    // }
   }
 
   const tableColumns: ColumnType<ImportationTableDataType>[] = [
@@ -64,7 +68,7 @@ const ImportationPage = () => {
       title: 'Số lượng PO',
       dataIndex: 'quantityPO',
       width: '7%',
-      responsive: ['sm'],
+      responsive: ['lg'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.quantityPO(record)
       }
@@ -73,7 +77,7 @@ const ImportationPage = () => {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
-      responsive: ['sm'],
+      responsive: ['md'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productColor(record)
       }
@@ -86,16 +90,16 @@ const ImportationPage = () => {
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productGroup(record)
       }
-    },
-    {
-      title: 'Nơi in',
-      dataIndex: 'printID',
-      width: '10%',
-      responsive: ['xxl'],
-      render: (_value: any, record: ImportationTableDataType) => {
-        return columns.printablePlace(record)
-      }
     }
+    // {
+    //   title: 'Nơi in',
+    //   dataIndex: 'printID',
+    //   width: '10%',
+    //   responsive: ['xl'],
+    //   render: (_value: any, record: ImportationTableDataType) => {
+    //     return columns.printablePlace(record)
+    //   }
+    // }
   ]
 
   return (
@@ -134,27 +138,52 @@ const ImportationPage = () => {
                 viewModel.state.setOpenModal(true)
               },
               title: 'New package',
-              isShow: true
+              isShow: !viewModel.state.showDeleted
             },
             isShow: true
           }}
           expandable={{
             expandedRowRender: (record: ImportationTableDataType) => {
               return (
-                <ImportationTable
-                  productRecord={record}
-                  viewModelProps={{
-                    tableProps: viewModel.table,
-                    showDeleted: viewModel.state.showDeleted,
-                    newRecord: viewModel.state.newRecord,
-                    setNewRecord: viewModel.state.setNewRecord,
-                    handleUpdate: viewModel.action.handleUpdate,
-                    handleDelete: viewModel.action.handleDelete,
-                    handleDeleteForever: viewModel.action.handleDeleteForever,
-                    handleRestore: viewModel.action.handleRestore,
-                    handlePageChange: viewModel.action.handlePageChange
-                  }}
-                />
+                <>
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow
+                        title='Số lượng PO:'
+                        isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      >
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    <ImportationTable
+                      productRecord={record}
+                      viewModelProps={{
+                        tableProps: viewModel.table,
+                        showDeleted: viewModel.state.showDeleted,
+                        newRecord: viewModel.state.newRecord,
+                        setNewRecord: viewModel.state.setNewRecord,
+                        handleUpdate: viewModel.action.handleUpdate,
+                        handleDelete: viewModel.action.handleDelete,
+                        handleDeleteForever: viewModel.action.handleDeleteForever,
+                        handleRestore: viewModel.action.handleRestore,
+                        handlePageChange: viewModel.action.handlePageChange
+                      }}
+                    />
+                  </SkyTableExpandableLayout>
+                </>
               )
             },
             columnWidth: '0.001%',

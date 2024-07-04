@@ -9,7 +9,8 @@ import {
   PackageSuccessIcon,
   PrintIcon,
   SewingMachineIcon,
-  UserIcon
+  UserIcon,
+  WarehouseIcon
 } from '~/assets/icons'
 import { UserRoleType } from '~/typing'
 // const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))

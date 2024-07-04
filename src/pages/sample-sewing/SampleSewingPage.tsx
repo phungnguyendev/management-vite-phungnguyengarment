@@ -15,6 +15,7 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  numberValidatorDisplay,
   textValidatorDisplay
 } from '~/utils/helpers'
 import useSampleSewingViewModel from './hooks/useSampleSewingViewModel'
@@ -22,104 +23,44 @@ import { SampleSewingTableDataType } from './type'
 
 const SampleSewingPage = () => {
   useTitle('Sample Sewing | Phung Nguyen')
-  const { state, action, table } = useSampleSewingViewModel()
-  const { newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } = state
-  const {
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useSampleSewingViewModel()
   const { width } = useDevice()
 
   const columns = {
     productCode: (record: SampleSewingTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
-          <SkyTableTypography strong status={record.status}>
-            {textValidatorDisplay(record.productCode)}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography strong status={record.status}>
+          {textValidatorDisplay(record.productCode)}
+        </SkyTableTypography>
       )
+    },
+    quantityPO: (record: SampleSewingTableDataType) => {
+      return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
     },
     productColor: (record: SampleSewingTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-          <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
-            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor?.color?.name)}
-            </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
-          </Flex>
-        </EditableStateCell>
+        <Flex justify='space-between' align='center' gap={10} wrap='wrap'>
+          <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
+            {textValidatorDisplay(record.productColor?.color?.name)}
+          </SkyTableTypography>
+          {record.productColor && (
+            <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+          )}
+        </Flex>
       )
     },
-    dateSubmissionNPL: (record: SampleSewingTableDataType) => {
+    productGroup: (record: SampleSewingTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='dateSubmissionNPL'
-          title='NPL may mẫu'
-          inputType='datepicker'
-          required={true}
-          defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionNPL)}
-          onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
-              return { ...prev, dateSubmissionNPL: dateFormatter(val, 'iso8601') }
-            })
-          }
-        >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateSubmissionNPL) : dateValidatorDisplay()}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
       )
     },
-    dateApprovalPP: (record: SampleSewingTableDataType) => {
+    printablePlace: (record: SampleSewingTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='dateApprovalPP'
-          title='Ngày duyệt mẫu PP'
-          inputType='datepicker'
-          required={true}
-          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalPP)}
-          onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
-              return { ...prev, dateApprovalPP: dateValidatorChange(val) }
-            })
-          }
-        >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateApprovalPP) : dateValidatorDisplay()}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    dateApprovalSO: (record: SampleSewingTableDataType) => {
-      return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='dateApprovalSO'
-          title='Ngày duyệt SO'
-          inputType='datepicker'
-          required={true}
-          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateApprovalSO)}
-          onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
-              return { ...prev, dateApprovalSO: dateValidatorChange(val) }
-            })
-          }
-        >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing ? dateValidatorDisplay(record.sampleSewing.dateApprovalSO) : dateValidatorDisplay()}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography status={record.printablePlace?.print?.status}>
+          {textValidatorDisplay(record.printablePlace?.print?.name)}
+        </SkyTableTypography>
       )
     }
   }
@@ -134,6 +75,15 @@ const SampleSewingPage = () => {
       }
     },
     {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '7%',
+      responsive: ['md'],
+      render: (_value: any, record: SampleSewingTableDataType) => {
+        return columns.quantityPO(record)
+      }
+    },
+    {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
@@ -143,55 +93,107 @@ const SampleSewingPage = () => {
       }
     },
     {
-      title: 'NPL may mẫu',
-      dataIndex: 'dateSubmissionNPL',
-      width: '15%',
-      responsive: ['md'],
-      render: (_value: any, record: SampleSewingTableDataType) => {
-        return columns.dateSubmissionNPL(record)
-      }
-    },
-    {
-      title: 'Ngày duyệt mẫu PP',
-      dataIndex: 'dateApprovalPP',
-      width: '15%',
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
       responsive: ['lg'],
       render: (_value: any, record: SampleSewingTableDataType) => {
-        return columns.dateApprovalPP(record)
+        return columns.productGroup(record)
       }
     },
     {
-      title: 'Ngày duyệt SO',
-      dataIndex: 'dateApprovalSO',
-      width: '15%',
+      title: 'Nơi in',
+      dataIndex: 'printID',
+      width: '10%',
       responsive: ['xl'],
       render: (_value: any, record: SampleSewingTableDataType) => {
-        return columns.dateApprovalSO(record)
+        return columns.printablePlace(record)
       }
     }
   ]
 
   const expandableColumns = {
+    dateSubmissionNPL: (record: SampleSewingTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          dataIndex='dateSubmissionNPL'
+          title='NPL may mẫu'
+          inputType='datepicker'
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionNPL)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateSubmissionNPL: dateFormatter(val, 'iso8601') }
+            })
+          }
+        >
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionNPL)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    dateApprovalPP: (record: SampleSewingTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          dataIndex='dateApprovalPP'
+          title='Ngày duyệt mẫu PP'
+          inputType='datepicker'
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateApprovalPP)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateApprovalPP: dateValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateApprovalPP)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    dateApprovalSO: (record: SampleSewingTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          dataIndex='dateApprovalSO'
+          title='Ngày duyệt SO'
+          inputType='datepicker'
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateApprovalSO)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateApprovalSO: dateValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateApprovalSO)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
     dateSubmissionFirstTime: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateSubmissionFirstTime'
           title='Ngày gửi mẫu lần 1'
           inputType='datepicker'
-          required={true}
-          // defaultValue={record.sampleSewing && dateValidatorInit(record.sampleSewing.dateSubmissionFirstTime)}
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionFirstTime)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               dateSubmissionFirstTime: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing
-              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionSecondTime)
-              : dateValidatorDisplay()}
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionFirstTime)}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -199,27 +201,21 @@ const SampleSewingPage = () => {
     dateSubmissionSecondTime: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateSubmissionSecondTime'
           title='Ngày gửi mẫu lần 2'
           inputType='datepicker'
-          required={true}
-          // defaultValue={
-          //   record.sampleSewing
-          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionSecondTime)
-          //     : dateValidatorDisplay()
-          // }
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionSecondTime)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               dateSubmissionSecondTime: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing
-              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionSecondTime)
-              : dateValidatorDisplay()}
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionSecondTime)}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -227,27 +223,21 @@ const SampleSewingPage = () => {
     dateSubmissionThirdTime: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateSubmissionThirdTime'
           title='Ngày gửi mẫu lần 3'
           inputType='datepicker'
-          required={true}
-          // defaultValue={
-          //   record.sampleSewing
-          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionThirdTime)
-          //     : dateValidatorDisplay()
-          // }
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionThirdTime)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               dateSubmissionThirdTime: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing
-              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionThirdTime)
-              : dateValidatorDisplay()}
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionThirdTime)}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -255,27 +245,21 @@ const SampleSewingPage = () => {
     dateSubmissionForthTime: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateSubmissionForthTime'
           title='Ngày gửi mẫu lần 4'
           inputType='datepicker'
-          required={true}
-          // defaultValue={
-          //   record.sampleSewing
-          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionForthTime)
-          //     : dateValidatorDisplay()
-          // }
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionForthTime)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               dateSubmissionForthTime: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing
-              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionForthTime)
-              : dateValidatorDisplay()}
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionForthTime)}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -283,109 +267,61 @@ const SampleSewingPage = () => {
     dateSubmissionFifthTime: (record: SampleSewingTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateSubmissionFifthTime'
           title='Ngày gửi mẫu lần 5'
           inputType='datepicker'
-          required={true}
-          // defaultValue={
-          //   record.sampleSewing
-          //     ? dateValidatorInit(record.sampleSewing.dateSubmissionFifthTime)
-          //     : dateValidatorDisplay()
-          // }
+          required
+          defaultValue={dateValidatorInit(record.sampleSewing?.dateSubmissionFifthTime)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               dateSubmissionFifthTime: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {record.sampleSewing
-              ? dateValidatorDisplay(record.sampleSewing.dateSubmissionFifthTime)
-              : dateValidatorDisplay()}
+          <SkyTableTypography status='active'>
+            {dateValidatorDisplay(record.sampleSewing?.dateSubmissionFifthTime)}
           </SkyTableTypography>
         </EditableStateCell>
       )
     }
   }
 
-  // const expandableCols: ColumnsType<SampleSewingTableDataType> = [
-  //   {
-  //     title: 'Ngày gửi mẫu lần 1',
-  //     dataIndex: 'dateSubmissionFirstTime',
-  //     width: '15%',
-  //     render: (_value: any, record: SampleSewingTableDataType) => {
-  //       return expandableColumns.dateSubmissionFirstTime(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Ngày gửi mẫu lần 2',
-  //     dataIndex: 'dateSubmissionSecondTime',
-  //     width: '15%',
-  //     render: (_value: any, record: SampleSewingTableDataType) => {
-  //       return expandableColumns.dateSubmissionSecondTime(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Ngày gửi mẫu lần 3',
-  //     dataIndex: 'dateSubmissionThirdTime',
-  //     width: '15%',
-  //     render: (_value: any, record: SampleSewingTableDataType) => {
-  //       return expandableColumns.dateSubmissionThirdTime(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Ngày gửi mẫu lần 4',
-  //     dataIndex: 'dateSubmissionForthTime',
-  //     width: '15%',
-  //     render: (_value: any, record: SampleSewingTableDataType) => {
-  //       return expandableColumns.dateSubmissionForthTime(record)
-  //     }
-  //   },
-  //   {
-  //     title: 'Ngày gửi mẫu lần 5',
-  //     dataIndex: 'dateSubmissionFifthTime',
-  //     width: '15%',
-  //     render: (_value: any, record: SampleSewingTableDataType) => {
-  //       return expandableColumns.dateSubmissionFirstTime(record)
-  //     }
-  //   }
-  // ]
-
   return (
     <>
       <BaseLayout
         title='May mẫu'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
-          placeholder: 'Tên nhóm..',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          // Search Input
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
         }}
         sortProps={{
-          onChange: handleSortChange
+          // Sort Switch Button
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: setShowDeleted
+          // Show delete list Switch Button
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
       >
         <SkyTable
           bordered
-          loading={table.loading}
+          loading={viewModel.table.loading}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          dataSource={viewModel.table.dataSource}
           rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
+          onPageChange={viewModel.action.handlePageChange}
+          isShowDeleted={viewModel.state.showDeleted}
           actionProps={{
             onEdit: {
               handleClick: (record) => {
                 if (record.sampleSewing)
-                  setNewRecord({
+                  viewModel.state.setNewRecord({
                     dateApprovalPP: record.sampleSewing.dateApprovalPP,
                     dateApprovalSO: record.sampleSewing.dateApprovalSO,
                     dateSubmissionNPL: record.sampleSewing.dateSubmissionNPL,
@@ -395,76 +331,129 @@ const SampleSewingPage = () => {
                     dateSubmissionForthTime: record.sampleSewing.dateSubmissionForthTime,
                     dateSubmissionFifthTime: record.sampleSewing.dateSubmissionFifthTime
                   })
-                table.handleStartEditing(record.key)
+                viewModel.table.handleStartEditing(record.key)
               },
-              isShow: !showDeleted
+              isShow: !viewModel.state.showDeleted
             },
             onSave: {
-              handleClick: (record) => handleUpdate(record),
-              isShow: !showDeleted
+              handleClick: (record) => viewModel.action.handleUpdate(record),
+              isShow: !viewModel.state.showDeleted
             },
             onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
+              handleClick: (record) => viewModel.table.handleStartDeleting(record.key),
+              isShow: !viewModel.state.showDeleted
             },
-            onDeleteForever: {
-              isShow: showDeleted
-            },
-            onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
-            },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
-            isShow: true
+            // onDeleteForever: {
+            //   isShow: viewModel.state.showDeleted
+            // },
+            // onRestore: {
+            //   handleClick: (record) => viewModel.table.handleStartRestore(record.key),
+            //   isShow: viewModel.state.showDeleted
+            // },
+            // Delete forever
+            // onConfirmDeleteForever: (record) => viewModel.action.handleDeleteForever(record),
+            // Cancel editing
+            onConfirmCancelEditing: () => viewModel.table.handleCancelEditing(),
+            // Cancel delete
+            onConfirmCancelDeleting: () => viewModel.table.handleCancelDeleting(),
+            // Start delete
+            onConfirmDelete: (record) => viewModel.action.handleDeleteForever(record),
+            // Cancel restore
+            onConfirmCancelRestore: () => viewModel.table.handleCancelRestore(),
+            // Restore
+            onConfirmRestore: (record) => viewModel.action.handleRestore(record),
+            // Show hide action col
+            isShow: !viewModel.state.showDeleted
           }}
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <SkyTableExpandableLayout>
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Màu:' isEditing={table.isEditing(record.id!)}>
-                      {columns.productColor(record)}
+                <>
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow
+                        title='Số lượng PO:'
+                        isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      >
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.printablePlace(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    <SkyTableExpandableItemRow title='NPL may mẫu:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {expandableColumns.dateSubmissionNPL(record)}
                     </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow title='NPL may mẫu:' isEditing={table.isEditing(record.id!)}>
-                      {columns.dateSubmissionNPL(record)}
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày duyệt mẫu PP:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateApprovalPP(record)}
                     </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.lg) && (
-                    <SkyTableExpandableItemRow title='Ngày duyệt mẫu PP:' isEditing={table.isEditing(record.id!)}>
-                      {columns.dateApprovalPP(record)}
+
+                    <SkyTableExpandableItemRow title='Ngày duyệt SO:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {expandableColumns.dateApprovalSO(record)}
                     </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xl) && (
-                    <SkyTableExpandableItemRow title='Ngày duyệt SO:' isEditing={table.isEditing(record.id!)}>
-                      {columns.dateApprovalSO(record)}
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày gửi mẫu lần 1:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateSubmissionFirstTime(record)}
                     </SkyTableExpandableItemRow>
-                  )}
-                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 1:' isEditing={table.isEditing(record.id!)}>
-                    {expandableColumns.dateSubmissionFirstTime(record)}
-                  </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 2:' isEditing={table.isEditing(record.id!)}>
-                    {expandableColumns.dateSubmissionSecondTime(record)}
-                  </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 3:' isEditing={table.isEditing(record.id!)}>
-                    {expandableColumns.dateSubmissionThirdTime(record)}
-                  </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 4:' isEditing={table.isEditing(record.id!)}>
-                    {expandableColumns.dateSubmissionForthTime(record)}
-                  </SkyTableExpandableItemRow>
-                  <SkyTableExpandableItemRow title='Ngày gửi mẫu lần 5:' isEditing={table.isEditing(record.id!)}>
-                    {expandableColumns.dateSubmissionFifthTime(record)}
-                  </SkyTableExpandableItemRow>
-                </SkyTableExpandableLayout>
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày gửi mẫu lần 2:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateSubmissionSecondTime(record)}
+                    </SkyTableExpandableItemRow>
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày gửi mẫu lần 3:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateSubmissionThirdTime(record)}
+                    </SkyTableExpandableItemRow>
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày gửi mẫu lần 4:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateSubmissionForthTime(record)}
+                    </SkyTableExpandableItemRow>
+
+                    <SkyTableExpandableItemRow
+                      title='Ngày gửi mẫu lần 5:'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                    >
+                      {expandableColumns.dateSubmissionFifthTime(record)}
+                    </SkyTableExpandableItemRow>
+                  </SkyTableExpandableLayout>
+                </>
               )
             },
-            columnWidth: '0.001%'
+            columnWidth: '0.001%',
+            onExpand: (expanded, record: SampleSewingTableDataType) =>
+              viewModel.table.handleStartExpanding(expanded, record.key),
+            expandedRowKeys: viewModel.table.expandingKeys
           }}
         />
       </BaseLayout>
