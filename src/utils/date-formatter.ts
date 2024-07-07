@@ -23,7 +23,7 @@ export const dateFormatter = (
     case 'timeOnly':
       return dayjs(date).format('HH:mm:ss')
     case 'dateTime':
-      return dayjs(date).format('L - LT')
+      return dayjs(date).format('DD/MM/YYYY hh:mm A')
     case 'iso8601':
       return dayjs(date).format('YYYY-MM-DDTHH:mm:ss.sssZ')
     default:

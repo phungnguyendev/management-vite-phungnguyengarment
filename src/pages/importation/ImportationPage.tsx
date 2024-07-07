@@ -26,6 +26,16 @@ const ImportationPage = () => {
         <SkyTableTypography strong status={record.status}>
           {textValidatorDisplay(record.productCode)}
         </SkyTableTypography>
+        // <Space direction='horizontal'>
+        //   <SkyTableTypography strong status={record.status}>
+        //     {textValidatorDisplay(record.productCode)}
+        //   </SkyTableTypography>
+        //   {viewModel.action.isChecked(record) && (
+        //     <SkyTableTypography code>
+        //       <Image src={ImportExportIcon} width={20} height={20} preview={false} />
+        //     </SkyTableTypography>
+        //   )}
+        // </Space>
       )
     },
     quantityPO: (record: ImportationTableDataType) => {

@@ -1,13 +1,15 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator, ResponseDataType } from '~/api/client'
+import { ResponseDataType } from '~/api/client'
 import CuttingGroupAPI from '~/api/services/CuttingGroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
+import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { CuttingGroup, Product, ProductColor } from '~/typing'
-import { dateValidator, numberValidator } from '~/utils/helpers'
+import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
+import { booleanComparator, dateComparator, isValidBoolean, isValidObject, numberComparator } from '~/utils/helpers'
 import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
 
 export default function useCuttingGroupViewModel() {
@@ -17,79 +19,97 @@ export default function useCuttingGroupViewModel() {
   // Services
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const cuttingGroupService = useAPIService<CuttingGroup>(CuttingGroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<CuttingGroupNewRecordProps>({})
+  const [newRecord, setNewRecord] = useState<CuttingGroupNewRecordProps | null>(null)
 
   // List
-  const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
+  const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [cuttingGroups, setCuttingGroups] = useState<CuttingGroup[]>([])
 
-  // New
-  const [sampleSewingNew, setCuttingGroupNew] = useState<CuttingGroup | undefined>(undefined)
-
   useEffect(() => {
-    loadData()
-  }, [sampleSewingNew, showDeleted])
+    initialize()
+  }, [])
 
-  useEffect(() => {
-    mappedData()
-  }, [products, productColors, cuttingGroups])
-
-  const mappedData = useCallback(() => {
-    table.setDataSource(() => {
-      const _dataSource = products.map((self) => {
-        return {
-          ...self,
-          key: `${self.id}`,
-          productColor: productColors.find((item) => item.productID === self.id),
-          cuttingGroup: cuttingGroups.find((item) => item.productID === self.id)
-        } as CuttingGroupTableDataType
-      })
-      return [..._dataSource]
+  /**
+   * Function convert data list of model to dataSource of table and other attributes
+   */
+  const dataMapped = (
+    products: Product[],
+    productColors: ProductColor[],
+    productGroups: ProductGroup[],
+    cuttingGroups: CuttingGroup[]
+  ) => {
+    const newDataSource = products.map((product) => {
+      return {
+        ...product,
+        key: `${product.id}`,
+        productColor: productColors.find((item) => item.productID === product.id),
+        productGroup: productGroups.find((item) => item.productID === product.id),
+        cuttingGroup: cuttingGroups.find((item) => item.productID === product.id)
+      } as CuttingGroupTableDataType
     })
-  }, [products, productColors, cuttingGroups])
+    table.setDataSource(newDataSource)
+  }
 
-  const loadData = async () => {
+  /**
+   * Initialize function
+   */
+  const initialize = useCallback(async () => {
     try {
-      table.setLoading(true)
+      const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      const newProducts = productsResult.data as Product[]
+
+      const productColorsResult = await productColorService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductColors = productColorsResult.data as ProductColor[]
+      setProductColors(newProductColors)
+
+      const productGroupsResult = await productGroupService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newProductGroups = productGroupsResult.data as ProductGroup[]
+      setProductGroups(newProductGroups)
+
+      const cuttingGroupResult = await cuttingGroupService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newCuttingGroups = cuttingGroupResult.data as CuttingGroup[]
+      setCuttingGroups(newCuttingGroups)
+
+      dataMapped(newProducts, newProductColors, newProductGroups, newCuttingGroups)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }, [])
+
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
       const productResult = await productService.getItems(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'title', term: searchText }
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading
       )
-      setProducts(productResult.data as Product[])
 
-      const productColorResult = await productColorService.getItems(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading
-      )
-      setProductColors(productColorResult.data as ProductColor[])
+      if (!productResult.success) throw new Error(define('dataLoad_failed'))
+      const newProducts = productResult.data as Product[]
 
-      const completionResult = await cuttingGroupService.getItems(
-        {
-          paginator: { page: 1, pageSize: -1 }
-        },
-        table.setLoading
-      )
-      setCuttingGroups(completionResult.data as CuttingGroup[])
+      dataMapped(newProducts, productColors, productGroups, cuttingGroups)
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -99,212 +119,130 @@ export default function useCuttingGroupViewModel() {
   }
 
   const handleUpdate = async (record: CuttingGroupTableDataType) => {
-    // const row = (await form.validateFields()) as any
-    console.log({ old: record, new: newRecord })
     try {
       table.setLoading(true)
-      if (newRecord.quantityRealCut && !numberValidator(newRecord.quantityRealCut))
-        throw new Error('Quantity must be than zero!')
-
-      if (newRecord.timeCut && !dateValidator(newRecord.timeCut)) throw new Error('Invalid time cut!')
-
-      if (newRecord.dateSendEmbroidered && !dateValidator(newRecord.dateSendEmbroidered))
-        throw new Error('Invalid date send embroidered!')
-
-      if (newRecord.quantityDeliveredBTP && !numberValidator(newRecord.quantityDeliveredBTP))
-        throw new Error('Invalid quantity delivery BTP!')
-
-      if (newRecord.quantityArrived1Th && !numberValidator(newRecord.quantityArrived1Th)) throw new Error('Invalid 1!')
-
-      if (newRecord.quantityArrived2Th && !numberValidator(newRecord.quantityArrived2Th)) throw new Error('Invalid 2!')
-
-      if (newRecord.quantityArrived3Th && !numberValidator(newRecord.quantityArrived3Th)) throw new Error('Invalid 3!')
-
-      if (newRecord.quantityArrived4Th && !numberValidator(newRecord.quantityArrived4Th)) throw new Error('Invalid 4!')
-
-      if (newRecord.quantityArrived5Th && !numberValidator(newRecord.quantityArrived5Th)) throw new Error('Invalid 5!')
-
-      if (newRecord.quantityArrived6Th && !numberValidator(newRecord.quantityArrived6Th)) throw new Error('Invalid 6!')
-
-      if (newRecord.quantityArrived7Th && !numberValidator(newRecord.quantityArrived7Th)) throw new Error('Invalid 7!')
-
-      if (newRecord.quantityArrived8Th && !numberValidator(newRecord.quantityArrived8Th)) throw new Error('Invalid 8!')
-
-      if (newRecord.quantityArrived9Th && !numberValidator(newRecord.quantityArrived9Th)) throw new Error('Invalid 9!')
-
-      if (newRecord.quantityArrived10Th && !numberValidator(newRecord.quantityArrived10Th))
-        throw new Error('Invalid 10!')
+      if (!newRecord) return
 
       if (
-        !record.cuttingGroup &&
-        (newRecord.quantityRealCut ||
-          newRecord.timeCut ||
-          newRecord.dateSendEmbroidered ||
-          newRecord.quantityDeliveredBTP ||
-          newRecord.quantityArrived1Th ||
-          newRecord.quantityArrived2Th ||
-          newRecord.quantityArrived3Th ||
-          newRecord.quantityArrived4Th ||
-          newRecord.quantityArrived5Th ||
-          newRecord.quantityArrived6Th ||
-          newRecord.quantityArrived7Th ||
-          newRecord.quantityArrived8Th ||
-          newRecord.quantityArrived9Th ||
-          newRecord.quantityArrived10Th)
+        isValidObject(record.cuttingGroup) &&
+        (numberComparator(newRecord.quantityRealCut, record.cuttingGroup.quantityRealCut) ||
+          dateComparator(newRecord.dateTimeCut, record.cuttingGroup.dateTimeCut) ||
+          dateComparator(newRecord.dateSendEmbroidered, record.cuttingGroup.dateSendEmbroidered) ||
+          numberComparator(newRecord.quantityDeliveredBTP, record.cuttingGroup.quantityDeliveredBTP) ||
+          booleanComparator(newRecord.syncStatus, record.cuttingGroup.syncStatus) ||
+          dateComparator(newRecord.dateArrived1Th, record.cuttingGroup.dateArrived1Th) ||
+          dateComparator(newRecord.dateArrived2Th, record.cuttingGroup.dateArrived2Th) ||
+          dateComparator(newRecord.dateArrived3Th, record.cuttingGroup.dateArrived3Th) ||
+          dateComparator(newRecord.dateArrived4Th, record.cuttingGroup.dateArrived4Th) ||
+          dateComparator(newRecord.dateArrived5Th, record.cuttingGroup.dateArrived5Th) ||
+          numberComparator(newRecord.quantityArrived1Th, record.cuttingGroup.quantityArrived1Th) ||
+          numberComparator(newRecord.quantityArrived2Th, record.cuttingGroup.quantityArrived2Th) ||
+          numberComparator(newRecord.quantityArrived3Th, record.cuttingGroup.quantityArrived3Th) ||
+          numberComparator(newRecord.quantityArrived4Th, record.cuttingGroup.quantityArrived4Th) ||
+          numberComparator(newRecord.quantityArrived5Th, record.cuttingGroup.quantityArrived5Th))
       ) {
-        console.log('add new')
-        await cuttingGroupService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(meta.message)
-        })
-      }
-      if (record.cuttingGroup) {
-        console.log('CuttingGroup progressing: ', newRecord)
         await cuttingGroupService.updateItemBySync(
           { field: 'productID', id: record.id! },
-          {
-            ...newRecord
-          },
+          { ...newRecord },
           table.setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error(meta.message)
+          (result) => {
+            if (!result.success) throw new Error(define('update_failed'))
+            const newCuttingGroup = result.data as CuttingGroup
+            table.handleUpdate(record.key, { ...record, cuttingGroup: newCuttingGroup })
           }
         )
       }
-      message.success('Success!')
+
+      if (!isValidObject(record.cuttingGroup)) {
+        await cuttingGroupService.createItemSync(
+          { ...newRecord, productID: record.id! },
+          table.setLoading,
+          (result) => {
+            if (!result.success) throw new Error(define('update_failed'))
+            const newCuttingGroup = result.data as CuttingGroup
+            table.handleUpdate(record.key, { ...record, cuttingGroup: newCuttingGroup })
+          }
+        )
+      }
+
+      message.success(define('success'))
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
+      setNewRecord({})
       table.handleCancelEditing()
       table.setLoading(false)
     }
   }
 
-  const handleDelete = async (record: CuttingGroupTableDataType) => {
-    // try {
-    //   table.setLoading(true)
-    //   if (record.cuttingGroup) {
-    //     await cuttingGroupService.deleteItemByPk(record.cuttingGroup.id!, table.setLoading, (meta, msg) => {
-    //       if (!meta?.success) throw new Error('API delete failed')
-    //       message.success(msg)
-    //       onDataSuccess?.(meta)
-    //     })
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   loadData()
-    //   table.setLoading(false)
-    //   setOpenModal(false)
-    // }
+  const handleDelete = async () => {}
+
+  const handleDeleteForever = async (record: CuttingGroupTableDataType) => {
+    try {
+      await cuttingGroupService.deleteItemBySync({ field: 'productID', id: record.id! }, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('delete_failed'))
+        delete record.cuttingGroup
+        table.handleUpdate(record.key, { ...record })
+        message.success(define('deleted_success'))
+      })
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
   }
 
-  const handleDeleteForever = async (id: number) => {
-    // console.log(id)
-    // try {
-    //   await accessoryNoteService.deleteItemSync(id, table.setLoading, (res) => {
-    //     if (!res.success) throw new Error(res.message)
-    //     table.handleDeleting(`${id}`)
-    //     message.success(`${res.message}`)
-    //   })
-    // } catch (error: any) {
-    //   message.error(`${error.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
+  const handleRestore = async () => {}
+
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageChange = async () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleRestore = async (record: CuttingGroupTableDataType) => {
-    // try {
-    //   await accessoryNoteService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
-    //     if (!meta?.success) throw new Error(meta?.message)
-    //     table.handleDeleting(`${record.id!}`)
-    //     message.success('Restored!')
-    //   })
-    // } catch (error: any) {
-    //   message.error(`${error.message}`)
-    // } finally {
-    //   loadData()
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
-  const handlePageChange = async (_page: number) => {
-    // try {
-    //   table.setLoading(true)
-    //   await productService.pageChange(
-    //     _page,
-    //     table.setLoading,
-    //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
-    //     },
-    //     { field: 'productCode', term: searchText }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSortChange = async (checked: boolean) => {
-    // try {
-    //   table.setLoading(true)
-    //   await productService.sortedListItems(
-    //     checked ? 'asc' : 'desc',
-    //     table.setLoading,
-    //     (meta) => {
-    //       if (meta?.success) {
-    //         selfConvertDataSource(meta?.data as Product[])
-    //       }
-    //     },
-    //     { field: 'productCode', term: searchText }
-    //   )
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
+  /**
+   * Function handle search button
+   */
+  const handleSearch = (value: string) => {
+    setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
-  const handleSearch = async (value: string) => {
-    // try {
-    //   table.setLoading(true)
-    //   if (value.length > 0) {
-    //     await productService.getListItems(
-    //       {
-    //         ...defaultRequestBody,
-    //         search: {
-    //           field: 'productCode',
-    //           term: value
-    //         }
-    //       },
-    //       table.setLoading,
-    //       (meta) => {
-    //         if (meta?.success) {
-    //           selfConvertDataSource(meta?.data as Product[])
-    //         }
-    //       }
-    //     )
-    //   }
-    // } catch (error: any) {
-    //   const resError: ResponseDataType = error.data
-    //   message.error(`${resError.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
+  const isChecked = (record: CuttingGroupTableDataType): boolean => {
+    return isValidBoolean(record.cuttingGroup?.syncStatus) ? record.cuttingGroup.syncStatus : false
+  }
+
+  const isDisableRecord = (record: CuttingGroupTableDataType): boolean => {
+    return table.isEditing(record.key)
+      ? isValidBoolean(newRecord?.syncStatus)
+        ? !newRecord.syncStatus
+        : true
+      : isValidBoolean(record.cuttingGroup?.syncStatus)
+        ? !record.cuttingGroup.syncStatus
+        : true
   }
 
   return {
     state: {
       showDeleted,
-      setShowDeleted,
-      searchTextChange,
-      setSearchTextChange,
       openModal,
       newRecord,
       setNewRecord,
@@ -316,13 +254,16 @@ export default function useCuttingGroupViewModel() {
       cuttingGroupService
     },
     action: {
+      isChecked,
       loadData,
       handleUpdate,
-      handleSortChange,
+      handleSwitchDeleteChange,
+      handleSwitchSortChange,
       handleSearch,
       handlePageChange,
       handleDelete,
       handleDeleteForever,
+      isDisableRecord,
       handleRestore
     },
     table

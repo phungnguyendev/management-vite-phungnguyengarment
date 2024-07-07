@@ -19,7 +19,7 @@ import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
-import { dateFormatter } from '~/utils/date-formatter'
+import dayjs, { dateFormatter } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
@@ -207,6 +207,23 @@ function EditableStateCell({
             value={value}
             defaultValue={defaultValue}
             format={datePickerProps?.format ?? 'DD/MM/YYYY'}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'dateTimePicker':
+        return (
+          <DatePicker
+            {...datePickerProps}
+            title={title}
+            placeholder={placeholder ?? `Ví dụ: ${dateFormatter(Date.now())}`}
+            name={dataIndex}
+            required={required}
+            onChange={(val) => val && onValueChange?.(val)}
+            disabled={disabled}
+            value={value}
+            showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm', 'A') }}
+            defaultValue={defaultValue}
+            format={datePickerProps?.format ?? 'DD/MM/YYYY - HH:mm A'}
             className={cn('w-full', restProps.className)}
           />
         )

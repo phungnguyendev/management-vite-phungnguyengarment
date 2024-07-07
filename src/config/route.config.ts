@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import {
   AgeGroupIcon,
   ColorIcon,
+  CutIcon,
   DeliveryIcon,
   NoteIcon,
   PackageSearchIcon,
@@ -84,15 +85,15 @@ const routes: SideType[] = [
     role: 'accessory_manager',
     icon: WarehouseIcon
   },
-  // {
-  //   key: '4',
-  //   name: 'Tổ cắt',
-  //   path: 'cutting-group',
-  //   isGroup: false,
-  //   role: 'cutting_group_manager',
-  //   component: CuttingGroupPage,
-  //   icon: CutIcon
-  // },
+  {
+    key: '4',
+    name: 'Tổ cắt',
+    path: 'cutting-groups',
+    isGroup: false,
+    role: 'cutting_group_manager',
+    component: CuttingGroupPage,
+    icon: CutIcon
+  },
   // {
   //   key: '5',
   //   name: 'Chuyền may',

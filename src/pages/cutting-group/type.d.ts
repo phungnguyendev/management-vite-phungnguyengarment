@@ -1,9 +1,10 @@
-import { CuttingGroup, Product, ProductColor } from '~/typing'
+import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CuttingGroupTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  cuttingGroup: CuttingGroup
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  cuttingGroup?: CuttingGroup
 }
 
 export interface CuttingGroupNewRecordProps extends CuttingGroup {

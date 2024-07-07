@@ -23,6 +23,7 @@ export type InputType =
   | 'colorpicker'
   | 'select'
   | 'datepicker'
+  | 'dateTimePicker'
   | 'colorselector'
   | 'textarea'
   | 'checkbox'
@@ -219,9 +220,8 @@ export interface CuttingGroup {
   id?: number
   productID?: number
   quantityRealCut?: number
-  timeCut?: string
+  dateTimeCut?: string
   dateSendEmbroidered?: string
-  quantityArrivedEmbroidered?: number
   quantityDeliveredBTP?: number
   status?: ItemStatusType
   syncStatus?: boolean

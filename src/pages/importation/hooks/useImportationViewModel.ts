@@ -8,7 +8,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Importation, Product, ProductColor, ProductGroup } from '~/typing'
-import { dateComparator, numberComparator } from '~/utils/helpers'
+import { dateComparator, isValidArray, numberComparator } from '~/utils/helpers'
 import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
 export default function useImportationViewModel() {
@@ -342,6 +342,10 @@ export default function useImportationViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
+  const isChecked = (record: ImportationTableDataType): boolean | undefined => {
+    return isValidArray(record.expandableImportationTableDataTypes)
+  }
+
   return {
     state: {
       productColors,
@@ -365,6 +369,7 @@ export default function useImportationViewModel() {
       importationService
     },
     action: {
+      isChecked,
       loadData,
       handleAddNew,
       handleUpdate,
