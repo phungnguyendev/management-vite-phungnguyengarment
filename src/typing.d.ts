@@ -54,6 +54,7 @@ export interface UserRole {
   id?: number
   roleID?: number
   userID?: number
+  user?: User
   role?: Role
   status?: ItemStatusType
   createdAt?: string

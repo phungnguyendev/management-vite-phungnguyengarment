@@ -1,6 +1,5 @@
 import { App } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { useEffect, useState } from 'react'
 import ColorAPI from '~/api/services/ColorAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
@@ -21,56 +20,60 @@ export default function useColorViewModel() {
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ColorAddNewProps>({})
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
-
-  const [colors, setColors] = useState<Color[]>([])
 
   useEffect(() => {
-    loadData()
-  }, [showDeleted, shorted, paginator, searchText])
+    initialize()
+  }, [])
 
-  useEffect(() => {
-    mappedData()
-  }, [colors])
-
-  const mappedData = useCallback(() => {
+  const dataMapped = (colors: Color[]) => {
     table.setDataSource(() => {
-      const _dataSource = colors.map((self) => {
+      return colors.map((self) => {
         return {
           ...self,
           key: `${self.id}`
         } as ColorTableDataType
       })
-      return _dataSource
     })
-  }, [colors])
+  }
 
-  const loadData = useCallback(async () => {
+  const initialize = async () => {
     try {
-      await colorService.getItemsSync(
+      const result = await colorService.getItems(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'name', term: searchText }
+          paginator: { page: 1, pageSize: -1 }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          const _colors = meta.data as Color[]
-          setColors(_colors)
-        }
+        table.setLoading
       )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newColors = result.data as Color[]
+
+      dataMapped(newColors)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
       table.setLoading(false)
     }
-  }, [showDeleted, paginator, shorted, searchText])
+  }
+
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
+      const result = await colorService.getItems(
+        {
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'name', term: query.searchTerm }
+        },
+        table.setLoading
+      )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newColors = result.data as Color[]
+      dataMapped(newColors)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
 
   const handleUpdate = async (record: ColorTableDataType) => {
     try {
@@ -132,11 +135,11 @@ export default function useColorViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id?: number) => {
+  const handleDeleteForever = async (record: ColorTableDataType) => {
     try {
-      await colorService.deleteItemSync(id, table.setLoading, (res) => {
+      await colorService.deleteItemSync(record.id!, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('delete_failed'))
-        table.handleDeleting(`${id}`)
+        table.handleDeleting(record.key)
         message.success(define('deleted_success'))
       })
     } catch (error: any) {
@@ -150,27 +153,40 @@ export default function useColorViewModel() {
     try {
       await colorService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
         if (!meta.success) throw new Error(define('restore_failed'))
-        table.handleDeleting(`${record.id!}`)
+        table.handleDeleting(record.key)
         message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      loadData()
       table.setLoading(false)
     }
   }
 
-  const handlePageChange = async (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
+  const handlePageChange = async () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleSortChange = async (checked: boolean) => {
-    setSorted(checked)
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -190,7 +206,8 @@ export default function useColorViewModel() {
     },
     action: {
       handleUpdate,
-      handleSortChange,
+      handleSwitchSortChange,
+      handleSwitchDeleteChange,
       handleSearch,
       handleAddNew,
       handlePageChange,

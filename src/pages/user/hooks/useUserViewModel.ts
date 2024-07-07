@@ -1,6 +1,5 @@
 import { App as AntApp } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { useEffect, useState } from 'react'
 import RoleAPI from '~/api/services/RoleAPI'
 import UserAPI from '~/api/services/UserAPI'
 import UserRoleAPI from '~/api/services/UserRoleAPI'
@@ -21,31 +20,21 @@ export default function useUserViewModel() {
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<UserAddNewProps>({})
 
   // List
-  const [users, setUsers] = useState<User[]>([])
   const [roles, setRoles] = useState<Role[]>([])
   const [userRoles, setUserRoles] = useState<UserRole[]>([])
 
   useEffect(() => {
-    loadData()
-  }, [showDeleted, shorted, paginator, searchText])
+    initialize()
+  }, [])
 
-  useEffect(() => {
-    mappedData()
-  }, [users, roles, userRoles])
-
-  const mappedData = useCallback(() => {
+  const dataMapped = (users: User[], userRoles: UserRole[], roles: Role[]) => {
     table.setDataSource(() => {
-      const _dataSource = users.map((self) => {
+      return users.map((self) => {
         const userRoleIDsMapped = userRoles
           .filter((item) => item.userID === self.id)
           .map((item) => {
@@ -57,47 +46,47 @@ export default function useUserViewModel() {
           roles: roles.filter((item) => userRoleIDsMapped.includes(item.id))
         } as UserTableDataType
       })
-      return _dataSource
     })
-  }, [users, roles, userRoles])
+  }
 
-  const loadData = async () => {
+  const initialize = async () => {
     try {
-      await userService.getItemsSync(
-        {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'email', term: searchText }
-        },
-        table.setLoading,
-        (res) => {
-          if (!res.success) throw new Error(define('dataLoad_failed'))
-          const data = res.data as User[]
-          setUsers(data)
-        }
-      )
+      const userResult = await userService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      if (!userResult.success) throw new Error(define('dataLoad_failed'))
+      const newUsers = userResult.data as User[]
 
-      await userRoleService.getItemsSync(
-        {
-          paginator: {
-            page: 1,
-            pageSize: -1
-          }
-        },
-        table.setLoading,
-        (res) => {
-          if (!res.success) throw new Error(define('dataLoad_failed'))
-          const data = res.data as UserRole[]
-          setUserRoles(data)
-        }
-      )
+      const userRoleResult = await userRoleService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      if (!userRoleResult.success) throw new Error(define('dataLoad_failed'))
+      const newUserRoles = userRoleResult.data as UserRole[]
+      setUserRoles(newUserRoles)
 
-      await roleService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (res) => {
-        if (!res.success) throw new Error(define('dataLoad_failed'))
-        const data = res.data as Role[]
-        setRoles(data)
-      })
+      const roleResult = await roleService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      if (!roleResult.success) throw new Error(define('dataLoad_failed'))
+      const newRoles = roleResult.data as Role[]
+      setRoles(newRoles)
+
+      dataMapped(newUsers, newUserRoles, newRoles)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
+
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
+      const result = await userService.getItems(
+        {
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'email', term: query.searchTerm }
+        },
+        table.setLoading
+      )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newUsers = result.data as User[]
+
+      dataMapped(newUsers, userRoles, roles)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -107,7 +96,6 @@ export default function useUserViewModel() {
 
   const handleUpdate = async (record: UserTableDataType) => {
     try {
-      console.log({ record, newRecord })
       let newItemSource: UserTableDataType = record
       if (
         textComparator(newRecord.email, record.email) ||
@@ -119,17 +107,16 @@ export default function useUserViewModel() {
         textComparator(newRecord.birthday, record.birthday)
       ) {
         await userService.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(define('update_failed'))
+          if (!meta.success) throw new Error(define('update_failed'))
           const dataUpdated = meta.data as User
           newItemSource = { ...dataUpdated, key: record.key, roles: record.roles }
         })
       }
-      const itemsToUpdate = newRecord.roleIDs?.map((roleID) => {
-        return { userID: record.id, roleID } as UserRole
-      })
-      if (newRecord.roleIDs && newRecord.roleIDs.length <= 0) throw new Error(`User roles cannot be set blank!`)
+
+      if (!isValidArray(newRecord.roleIDs)) throw new Error(define('user_role_not_blank'))
       if (
-        isValidArray(itemsToUpdate) &&
+        isValidArray(newRecord.roleIDs) &&
+        isValidArray(record.roles) &&
         arrayComparator(
           newRecord.roleIDs,
           record.roles.map((item) => {
@@ -139,14 +126,18 @@ export default function useUserViewModel() {
       ) {
         await userRoleService.updateItemsSync(
           { field: 'userID', id: record.id! },
-          itemsToUpdate,
+          newRecord.roleIDs.map((roleID) => {
+            return { userID: record.id, roleID: roleID } as UserRole
+          }),
           table.setLoading,
           (res) => {
-            if (!res?.success) throw new Error(define('update_failed'))
-            const dataUpdated = res.data as UserRole[]
+            if (!res.success) throw new Error(define('update_failed'))
+            const updatedUserRoles = res.data as UserRole[]
             newItemSource = {
               ...newItemSource,
-              roles: roles.filter((item) => dataUpdated.some((self) => self.roleID === item.id))
+              roles: updatedUserRoles.map((item) => {
+                return item.role!
+              })
             }
           }
         )
@@ -238,16 +229,30 @@ export default function useUserViewModel() {
     }
   }
 
-  const handlePageChange = async (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
+  const handlePageChange = async () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleSortChange = async (checked: boolean) => {
-    setSorted(checked)
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -269,7 +274,8 @@ export default function useUserViewModel() {
     action: {
       loadData,
       handleUpdate,
-      handleSortChange,
+      handleSwitchDeleteChange,
+      handleSwitchSortChange,
       handleSearch,
       handleAddNew,
       handlePageChange,

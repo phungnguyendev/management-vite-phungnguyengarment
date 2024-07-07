@@ -1,6 +1,5 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
@@ -27,7 +26,6 @@ export default function useProductViewModel() {
   const groupService = useAPIService<Group>(GroupAPI)
   const printService = useAPIService<Group>(PrintAPI)
 
-  const [paginator, setPaginator] = useState<Paginator>({ page: 1, pageSize: -1 })
   const [searchText, setSearchText] = useState<string>('')
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
@@ -123,7 +121,7 @@ export default function useProductViewModel() {
   /**
    * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
    */
-  const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
     try {
       await productService.getItemsSync(
         {
@@ -148,28 +146,7 @@ export default function useProductViewModel() {
   /**
    * Function will be load data whenever edit button clicked
    */
-  const loadDataEditingChange = async () => {
-    // try {
-    //   if (isValidString(table.editingKey)) {
-    //     await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-    //       if (!result.success) throw new Error(define('dataLoad_failed'))
-    //       setColors(result.data as Color[])
-    //     })
-    //     await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-    //       if (!result.success) throw new Error(define('dataLoad_failed'))
-    //       setGroups(result.data as Group[])
-    //     })
-    //     await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-    //       if (!result.success) throw new Error(define('dataLoad_failed'))
-    //       setPrints(result.data as Print[])
-    //     })
-    //   }
-    // } catch (error: any) {
-    //   message.error(`${error.message}`)
-    // } finally {
-    //   table.setLoading(false)
-    // }
-  }
+  const loadDataEditingChange = async () => {}
 
   /**
    * Function update record
@@ -398,7 +375,6 @@ export default function useProductViewModel() {
       await productService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
         if (!meta?.success) throw new Error(define('restore_failed'))
         table.handleDeleting(record.key)
-        // table.handleUpdate(record.key, { ...record, status: 'active' })
         message.success(define('restored_success'))
       })
     } catch (error: any) {
@@ -411,17 +387,14 @@ export default function useProductViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = async (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
-    loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
-  }
+  const handlePageChange = async () => {}
 
   /**
    * Function handle switch delete button
    */
   const handleSwitchDeleteChange = (checked: boolean) => {
     setShowDeleted(checked)
-    loadData({ paginator, isDeleted: checked, searchTerm: searchText })
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
   /**
@@ -440,7 +413,7 @@ export default function useProductViewModel() {
    */
   const handleSearch = (value: string) => {
     setSearchText(value)
-    loadData({ paginator, isDeleted: showDeleted, searchTerm: value })
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {

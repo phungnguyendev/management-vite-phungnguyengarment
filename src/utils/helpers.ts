@@ -118,33 +118,9 @@ export const arrayComparator = <T>(array1?: T[], array2?: T[]): boolean => {
 
   // Kiểm tra xem phần tử nào của array1 không có trong array2 và ngược lại
   const diff1 = array1.filter((item) => !array2.includes(item))
-  const diff2 = array2.filter((item) => !array1.includes(item)) // array2: [b, y, f], array1: [a, b, c] => diff2 = [a, c]
+  const diff2 = array2.filter((item) => !array1.includes(item))
 
-  /** VD1: 2 mảng giống nhau chiều dài, khác nhau nội dung
-   * array1: [a, b, c] and array2: [b, y, f]
-   * => diff1 = [b, f]
-   * => diff2 = [a, c]
-   * ==> Không thể so sánh length giữa 2 mảng được
-   */
-
-  /** VD2: 2 mảng khác chiều dài, khác nội dung
-   * array1: [a, b, c, h] and array2: [e, d, f]
-   * => diff1 = [e, d, f]
-   * => diff2 = [a, b, c, h]
-   * ==> Không thể so sánh length giữa 2 mảng được
-   */
-
-  /** VD3: 2 mảng giống chiều dài, giống nội dung
-   * array1: [a, b, c] and array2: [a, b, c]
-   * => diff1 = []
-   * => diff2 = []
-   * ==> Không thể so sánh length giữa 2 mảng được
-   */
-
-  // Kết luận: Nếu diff1 và diff2 có => so sánh nội dung, ngược lại => false
-
-  // Trả về true nếu có bất kỳ sự khác biệt nào
-  return diff1.length > 0 && diff2.length > 0 ? diff1.some((item) => diff2.includes(item)) : false
+  return diff1.length > 0 || diff2.length > 0
 }
 
 export const isValidArray = <T>(arr?: T[] | null): arr is T[] => {

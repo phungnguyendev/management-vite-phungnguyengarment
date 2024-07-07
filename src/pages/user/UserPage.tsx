@@ -1,5 +1,5 @@
-import { Divider, Flex, Space } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { Space } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
@@ -7,7 +7,9 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
@@ -16,6 +18,7 @@ import {
   breakpoint,
   dateValidatorDisplay,
   dateValidatorInit,
+  isValidArray,
   textValidatorChange,
   textValidatorDisplay,
   textValidatorInit
@@ -26,33 +29,22 @@ import { UserTableDataType } from './type'
 
 const UserPage = () => {
   useTitle('Users - Phung Nguyen')
-  const { state, action, table } = useUserViewModel()
-  const { roles, newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
-  const {
-    handleAddNew,
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useUserViewModel()
   const { width } = useDevice()
 
   const columns = {
     email: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='email'
           title='Email'
           inputType='text'
           required
           defaultValue={textValidatorInit(record.email)}
-          value={newRecord.email}
+          value={viewModel.state.newRecord.email}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, email: textValidatorChange(val) }
             })
           }
@@ -64,15 +56,15 @@ const UserPage = () => {
     fullName: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='fullName'
           title='Full name'
           inputType='text'
           required
           defaultValue={textValidatorInit(record.fullName)}
-          value={newRecord.fullName}
+          value={viewModel.state.newRecord.fullName}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, fullName: textValidatorChange(val) }
             })
           }
@@ -84,15 +76,15 @@ const UserPage = () => {
     password: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='password'
           title='Password'
           inputType='password'
           required
           defaultValue={textValidatorInit(record.password)}
-          value={newRecord.password}
+          value={viewModel.state.newRecord.password}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, password: textValidatorChange(val) }
             })
           }
@@ -104,15 +96,15 @@ const UserPage = () => {
     phone: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='phone'
           title='Phone'
           inputType='text'
           required
           defaultValue={textValidatorInit(record.phone)}
-          value={newRecord.phone}
+          value={viewModel.state.newRecord.phone}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, phone: textValidatorChange(val) }
             })
           }
@@ -126,16 +118,16 @@ const UserPage = () => {
     workDescription: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='workDescription'
           title='Work description'
           inputType='textarea'
           required
           placeholder='Ví dụ: Quản lý sản phẩm, Quản lý xuất nhập khẩu,...'
           defaultValue={textValidatorInit(record.workDescription)}
-          value={newRecord.workDescription}
+          value={viewModel.state.newRecord.workDescription}
           onValueChange={(val: string) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, workDescription: textValidatorChange(val) }
             })
           }
@@ -147,14 +139,14 @@ const UserPage = () => {
     birthday: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='birthday'
           title='Birthday'
           inputType='datepicker'
           required
           defaultValue={dateValidatorInit(record.birthday)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord((prev) => {
+            viewModel.state.setNewRecord((prev) => {
               return { ...prev, birthday: dateFormatter(val.toDate(), 'iso8601') }
             })
           }
@@ -166,33 +158,45 @@ const UserPage = () => {
     role: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='roles'
           title='Vai trò'
           inputType='multipleselect'
           required
           selectProps={{
-            options: roles.map((role) => {
+            options: viewModel.state.roles.map((role) => {
               return {
                 value: role.id,
-                label: <SkyTableRowHighLightItem title={role.desc} role={role.role} />
+                label: (
+                  <SkyTableRowHighLightItem
+                    title={role.desc}
+                    role={role.role}
+                    type={role.role === 'admin' ? 'success' : undefined}
+                  />
+                )
               }
             }),
-            defaultValue: record.roles.map((role) => {
+            defaultValue: record.roles?.map((role) => {
               return {
                 value: role.id,
-                label: <SkyTableRowHighLightItem title={role.desc} role={role.role} />
+                label: (
+                  <SkyTableRowHighLightItem
+                    title={role.desc}
+                    role={role.role}
+                    type={role.role === 'admin' ? 'success' : undefined}
+                  />
+                )
               }
             })
           }}
           onValueChange={(roleIDs: number[]) => {
-            setNewRecord((prevData) => {
+            viewModel.state.setNewRecord((prevData) => {
               return { ...prevData, roleIDs: roleIDs }
             })
           }}
         >
           <Space size='small' wrap>
-            {record.roles.map((role, index) => {
+            {record.roles?.map((role, index) => {
               return (
                 <SkyTableRowHighLightItem
                   key={index}
@@ -280,110 +284,141 @@ const UserPage = () => {
     }
   ]
 
+  const actionCol: ColumnType<UserTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: UserTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                fullName: record.fullName,
+                email: record.email,
+                password: record.password,
+                avatar: record.avatar,
+                phone: record.phone,
+                otp: record.otp,
+                isAdmin: record.isAdmin,
+                workDescription: record.workDescription,
+                birthday: record.birthday,
+                roleIDs: isValidArray(record.roles)
+                  ? record.roles.map((item) => {
+                      return item.id!
+                    })
+                  : undefined
+              })
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore(record)}
+          // Show hide action col
+        />
+      )
+    }
+  }
+
   return (
     <ProtectedLayout>
       <BaseLayout
         title='Danh sách người dùng'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
+          onSearch: viewModel.action.handleSearch,
           placeholder: 'Ví dụ: abc@gmail.com'
         }}
         sortProps={{
-          onChange: handleSortChange
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: setShowDeleted
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
         addNewProps={{
-          onClick: () => setOpenModal(true)
+          onClick: () => viewModel.state.setOpenModal(true)
         }}
       >
         <SkyTable
-          bordered
-          loading={table.loading}
+          loading={viewModel.table.loading}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
-          actionProps={{
-            onEdit: {
-              handleClick: (record) => {
-                setNewRecord({
-                  ...record,
-                  roleIDs:
-                    record.roles &&
-                    record.roles.map((item) => {
-                      return item.id!
-                    })
-                })
-                table.handleStartEditing(record.key)
-              },
-              isShow: !showDeleted
-            },
-            onSave: {
-              handleClick: (record) => handleUpdate(record),
-              isShow: !showDeleted
-            },
-            onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
-            },
-            onDeleteForever: {
-              isShow: showDeleted
-            },
-            onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
-            },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record),
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
-            isShow: true
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex vertical className='w-full lg:w-1/2'>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
-                    {!(width >= breakpoint.lg) && (
-                      <SkyTableExpandableItemRow title='Email:' isEditing={table.isEditing(record.id!)}>
-                        {columns.email(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.sm) && (
-                      <SkyTableExpandableItemRow title='Roles:' isEditing={table.isEditing(record.id!)}>
-                        {columns.role(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.md) && (
-                      <SkyTableExpandableItemRow title='Password:' isEditing={table.isEditing(record.id!)}>
-                        {columns.password(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xxl) && (
-                      <SkyTableExpandableItemRow title='Phone:' isEditing={table.isEditing(record.id!)}>
-                        {columns.phone(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xxl) && (
-                      <SkyTableExpandableItemRow title='Work description:' isEditing={table.isEditing(record.id!)}>
-                        {columns.workDescription(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xxl) && (
-                      <SkyTableExpandableItemRow title='Birthday:' isEditing={table.isEditing(record.id!)}>
-                        {columns.birthday(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                  </Space>
-                </Flex>
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.lg) && (
+                    <SkyTableExpandableItemRow title='Email:' isEditing={viewModel.table.isEditing(record.id!)}>
+                      {columns.email(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow title='Roles:' isEditing={viewModel.table.isEditing(record.id!)}>
+                      {columns.role(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <SkyTableExpandableItemRow title='Password:' isEditing={viewModel.table.isEditing(record.id!)}>
+                      {columns.password(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow title='Phone:' isEditing={viewModel.table.isEditing(record.id!)}>
+                      {columns.phone(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow
+                      title='Work description:'
+                      isEditing={viewModel.table.isEditing(record.id!)}
+                    >
+                      {columns.workDescription(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow title='Birthday:' isEditing={viewModel.table.isEditing(record.id!)}>
+                      {columns.birthday(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                </SkyTableExpandableLayout>
               )
             },
             columnWidth: '0.001%',
@@ -391,12 +426,12 @@ const UserPage = () => {
           }}
         />
       </BaseLayout>
-      {openModal && (
+      {viewModel.state.openModal && (
         <ModalAddNewUser
-          okButtonProps={{ loading: table.loading }}
-          open={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNew}
+          okButtonProps={{ loading: viewModel.table.loading }}
+          open={viewModel.state.openModal}
+          setOpenModal={viewModel.state.setOpenModal}
+          onAddNew={viewModel.action.handleAddNew}
         />
       )}
     </ProtectedLayout>

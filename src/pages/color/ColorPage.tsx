@@ -1,5 +1,5 @@
 import { Color as AntColor } from 'antd/es/color-picker'
-import { ColumnsType } from 'antd/es/table'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import { ColorPicker } from 'antd/lib'
 import { memo } from 'react'
 import useTitle from '~/components/hooks/useTitle'
@@ -7,6 +7,7 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import ProtectedLayout from '~/components/layout/ProtectedLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { colorValidatorChange, textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
@@ -17,18 +18,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ColorPage: React.FC<Props> = () => {
   useTitle('Colors | Phung Nguyen')
-  const { state, action, table } = useColorViewModel()
-  const { newRecord, setNewRecord, openModal, setOpenModal, showDeleted, setShowDeleted } = state
-  const {
-    handleAddNew,
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useColorViewModel()
 
   const tableColumns: ColumnsType<ColorTableDataType> = [
     {
@@ -38,15 +28,15 @@ const ColorPage: React.FC<Props> = () => {
       render: (_value: any, record: ColorTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
+            isEditing={viewModel.table.isEditing(record.key!)}
             dataIndex='name'
             title='Tên màu'
             inputType='text'
             required={true}
             defaultValue={record.name}
-            value={newRecord.name}
+            value={viewModel.state.newRecord.name}
             onValueChange={(val) =>
-              setNewRecord((prev) => {
+              viewModel.state.setNewRecord((prev) => {
                 return { ...prev, name: textValidatorChange(val.trim()) }
               })
             }
@@ -63,16 +53,16 @@ const ColorPage: React.FC<Props> = () => {
       render: (_, record: ColorTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
+            isEditing={viewModel.table.isEditing(record.key!)}
             dataIndex='hexColor'
             title='Mã màu'
             inputType='colorpicker'
             required={true}
             className='w-fit'
             defaultValue={record.hexColor}
-            value={newRecord.hexColor}
+            value={viewModel.state.newRecord.hexColor}
             onValueChange={(val: AntColor) =>
-              setNewRecord((prev) => {
+              viewModel.state.setNewRecord((prev) => {
                 return { ...prev, hexColor: colorValidatorChange(val) }
               })
             }
@@ -90,74 +80,96 @@ const ColorPage: React.FC<Props> = () => {
     }
   ]
 
+  const actionCol: ColumnType<ColorTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ColorTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({ ...record })
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore(record)}
+          // Show hide action col
+        />
+      )
+    }
+  }
+
   return (
     <ProtectedLayout>
       <BaseLayout
         title='Danh sách màu'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
+          onSearch: viewModel.action.handleSearch,
           placeholder: 'Ví dụ: Black, White,..'
         }}
         sortProps={{
-          onChange: handleSortChange
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: setShowDeleted
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
         addNewProps={{
-          onClick: () => setOpenModal(true)
+          onClick: () => viewModel.state.setOpenModal(true)
         }}
       >
         <SkyTable
-          bordered
-          loading={table.loading}
+          loading={viewModel.table.loading}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
-          actionProps={{
-            onEdit: {
-              handleClick: (record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record.key)
-              },
-              isShow: !showDeleted
-            },
-            onSave: {
-              handleClick: (record) => handleUpdate(record),
-              isShow: !showDeleted
-            },
-            onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
-            },
-            onDeleteForever: {
-              isShow: showDeleted
-            },
-            onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
-            },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
-            isShow: true
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
         />
       </BaseLayout>
-      {openModal && (
+      {viewModel.state.openModal && (
         <ModalAddNewColor
-          okButtonProps={{ loading: table.loading }}
-          open={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNew}
+          okButtonProps={{ loading: viewModel.table.loading }}
+          open={viewModel.state.openModal}
+          setOpenModal={viewModel.state.setOpenModal}
+          onAddNew={viewModel.action.handleAddNew}
         />
       )}
     </ProtectedLayout>

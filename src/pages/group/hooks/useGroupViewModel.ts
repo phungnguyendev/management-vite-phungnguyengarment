@@ -1,6 +1,5 @@
 import { App as AntApp } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { useEffect, useState } from 'react'
 import GroupAPI from '~/api/services/GroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
@@ -21,55 +20,60 @@ export default function useGroupViewModel() {
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<GroupAddNewProps>({})
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
-  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
-    loadData()
-  }, [showDeleted, shorted, paginator, searchText])
+    initialize()
+  }, [])
 
-  useEffect(() => {
-    mappedData()
-  }, [groups])
-
-  const mappedData = useCallback(() => {
+  const dataMapped = (groups: Group[]) => {
     table.setDataSource(() => {
-      const _dataSource = groups.map((self) => {
+      return groups.map((self) => {
         return {
           ...self,
           key: `${self.id}`
         } as GroupTableDataType
       })
-      return _dataSource
     })
-  }, [groups])
+  }
 
-  const loadData = useCallback(async () => {
+  const initialize = async () => {
     try {
-      await groupService.getItemsSync(
+      const result = await groupService.getItems(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'name', term: searchText }
+          paginator: { page: 1, pageSize: -1 }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          const _groups = meta.data as Group[]
-          setGroups(_groups)
-        }
+        table.setLoading
       )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newGroups = result.data as Group[]
+
+      dataMapped(newGroups)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
       table.setLoading(false)
     }
-  }, [showDeleted, paginator, shorted, searchText])
+  }
+
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
+      const result = await groupService.getItems(
+        {
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'name', term: query.searchTerm }
+        },
+        table.setLoading
+      )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newGroups = result.data as Group[]
+      dataMapped(newGroups)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
 
   const handleUpdate = async (record: GroupTableDataType) => {
     try {
@@ -125,12 +129,11 @@ export default function useGroupViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id?: number) => {
-    console.log(id)
+  const handleDeleteForever = async (record: GroupTableDataType) => {
     try {
-      await groupService.deleteItemSync(id, table.setLoading, (res) => {
+      await groupService.deleteItemSync(record.id!, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('delete_failed'))
-        table.handleDeleting(`${id}`)
+        table.handleDeleting(record.key)
         message.success(define('deleted_success'))
       })
     } catch (error: any) {
@@ -144,27 +147,40 @@ export default function useGroupViewModel() {
     try {
       await groupService.updateItemByPkSync(record.id!, { status: 'active' }, table.setLoading, (meta) => {
         if (!meta.success) throw new Error(define('restore_failed'))
-        table.handleDeleting(`${record.id!}`)
+        table.handleDeleting(record.key)
         message.success(define('restored_success'))
       })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      loadData()
       table.setLoading(false)
     }
   }
 
-  const handlePageChange = async (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
+  const handlePageChange = async () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleSortChange = async (checked: boolean) => {
-    setSorted(checked)
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -184,7 +200,8 @@ export default function useGroupViewModel() {
     action: {
       loadData,
       handleUpdate,
-      handleSortChange,
+      handleSwitchSortChange,
+      handleSwitchDeleteChange,
       handleSearch,
       handleAddNew,
       handlePageChange,

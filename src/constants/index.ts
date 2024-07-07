@@ -20,6 +20,7 @@ export type DefineType =
   | 'password_reset_successful'
   | 'login_success'
   | 'login_failed'
+  | 'user_role_not_blank'
 
 const define = (type: DefineType): string => {
   switch (type) {
@@ -61,6 +62,8 @@ const define = (type: DefineType): string => {
       return 'Đăng nhập thất bại!'
     case 'login_success':
       return 'Đăng nhập thành công!'
+    case 'user_role_not_blank':
+      return 'User roles cannot be set blank!'
     case 'login_session_expired':
       return 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!'
     default:

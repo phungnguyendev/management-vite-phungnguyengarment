@@ -361,56 +361,32 @@ const ProductPage = () => {
               return (
                 <SkyTableExpandableLayout>
                   {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Số lượng PO:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.quantityPO(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Màu:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.productColor(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.xl) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Nhóm:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.productGroup(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Nơi in:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.printablePlace(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow
-                      title='Ngày nhập NPL:'
-                      className='flex w-1/2 lg:hidden'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Ngày nhập NPL:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.lg) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày xuất FCR:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
+                    <SkyTableExpandableItemRow title='Ngày xuất FCR:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.dateInputNPL(record)}
                     </SkyTableExpandableItemRow>
                   )}

@@ -1,6 +1,5 @@
 import { App as AntApp } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
+import { useEffect, useState } from 'react'
 import SewingLineAPI from '~/api/services/SewingLineAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
@@ -21,62 +20,66 @@ export default function useSewingLineViewModel() {
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<SewingLineAddNewProps>({})
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
-  const [shorted, setSorted] = useState<boolean>(false)
-
-  const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
 
   useEffect(() => {
-    loadData()
-  }, [showDeleted, shorted, paginator, searchText])
+    initialize()
+  }, [])
 
-  useEffect(() => {
-    mappedData()
-  }, [sewingLines])
-
-  const mappedData = useCallback(() => {
+  const dataMapped = (groups: SewingLine[]) => {
     table.setDataSource(() => {
-      const _dataSource = sewingLines.map((self) => {
+      return groups.map((self) => {
         return {
           ...self,
           key: `${self.id}`
         } as SewingLineTableDataType
       })
-      return _dataSource
     })
-  }, [sewingLines])
+  }
 
-  const loadData = useCallback(async () => {
+  const initialize = async () => {
     try {
-      await sewingLineService.getItemsSync(
+      const result = await sewingLineService.getItems(
         {
-          paginator: paginator,
-          sorting: { column: 'id', direction: shorted ? 'asc' : 'desc' },
-          filter: { field: 'id', items: [-1], status: showDeleted ? 'deleted' : 'active' },
-          search: { field: 'name', term: searchText }
+          paginator: { page: 1, pageSize: -1 }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(define('dataLoad_failed'))
-          const _sewingLines = meta.data as SewingLine[]
-          setSewingLines(_sewingLines)
-        }
+        table.setLoading
       )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newSewingLines = result.data as SewingLine[]
+
+      dataMapped(newSewingLines)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
       table.setLoading(false)
     }
-  }, [showDeleted, paginator, shorted, searchText])
+  }
+
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
+      const result = await sewingLineService.getItems(
+        {
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'name', term: query.searchTerm }
+        },
+        table.setLoading
+      )
+      if (!result.success) throw new Error(define('dataLoad_failed'))
+      const newSewingLines = result.data as SewingLine[]
+      dataMapped(newSewingLines)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
 
   const handleUpdate = async (record: SewingLineTableDataType) => {
     try {
       if (textComparator(record.name, newRecord.name)) {
         await sewingLineService.updateItemByPkSync(record.id!, { name: newRecord.name }, table.setLoading, (meta) => {
-          if (!meta?.success) throw new Error(define('update_failed'))
+          if (!meta.success) throw new Error(define('update_failed'))
           const itemUpdated = meta.data as SewingLine
           table.handleUpdate(record.key, { ...itemUpdated, key: `${itemUpdated.id}` } as SewingLineTableDataType)
           message.success(define('updated_success'))
@@ -98,7 +101,7 @@ export default function useSewingLineViewModel() {
         },
         table.setLoading,
         (meta) => {
-          if (!meta?.success) throw new Error(define('create_failed'))
+          if (!meta.success) throw new Error(define('create_failed'))
           const newSewingLine = meta.data as SewingLine
           table.handleAddNew({ ...newSewingLine, key: `${newSewingLine.id}` })
           message.success(define('created_success'))
@@ -115,7 +118,7 @@ export default function useSewingLineViewModel() {
   const handleDelete = async (record: SewingLineTableDataType) => {
     try {
       await sewingLineService.updateItemByPkSync(record.id!, { status: 'deleted' }, table.setLoading, (meta) => {
-        if (!meta?.success) throw new Error(define('delete_failed'))
+        if (!meta.success) throw new Error(define('delete_failed'))
         table.handleDeleting(record.key)
         message.success(define('deleted_success'))
       })
@@ -126,11 +129,11 @@ export default function useSewingLineViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id?: number) => {
+  const handleDeleteForever = async (recrod: SewingLineTableDataType) => {
     try {
-      await sewingLineService.deleteItemSync(id, table.setLoading, (res) => {
+      await sewingLineService.deleteItemSync(recrod.id!, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('delete_failed'))
-        table.handleDeleting(`${id}`)
+        table.handleDeleting(recrod.key)
         message.success(define('deleted_success'))
       })
     } catch (error: any) {
@@ -154,16 +157,30 @@ export default function useSewingLineViewModel() {
     }
   }
 
-  const handlePageChange = async (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
+  const handlePageChange = async () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
-  const handleSortChange = async (checked: boolean) => {
-    setSorted(checked)
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
   }
 
   const handleSearch = async (value: string) => {
     setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -183,7 +200,8 @@ export default function useSewingLineViewModel() {
     action: {
       loadData,
       handleUpdate,
-      handleSortChange,
+      handleSwitchDeleteChange,
+      handleSwitchSortChange,
       handleSearch,
       handleAddNew,
       handlePageChange,
