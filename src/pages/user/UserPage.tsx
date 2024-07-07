@@ -194,9 +194,12 @@ const UserPage = () => {
           <Space size='small' wrap>
             {record.roles.map((role, index) => {
               return (
-                <span key={index}>
-                  <SkyTableRowHighLightItem title={role.desc} role={role.role} background />
-                </span>
+                <SkyTableRowHighLightItem
+                  key={index}
+                  title={role.desc}
+                  type={role.role === 'admin' ? 'success' : undefined}
+                  background
+                />
               )
             })}
           </Space>
@@ -336,7 +339,7 @@ const UserPage = () => {
               handleClick: (record) => table.handleStartRestore(record.key),
               isShow: showDeleted
             },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
+            onConfirmDeleteForever: (record) => handleDeleteForever(record),
             onConfirmCancelEditing: () => table.handleCancelEditing(),
             onConfirmCancelDeleting: () => table.handleCancelDeleting(),
             onConfirmDelete: (record) => handleDelete(record),

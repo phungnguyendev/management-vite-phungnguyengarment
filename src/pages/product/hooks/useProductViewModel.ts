@@ -13,7 +13,7 @@ import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductAddNewProps, ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
-import { dateComparator, isValidNumber, isValidString, numberComparator, textComparator } from '~/utils/helpers'
+import { dateComparator, isValidNumber, numberComparator, textComparator } from '~/utils/helpers'
 
 export default function useProductViewModel() {
   const { message } = AntApp.useApp()
@@ -100,6 +100,19 @@ export default function useProductViewModel() {
       setPrintablePlaces(newPrintablePlaces)
 
       dataMapped(newProducts, newProductColors, newProductGroups, newPrintablePlaces)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
+      await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setPrints(result.data as Print[])
+      })
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -114,7 +127,7 @@ export default function useProductViewModel() {
     try {
       await productService.getItemsSync(
         {
-          paginator: query.paginator,
+          paginator: { page: 1, pageSize: -1 },
           filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
           search: { field: 'productCode', term: query.searchTerm }
         },
@@ -136,26 +149,26 @@ export default function useProductViewModel() {
    * Function will be load data whenever edit button clicked
    */
   const loadDataEditingChange = async () => {
-    try {
-      if (isValidString(table.editingKey)) {
-        await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-          if (!result.success) throw new Error(define('dataLoad_failed'))
-          setColors(result.data as Color[])
-        })
-        await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-          if (!result.success) throw new Error(define('dataLoad_failed'))
-          setGroups(result.data as Group[])
-        })
-        await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
-          if (!result.success) throw new Error(define('dataLoad_failed'))
-          setPrints(result.data as Print[])
-        })
-      }
-    } catch (error: any) {
-      message.error(`${error.message}`)
-    } finally {
-      table.setLoading(false)
-    }
+    // try {
+    //   if (isValidString(table.editingKey)) {
+    //     await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+    //       if (!result.success) throw new Error(define('dataLoad_failed'))
+    //       setColors(result.data as Color[])
+    //     })
+    //     await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+    //       if (!result.success) throw new Error(define('dataLoad_failed'))
+    //       setGroups(result.data as Group[])
+    //     })
+    //     await printService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+    //       if (!result.success) throw new Error(define('dataLoad_failed'))
+    //       setPrints(result.data as Print[])
+    //     })
+    //   }
+    // } catch (error: any) {
+    //   message.error(`${error.message}`)
+    // } finally {
+    //   table.setLoading(false)
+    // }
   }
 
   /**
@@ -163,6 +176,7 @@ export default function useProductViewModel() {
    */
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
+      console.log({ newRecord, record })
       let updatedProduct: ProductTableDataType = record
       if (
         textComparator(newRecord.productCode, record.productCode) ||
@@ -219,7 +233,27 @@ export default function useProductViewModel() {
           }
         )
       }
+
+      if (!record.printablePlace) {
+        console.log('Create')
+        await printablePlaceService.createItemSync(
+          { productID: record.id!, printID: newRecord.printID },
+          table.setLoading,
+          (meta) => {
+            if (!meta.success) throw new Error(define('update_failed'))
+            const newPrintablePlace = meta.data as PrintablePlace
+            console.log(newPrintablePlace)
+            updatedProduct = {
+              ...updatedProduct,
+              printablePlace: newPrintablePlace
+            }
+          }
+        )
+      }
+
+      // Thêm mới hoặc cập nhật PrintablePlace vì không bắt buộc trong mục thêm mới
       if (numberComparator(newRecord.printID, record.printablePlace?.printID)) {
+        console.log('Update')
         await printablePlaceService.updateItemBySync(
           { field: 'productID', id: record.id! },
           { printID: newRecord.printID },
@@ -227,6 +261,7 @@ export default function useProductViewModel() {
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
             const newPrintablePlace = meta.data as PrintablePlace
+            console.log(newPrintablePlace)
             updatedProduct = {
               ...updatedProduct,
               printablePlace: newPrintablePlace

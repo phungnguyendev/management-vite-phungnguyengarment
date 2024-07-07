@@ -1,6 +1,5 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
 import ImportationAPI from '~/api/services/ImportationAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -25,10 +24,6 @@ export default function useImportationViewModel() {
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
-  const [paginator, setPaginator] = useState<Paginator>({
-    page: 1,
-    pageSize: -1
-  })
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ImportationExpandableAddNewProps>({})
@@ -117,21 +112,30 @@ export default function useImportationViewModel() {
   /**
    * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
    */
-  const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
     try {
-      await productService.getItemsSync(
+      const productResult = await productService.getItems(
         {
-          paginator: query.paginator,
+          paginator: { page: 1, pageSize: -1 },
           filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
           search: { field: 'productCode', term: query.searchTerm }
         },
-        table.setLoading,
-        (meta) => {
-          if (!meta.success) throw new Error(define('dataLoad_failed'))
-          const newProducts = meta.data as Product[]
-          dataMapped(newProducts, productColors, productGroups, importations)
-        }
+        table.setLoading
       )
+
+      if (!productResult.success) throw new Error(define('dataLoad_failed'))
+      const newProducts = productResult.data as Product[]
+
+      const importationResult = await importationService.getItems(
+        {
+          paginator: { page: 1, pageSize: -1 }
+        },
+        table.setLoading
+      )
+      if (!importationResult.success) throw new Error(define('dataLoad_failed'))
+      const newImportations = importationResult.data as Importation[]
+
+      dataMapped(newProducts, productColors, productGroups, newImportations)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -302,10 +306,14 @@ export default function useImportationViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
-    loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
+  const handlePageChange = () => {
+    // loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
   }
+
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageExpandedChange = () => {}
 
   /**
    * Function handle switch sort button
@@ -323,7 +331,7 @@ export default function useImportationViewModel() {
    */
   const handleSwitchDeleteChange = (checked: boolean) => {
     setShowDeleted(checked)
-    loadData({ paginator, isDeleted: checked, searchTerm: searchText })
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
   /**
@@ -331,7 +339,7 @@ export default function useImportationViewModel() {
    */
   const handleSearch = (value: string) => {
     setSearchText(value)
-    loadData({ paginator, isDeleted: showDeleted, searchTerm: value })
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {
@@ -364,6 +372,7 @@ export default function useImportationViewModel() {
       handleSwitchDeleteChange,
       handleSearch,
       handlePageChange,
+      handlePageExpandedChange,
       handleDelete,
       handleDeleteForever,
       handleRestore

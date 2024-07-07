@@ -13,6 +13,7 @@ import { breakpoint, numberValidatorCalc, numberValidatorDisplay, textValidatorD
 import StatisticSlide from './components/StatisticSlide'
 import useDashboard from './hooks/useDashboardViewModel'
 import { DashboardTableDataType } from './type'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 
 const Dashboard = () => {
   const table = useTable<DashboardTableDataType>([])
@@ -50,9 +51,7 @@ const Dashboard = () => {
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
+            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )

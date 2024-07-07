@@ -1,7 +1,5 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { Paginator } from '~/api/client'
-import PrintablePlaceAPI from '~/api/services/PrintablePlaceAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
@@ -9,7 +7,7 @@ import SampleSewingAPI from '~/api/services/SampleSewingAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { PrintablePlace, Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
+import { Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
 import { dateComparator } from '~/utils/helpers'
 import { SampleSewingAddNewProps, SampleSewingTableDataType } from '../type'
 
@@ -21,12 +19,10 @@ export default function useSampleSewingViewModel() {
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
-  const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const sampleSewingService = useAPIService<SampleSewing>(SampleSewingAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
-  const [paginator, setPaginator] = useState<Paginator>({ page: 1, pageSize: -1 })
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchTextChange, setSearchTextChange] = useState<string>('')
   const [searchText, setSearchText] = useState<string>('')
@@ -35,7 +31,6 @@ export default function useSampleSewingViewModel() {
   // List
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
-  const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
   const [sampleSewings, setSampleSewings] = useState<SampleSewing[]>([])
 
   useEffect(() => {
@@ -53,7 +48,6 @@ export default function useSampleSewingViewModel() {
     products: Product[],
     productColors: ProductColor[],
     productGroups: ProductGroup[],
-    printablePlaces: PrintablePlace[],
     sampleSewings: SampleSewing[]
   ) => {
     const newDataSource = products.map((product) => {
@@ -62,7 +56,6 @@ export default function useSampleSewingViewModel() {
         key: `${product.id}`,
         productColor: productColors.find((item) => item.productID === product.id),
         productGroup: productGroups.find((item) => item.productID === product.id),
-        printablePlace: printablePlaces.find((item) => item.productID === product.id),
         sampleSewing: sampleSewings.find((item) => item.productID === product.id)
       } as SampleSewingTableDataType
     })
@@ -91,13 +84,6 @@ export default function useSampleSewingViewModel() {
       const newProductGroups = productGroupsResult.data as ProductGroup[]
       setProductGroups(newProductGroups)
 
-      const printablePlacesResult = await printablePlaceService.getItems(
-        { paginator: { page: 1, pageSize: -1 } },
-        table.setLoading
-      )
-      const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
-      setPrintablePlaces(newPrintablePlaces)
-
       const sampleSewingResult = await sampleSewingService.getItems(
         { paginator: { page: 1, pageSize: -1 } },
         table.setLoading
@@ -105,7 +91,7 @@ export default function useSampleSewingViewModel() {
       const newSampleSewing = sampleSewingResult.data as SampleSewing[]
       setSampleSewings(newSampleSewing)
 
-      dataMapped(newProducts, newProductColors, newProductGroups, newPrintablePlaces, newSampleSewing)
+      dataMapped(newProducts, newProductColors, newProductGroups, newSampleSewing)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -116,11 +102,11 @@ export default function useSampleSewingViewModel() {
   /**
    * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
    */
-  const loadData = async (query: { paginator: Paginator; isDeleted: boolean; searchTerm: string }) => {
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
     try {
       await productService.getItemsSync(
         {
-          paginator: query.paginator,
+          paginator: { page: 1, pageSize: -1 },
           filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
           search: { field: 'productCode', term: query.searchTerm }
         },
@@ -128,7 +114,7 @@ export default function useSampleSewingViewModel() {
         (meta) => {
           if (!meta.success) throw new Error(define('dataLoad_failed'))
           const newProducts = meta.data as Product[]
-          dataMapped(newProducts, productColors, productGroups, printablePlaces, sampleSewings)
+          dataMapped(newProducts, productColors, productGroups, sampleSewings)
         }
       )
     } catch (error: any) {
@@ -241,17 +227,14 @@ export default function useSampleSewingViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = (page: number, pageSize: number) => {
-    setPaginator({ page, pageSize })
-    loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
-  }
+  const handlePageChange = () => {}
 
   /**
    * Function handle switch delete button
    */
   const handleSwitchDeleteChange = (checked: boolean) => {
     setShowDeleted(checked)
-    loadData({ paginator, isDeleted: checked, searchTerm: searchText })
+    loadData({ isDeleted: checked, searchTerm: searchText })
   }
 
   /**
@@ -270,7 +253,7 @@ export default function useSampleSewingViewModel() {
    */
   const handleSearch = (value: string) => {
     setSearchText(value)
-    loadData({ paginator, isDeleted: showDeleted, searchTerm: value })
+    loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
   return {

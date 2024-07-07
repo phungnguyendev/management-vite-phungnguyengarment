@@ -17,8 +17,6 @@ export type SortDirection = 'asc' | 'desc'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
-export type NoteItemStatusType = 'lake' | 'enough' | 'arrived' | 'not_arrived'
-
 export type InputType =
   | 'number'
   | 'text'
@@ -161,6 +159,7 @@ export interface GarmentAccessory {
   passingDeliveryDate?: string
   status?: ItemStatusType
   syncStatus?: boolean
+  notes?: string
   product?: Product
   createdAt?: string
   updatedAt?: string
@@ -177,16 +176,14 @@ export interface AccessoryNote {
 
 export interface GarmentAccessoryNote {
   id?: number
-  productID?: number
-  product?: Product
   accessoryNoteID?: number
-  accessoryNote?: AccessoryNote
   garmentAccessoryID?: number
-  garmentAccessory?: GarmentAccessory
-  noteStatus?: NoteItemStatusType
   status?: ItemStatusType
   createdAt?: string
   updatedAt?: string
+  product?: Product
+  garmentAccessory?: GarmentAccessory
+  accessoryNote?: AccessoryNote
 }
 
 export interface Importation {

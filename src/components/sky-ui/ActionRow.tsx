@@ -6,7 +6,7 @@ import { cn } from '~/utils/helpers'
 export interface ActionButtonProps<T extends { key: string }> {
   handleClick?: (record: T) => void
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void
-  isShow?: boolean | true
+  isShow?: (record: T) => boolean
   title?: string
   disabled?: boolean
   type?: ButtonType

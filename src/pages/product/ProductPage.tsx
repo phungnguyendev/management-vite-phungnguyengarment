@@ -1,4 +1,4 @@
-import { ColorPicker, Flex } from 'antd'
+import { Flex } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
@@ -6,6 +6,8 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
@@ -97,7 +99,7 @@ const ProductPage = () => {
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
-            <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )
@@ -190,6 +192,63 @@ const ProductPage = () => {
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateOutputFCR)}</SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    actionCol: (record: ProductTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                productCode: record.productCode,
+                quantityPO: record.quantityPO,
+                colorID: record.productColor?.colorID,
+                groupID: record.productGroup?.groupID,
+                printID: record.printablePlace?.printID,
+                dateInputNPL: record.dateInputNPL,
+                dateOutputFCR: record.dateOutputFCR
+              })
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: true
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore(record)}
+          // Show hide action col
+        />
+      )
     }
   }
 
@@ -203,21 +262,21 @@ const ProductPage = () => {
       }
     },
     {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '7%',
-      responsive: ['sm'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return columns.quantityPO(record)
-      }
-    },
-    {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productColor(record)
+      }
+    },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '7%',
+      responsive: ['sm'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.quantityPO(record)
       }
     },
     {
@@ -258,6 +317,14 @@ const ProductPage = () => {
     }
   ]
 
+  const actionCol: ColumnType<ProductTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <BaseLayout
@@ -282,58 +349,13 @@ const ProductPage = () => {
         }}
       >
         <SkyTable
-          bordered
           loading={viewModel.table.loading}
-          columns={tableColumns}
-          editingKey={viewModel.table.editingKey}
-          deletingKey={viewModel.table.deletingKey}
-          dataSource={viewModel.table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={viewModel.action.handlePageChange}
-          isShowDeleted={viewModel.state.showDeleted}
-          actionProps={{
-            onEdit: {
-              // Start editing
-              handleClick: (record) => {
-                viewModel.state.setNewRecord({ ...record })
-                viewModel.table.handleStartEditing(record.key)
-              },
-              isShow: !viewModel.state.showDeleted
-            },
-            onSave: {
-              // Save
-              handleClick: (record) => viewModel.action.handleUpdate(record!)
-            },
-            // Start delete
-            onDelete: {
-              handleClick: (record) => viewModel.table.handleStartDeleting(record.key),
-              isShow: !viewModel.state.showDeleted
-            },
-            // Start delete forever
-            onDeleteForever: {
-              handleClick: () => {},
-              isShow: viewModel.state.showDeleted
-            },
-            // Start restore
-            onRestore: {
-              handleClick: (record) => viewModel.table.handleStartRestore(record.key),
-              isShow: viewModel.state.showDeleted
-            },
-            // Delete forever
-            onConfirmDeleteForever: (record) => viewModel.action.handleDeleteForever(record),
-            // Cancel editing
-            onConfirmCancelEditing: () => viewModel.table.handleCancelEditing(),
-            // Cancel delete
-            onConfirmCancelDeleting: () => viewModel.table.handleCancelDeleting(),
-            // Delete (update status record => 'deleted')
-            onConfirmDelete: (record) => viewModel.action.handleDelete(record),
-            // Cancel restore
-            onConfirmCancelRestore: () => viewModel.table.handleCancelRestore(),
-            // Restore
-            onConfirmRestore: (record) => viewModel.action.handleRestore(record),
-            // Show hide action col
-            isShow: true
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (

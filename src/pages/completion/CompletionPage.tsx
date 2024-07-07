@@ -23,6 +23,7 @@ import {
 } from '~/utils/helpers'
 import useCompletionViewModel from './hooks/useCompletionViewModel'
 import { CompletionTableDataType } from './type'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 
 const FinishPage = () => {
   useTitle('Hoàn thành - Phung Nguyen')
@@ -81,9 +82,7 @@ const FinishPage = () => {
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
+            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )

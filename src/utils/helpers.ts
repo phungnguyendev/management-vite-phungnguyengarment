@@ -76,7 +76,7 @@ export const colorValidatorChange = (color?: Color | null): string => {
 // Validator initial value
 
 export const dateValidatorInit = (date?: string | Date | dayjs.Dayjs): dayjs.Dayjs | undefined => {
-  return date ? (isValidDate(date) ? dayjs(date) : dayjs(Date.now())) : dayjs(Date.now())
+  if (date && isValidDate(date)) return dayjs(date)
 }
 
 export const textValidatorInit = (text?: string): string | undefined => {
@@ -87,26 +87,16 @@ export const numberValidatorInit = (number?: number): number | undefined => {
   return number ? number : undefined
 }
 
-// Validator
-
-export const dateValidator = (date?: string | Date | dayjs.Dayjs): boolean => {
-  return date ? dayjs(date).isValid() : false
-}
-
-export const textValidator = (text?: string): boolean => {
-  return text ? text !== '' : false
-}
-
 export const textComparator = (text1?: string, text2?: string): boolean => {
-  return isValidString(text1) && isValidString(text2) ? text1 !== text2 : false
+  return text1 !== text2
 }
 
-export const numberValidator = (number?: number | undefined): number | undefined => {
-  return number ? number : undefined
+export const numberComparator = (number1?: number | null | undefined, number2?: number | null | undefined): boolean => {
+  return number1 !== number2
 }
 
-export const numberComparator = (number1?: number, number2?: number): boolean => {
-  return number1 && number2 ? number1 !== number2 : false
+export const booleanComparator = (value1?: boolean, value2?: boolean): boolean => {
+  return value1 !== value2
 }
 
 export const dateComparator = (date1?: string | Date | dayjs.Dayjs, date2?: string | Date | dayjs.Dayjs): boolean => {
@@ -128,10 +118,33 @@ export const arrayComparator = <T>(array1?: T[], array2?: T[]): boolean => {
 
   // Kiểm tra xem phần tử nào của array1 không có trong array2 và ngược lại
   const diff1 = array1.filter((item) => !array2.includes(item))
-  const diff2 = array2.filter((item) => !array1.includes(item))
+  const diff2 = array2.filter((item) => !array1.includes(item)) // array2: [b, y, f], array1: [a, b, c] => diff2 = [a, c]
+
+  /** VD1: 2 mảng giống nhau chiều dài, khác nhau nội dung
+   * array1: [a, b, c] and array2: [b, y, f]
+   * => diff1 = [b, f]
+   * => diff2 = [a, c]
+   * ==> Không thể so sánh length giữa 2 mảng được
+   */
+
+  /** VD2: 2 mảng khác chiều dài, khác nội dung
+   * array1: [a, b, c, h] and array2: [e, d, f]
+   * => diff1 = [e, d, f]
+   * => diff2 = [a, b, c, h]
+   * ==> Không thể so sánh length giữa 2 mảng được
+   */
+
+  /** VD3: 2 mảng giống chiều dài, giống nội dung
+   * array1: [a, b, c] and array2: [a, b, c]
+   * => diff1 = []
+   * => diff2 = []
+   * ==> Không thể so sánh length giữa 2 mảng được
+   */
+
+  // Kết luận: Nếu diff1 và diff2 có => so sánh nội dung, ngược lại => false
 
   // Trả về true nếu có bất kỳ sự khác biệt nào
-  return diff1.length > 0 || diff2.length > 0
+  return diff1.length > 0 && diff2.length > 0 ? diff1.some((item) => diff2.includes(item)) : false
 }
 
 export const isValidArray = <T>(arr?: T[] | null): arr is T[] => {
@@ -148,7 +161,7 @@ export function isValidNumber(value?: number | null): value is number {
 }
 
 // Hàm kiểm tra boolean hợp lệ
-export function isValidBoolean(value?: boolean | null): value is boolean {
+export function isValidBoolean(value?: boolean | null | undefined): value is boolean {
   return typeof value === 'boolean'
 }
 
@@ -160,8 +173,9 @@ export function isValidDate(value?: string | Date | dayjs.Dayjs): boolean {
 }
 
 // Hàm kiểm tra object hợp lệ
-export function isValidObject<T>(value?: T | null): value is T {
-  return typeof value === 'object' && value !== null
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function isValidObject<T extends { id?: number }>(value?: T | null | undefined): value is T {
+  return typeof value === 'object' && value !== null && value !== undefined && isValidNumber(value.id)
 }
 
 export const extractEmailName = (email: string): string => {

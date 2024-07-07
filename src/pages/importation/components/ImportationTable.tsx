@@ -1,9 +1,10 @@
-import { ColumnType } from 'antd/es/table'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import React from 'react'
 import { UseTableProps } from '~/components/hooks/useTable'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   dateValidatorChange,
@@ -86,10 +87,48 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
           <SkyTableTypography status={record.status}>{dateValidatorDisplay(record.dateImported)}</SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    actionCol: (record: ImportationExpandableTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          addingKey={tableProps.addingKey.key}
+          editingKey={tableProps.editingKey}
+          deletingKey={tableProps.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              setNewRecord({ ...record, productID: productRecord.id })
+              tableProps.handleStartEditing(record.key)
+            },
+            isShow: !showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => handleUpdate(productRecord, record),
+            isShow: true
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => tableProps.handleStartDeleting(record.key),
+            isShow: !showDeleted
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => tableProps.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => tableProps.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => handleDeleteForever(productRecord, record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => tableProps.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => handleRestore(record)}
+          // Show hide action col
+        />
+      )
     }
   }
 
-  const tableColumns: ColumnType<ImportationExpandableTableDataType>[] = [
+  const tableColumns: ColumnsType<ImportationExpandableTableDataType> = [
     {
       title: 'Lô nhập',
       dataIndex: 'quantityPO',
@@ -106,42 +145,26 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
     }
   ]
 
+  const actionCol: ColumnType<ImportationExpandableTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ImportationExpandableTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <SkyTable
-        bordered
         loading={tableProps.loading}
         columns={tableColumns}
-        addingKey={tableProps.addingKey.key}
-        editingKey={tableProps.editingKey}
-        deletingKey={tableProps.deletingKey}
-        dataSource={productRecord.expandableImportationTableDataTypes}
-        rowClassName='editable-row'
-        onPageChange={handlePageChange}
-        isShowDeleted={showDeleted}
-        pagination={{ pageSize: 5 }}
-        actionProps={{
-          onEdit: {
-            handleClick: (record) => {
-              setNewRecord({ ...record, productID: productRecord.id })
-              tableProps.handleStartEditing(record.key)
-            },
-            isShow: !showDeleted
-          },
-          onSave: {
-            handleClick: (record) => handleUpdate(productRecord, record)
-          },
-          onDelete: {
-            handleClick: (record) => tableProps.handleStartDeleting(record.key),
-            isShow: !showDeleted
-          },
-          onConfirmCancelEditing: () => tableProps.handleCancelEditing(),
-          onConfirmCancelDeleting: () => tableProps.handleCancelDeleting(),
-          onConfirmDelete: (record) => handleDeleteForever(productRecord, record),
-          onConfirmCancelRestore: () => tableProps.handleCancelRestore(),
-          onConfirmRestore: (record) => handleRestore(record),
-          isShow: !showDeleted
+        tableColumns={{
+          columns: tableColumns,
+          actionColumn: actionCol,
+          showAction: !showDeleted
         }}
+        dataSource={productRecord.expandableImportationTableDataTypes}
+        pagination={{ pageSize: 5, onChange: handlePageChange }}
       />
     </>
   )

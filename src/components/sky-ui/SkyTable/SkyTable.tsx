@@ -4,28 +4,22 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { TableProps } from 'antd'
 import { Table } from 'antd'
-import { ColumnType, ColumnsType } from 'antd/es/table'
-import { useState } from 'react'
-import { defaultRequestBody } from '~/hooks/useAPIService'
-import ActionRow, { ActionProps } from '../ActionRow'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
+import { cn } from '~/utils/helpers'
 import SkyTableRow from './SkyTableRow'
 
 export type SkyTableRequiredDataType = {
   key: string
-  id?: number
-  createdAt?: string
-  updatedAt?: string
-  orderNumber?: number
 }
 
 export interface SkyTableProps<T extends SkyTableRequiredDataType> extends TableProps {
   dataSource: T[]
+  tableColumns: {
+    columns: ColumnsType<T>
+    actionColumn: ColumnType<T>
+    showAction?: boolean
+  }
   onPageChange?: (page: number, pageSize: number) => void
-  actionProps?: ActionProps<T>
-  isShowDeleted?: boolean
-  addingKey?: string
-  editingKey?: string
-  deletingKey?: string
   onDragStart?(event: DragStartEvent): void
   onDragMove?(event: DragMoveEvent): void
   onDragOver?(event: DragOverEvent): void
@@ -34,107 +28,30 @@ export interface SkyTableProps<T extends SkyTableRequiredDataType> extends Table
 }
 
 const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProps<T>) => {
-  const [editKey, setEditKey] = useState<string>('-1')
-  const isEditing = (key: string): boolean => {
-    return props.editingKey === key
-  }
-
-  const actionsCol: ColumnType<T> = {
-    title: 'Operation',
-    width: '0.01%',
-    dataIndex: 'operation',
-    render: (_value: any, record: T) => {
-      return (
-        <ActionRow
-          isEditing={isEditing(record.key)}
-          onAdd={{
-            ...props.actionProps?.onAdd,
-            onClick: () => props.actionProps?.onAdd?.handleClick?.(record),
-            disabled: props.actionProps?.onAdd?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onAdd ? props.actionProps.onAdd.isShow ?? true : false
-          }}
-          onSave={{
-            ...props.actionProps?.onSave,
-            onClick: () => props.actionProps?.onSave?.handleClick?.(record),
-            disabled: props.actionProps?.onSave?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onSave ? props.actionProps.onSave.isShow ?? true : false
-          }}
-          onEdit={{
-            ...props.actionProps?.onEdit,
-            onClick: () => {
-              setEditKey(record.key!)
-              props.actionProps?.onEdit?.handleClick?.(record)
-            },
-            disabled: props.actionProps?.onEdit?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onEdit ? props.actionProps.onEdit.isShow ?? true : false
-          }}
-          onDelete={{
-            ...props.actionProps?.onDelete,
-            onClick: () => {
-              props.actionProps?.onDelete?.handleClick?.(record)
-            },
-            disabled: props.actionProps?.onDelete?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onDelete ? props.actionProps.onDelete.isShow ?? true : false
-          }}
-          onRestore={{
-            ...props.actionProps?.onRestore,
-            onClick: () => {
-              props.actionProps?.onRestore?.handleClick?.(record)
-            },
-            disabled: props.actionProps?.onRestore?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onRestore ? props.actionProps.onRestore.isShow ?? true : false
-          }}
-          onDeleteForever={{
-            ...props.actionProps?.onDeleteForever,
-            onClick: () => {
-              props.actionProps?.onDeleteForever?.handleClick?.(record)
-            },
-            disabled: props.actionProps?.onDeleteForever?.disabled ?? isEditing(editKey),
-            isShow: props.actionProps?.onDeleteForever ? props.actionProps.onDeleteForever.isShow ?? true : false
-          }}
-          onConfirmCancelEditing={(e) => props.actionProps?.onConfirmCancelEditing?.(e)}
-          onConfirmCancelDeleting={props.actionProps?.onConfirmCancelDeleting}
-          onConfirmCancelDeleteForever={props.actionProps?.onConfirmCancelDeleteForever}
-          onConfirmDelete={() => props.actionProps?.onConfirmDelete?.(record)}
-          onConfirmRestore={() => props.actionProps?.onConfirmRestore?.(record)}
-          onConfirmDeleteForever={() => props.actionProps?.onConfirmDeleteForever?.(record)}
-        />
-      )
-    }
-  }
-
-  const getColumn = (showAction: boolean): ColumnsType<T> => {
-    return showAction ? [...props.columns!, actionsCol] : [...props.columns!]
-  }
-
   return (
     <DndContext modifiers={[restrictToVerticalAxis]} {...props}>
-      <SortableContext
-        // rowKey array
-        items={props.dataSource.map((i) => `${i.key}`)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={props.dataSource.map((i) => i.key)} strategy={verticalListSortingStrategy}>
         <Table
           {...props}
-          columns={getColumn(props.actionProps?.isShow ?? false)}
+          columns={
+            props.tableColumns.showAction ?? true
+              ? [...props.tableColumns.columns, props.tableColumns.actionColumn]
+              : props.tableColumns.columns
+          }
+          bordered
           components={{
             body: {
               row: SkyTableRow
             }
           }}
-          // expandable={{
-          //   ...props.expandable,
-          //   expandIcon: props.expandable?.showExpandColumn
-          //     ? ({ expanded, onExpand, record }) =>
-          //         expanded ? (
-          //           <MinusCircleTwoTone onClick={(e) => onExpand(record, e)} />
-          //         ) : (
-          //           <PlusCircleTwoTone onClick={(e) => onExpand(record, e)} />
-          //         )
-          //     : undefined
-          // }}
-          pagination={props.pagination ?? { pageSize: defaultRequestBody.paginator?.pageSize ?? 5 }}
-          className='z-0'
+          pagination={
+            props.pagination ?? {
+              pageSize: 10,
+              onChange: props.onPageChange
+            }
+          }
+          rowClassName='editable-row'
+          className={cn('z-0', props.className)}
           rowKey='key'
           dataSource={props.dataSource}
         />

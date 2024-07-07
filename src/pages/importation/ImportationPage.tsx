@@ -1,9 +1,11 @@
-import { ColorPicker, Flex } from 'antd'
+import { Flex } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
@@ -35,7 +37,7 @@ const ImportationPage = () => {
           <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
             {textValidatorDisplay(record.productColor?.color?.name)}
           </SkyTableTypography>
-          <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
+          <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
         </Flex>
       )
     },
@@ -44,6 +46,23 @@ const ImportationPage = () => {
         <SkyTableTypography status={record.productGroup?.group?.status}>
           {textValidatorDisplay(record.productGroup?.group?.name)}
         </SkyTableTypography>
+      )
+    },
+    actionCol: (record: ImportationTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonAdd={{
+            onClick: () => {
+              viewModel.table.handleStartAdding(`${record.productCode}`, record)
+              viewModel.state.setOpenModal(true)
+            },
+            title: 'New package',
+            isShow: !viewModel.state.showDeleted
+          }}
+        />
       )
     }
     // printablePlace: (record: ImportationTableDataType) => {
@@ -65,21 +84,21 @@ const ImportationPage = () => {
       }
     },
     {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '7%',
-      responsive: ['lg'],
-      render: (_value: any, record: ImportationTableDataType) => {
-        return columns.quantityPO(record)
-      }
-    },
-    {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
       responsive: ['md'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productColor(record)
+      }
+    },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '7%',
+      responsive: ['lg'],
+      render: (_value: any, record: ImportationTableDataType) => {
+        return columns.quantityPO(record)
       }
     },
     {
@@ -102,6 +121,14 @@ const ImportationPage = () => {
     // }
   ]
 
+  const actionCol: ColumnType<ImportationTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ImportationTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <BaseLayout
@@ -122,26 +149,14 @@ const ImportationPage = () => {
         }}
       >
         <SkyTable
-          bordered
           loading={viewModel.table.loading}
-          columns={tableColumns}
-          editingKey={viewModel.table.editingKey}
-          deletingKey={viewModel.table.deletingKey}
-          dataSource={viewModel.table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={viewModel.action.handlePageChange}
-          isShowDeleted={viewModel.state.showDeleted}
-          actionProps={{
-            onAdd: {
-              handleClick: (record) => {
-                viewModel.table.handleStartAdding(`${record.productCode}`, record)
-                viewModel.state.setOpenModal(true)
-              },
-              title: 'New package',
-              isShow: !viewModel.state.showDeleted
-            },
-            isShow: true
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol,
+            showAction: !viewModel.state.showDeleted
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record: ImportationTableDataType) => {
               return (
@@ -179,7 +194,7 @@ const ImportationPage = () => {
                         handleDelete: viewModel.action.handleDelete,
                         handleDeleteForever: viewModel.action.handleDeleteForever,
                         handleRestore: viewModel.action.handleRestore,
-                        handlePageChange: viewModel.action.handlePageChange
+                        handlePageChange: viewModel.action.handlePageExpandedChange
                       }}
                     />
                   </SkyTableExpandableLayout>

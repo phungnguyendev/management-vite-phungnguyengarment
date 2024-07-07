@@ -1,4 +1,4 @@
-import { Checkbox, ColorPicker, Flex } from 'antd'
+import { Checkbox, Flex } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
@@ -6,6 +6,7 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
@@ -56,9 +57,7 @@ const SampleSewingPage = () => {
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
+            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )

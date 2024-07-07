@@ -103,9 +103,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: GarmentAccessoryNote[], accessToken: string): Promise<ResponseDataType> => {
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: GarmentAccessoryNote[],
+    accessToken: string
+  ): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}`, itemsToUpdate, {
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

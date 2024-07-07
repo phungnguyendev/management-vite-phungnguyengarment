@@ -1,4 +1,4 @@
-import { Checkbox, ColorPicker, Flex, Space } from 'antd'
+import { Checkbox, Flex, Space } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
@@ -7,6 +7,7 @@ import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
@@ -74,9 +75,7 @@ const CuttingGroupTable: React.FC<Props> = () => {
               <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
                 {textValidatorDisplay(record.productColor?.color?.name)}
               </SkyTableTypography>
-              {record.productColor && (
-                <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-              )}
+              <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
             </Flex>
           </EditableStateCell>
         )

@@ -208,12 +208,12 @@ export default function useUserViewModel() {
     }
   }
 
-  const handleDeleteForever = async (id?: number) => {
+  const handleDeleteForever = async (record: UserTableDataType) => {
     try {
       table.setLoading(true)
-      await userService.deleteItemSync(id, table.setLoading, (meta) => {
+      await userService.deleteItemSync(record.id!, table.setLoading, (meta) => {
         if (!meta.success) throw new Error(`${define('delete_failed')}`)
-        table.handleDeleting(`${id}`)
+        table.handleDeleting(record.key)
         message.success(define('deleted_success'))
       })
     } catch (error: any) {

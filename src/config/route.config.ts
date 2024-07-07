@@ -75,15 +75,15 @@ const routes: SideType[] = [
     role: 'sample_sewing_manager',
     icon: SewingMachineIcon
   },
-  // {
-  //   key: '3',
-  //   name: 'Phụ liệu',
-  //   path: 'accessory',
-  //   component: GarmentAccessoryPage,
-  //   isGroup: false,
-  //   role: 'accessory_manager',
-  //   icon: WarehouseIcon
-  // },
+  {
+    key: '3',
+    name: 'Phụ liệu',
+    path: 'garment-accessories',
+    component: GarmentAccessoryPage,
+    isGroup: false,
+    role: 'accessory_manager',
+    icon: WarehouseIcon
+  },
   // {
   //   key: '4',
   //   name: 'Tổ cắt',

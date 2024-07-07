@@ -9,7 +9,7 @@ export interface SkyTableTypographyProps extends BlockProps {
   required?: boolean
 }
 
-const SkyTableTypography = ({ status, required, ...props }: SkyTableTypographyProps) => {
+const SkyTableTypography: React.FC<SkyTableTypographyProps> = ({ status, required, ...props }) => {
   return (
     <Typography.Text
       {...props}

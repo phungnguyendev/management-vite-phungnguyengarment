@@ -33,6 +33,7 @@ const LoginPage: React.FC<Props> = () => {
   const initialize = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    localStorage.removeItem('userID')
   }
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {

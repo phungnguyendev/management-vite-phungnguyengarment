@@ -1,17 +1,22 @@
-import { GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
+import { AccessoryNote, GarmentAccessory, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface GarmentAccessoryTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  garmentAccessory: GarmentAccessory
-  garmentAccessoryNotes: GarmentAccessoryNote[]
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  printablePlace?: PrintablePlace
+  expandableGarmentAccessory?: ExpandableGarmentAccessoryTableDataType
 }
 
-export interface GarmentAccessoryNewRecordProps {
-  garmentAccessoryID?: number // Using for compare check box
-  productColorID?: number // Using for compare check box
+export interface ExpandableGarmentAccessoryTableDataType extends GarmentAccessory {
+  accessoryNotes?: AccessoryNote[]
+}
+
+export interface GarmentAccessoryAddNewProps {
+  id?: number
   amountCutting?: number
   passingDeliveryDate?: string
   syncStatus?: boolean
-  garmentAccessoryNotes?: GarmentAccessoryNote[]
+  accessoryNoteIDs?: number[] // Danh sách id ghi chú phụ liệu
+  notes?: string
 }

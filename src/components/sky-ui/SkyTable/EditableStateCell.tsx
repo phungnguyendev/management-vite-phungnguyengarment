@@ -141,7 +141,7 @@ function EditableStateCell({
           <Select
             {...selectProps}
             title={title}
-            placeholder={placeholder}
+            placeholder={placeholder ?? 'Select item'}
             defaultValue={defaultValue ?? selectProps?.defaultValue}
             value={value ?? selectProps?.value}
             onChange={(val, option) => onValueChange?.(val, option)}
@@ -155,7 +155,7 @@ function EditableStateCell({
           <Select
             {...selectProps}
             title={title}
-            placeholder={placeholder}
+            placeholder={placeholder ?? 'Select item'}
             mode='multiple'
             virtual={false}
             defaultValue={defaultValue ?? selectProps?.defaultValue}
