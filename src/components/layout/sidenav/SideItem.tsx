@@ -1,6 +1,6 @@
 import { Divider, Flex, Typography } from 'antd'
 import { Link } from 'react-router-dom'
-import { SideType } from '~/utils/route'
+import { SideType } from '~/config/route.config'
 
 const SideItem = (item: SideType) => {
   return (

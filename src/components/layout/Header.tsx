@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
 import useAuthService from '~/hooks/useAuthService'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import ProfileDialog from '~/pages/user/components/profiles/ProfileDialog'
 import { setLoading } from '~/store/actions-creator'
 import { RootState } from '~/store/store'
 import { cn, extractEmailName } from '~/utils/helpers'
@@ -23,7 +22,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const { message } = AntApp.useApp()
-  const [openProfile, setOpenProfile] = useState<boolean>(false)
+  const [, setOpenProfile] = useState<boolean>(false)
   const [refreshTokenStored] = useLocalStorage('refreshToken', '')
   const { isHidden, offsetY } = useScroll()
   const navigate = useNavigate()
@@ -99,7 +98,6 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
           </Flex>
         </Space>
       </Flex>
-      <ProfileDialog open={openProfile} setOpen={setOpenProfile} />
     </AntHeader>
   )
 }
