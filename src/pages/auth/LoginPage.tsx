@@ -45,6 +45,7 @@ const LoginPage: React.FC<Props> = () => {
       setLoading(true)
       // Create a new request to login user
       await authService.login(user.email, user.password, setLoading).then((res) => {
+        if (!res.success) throw new Error(define('login_failed'))
         const userLogged = res.data as User
         setAccessToken(`Bearer ${userLogged.accessToken}`)
         setRefreshToken(userLogged.refreshToken ?? '')
@@ -104,7 +105,6 @@ const LoginPage: React.FC<Props> = () => {
                 label='Email'
                 name='email'
                 className='m-0 w-full p-0'
-                initialValue='phungnguyengarment.dev@gmail.com'
                 rules={[
                   { required: true, message: 'Please input your email!', validateTrigger: 'onBlur', type: 'email' }
                 ]}
@@ -123,7 +123,6 @@ const LoginPage: React.FC<Props> = () => {
                 label='Password'
                 name='password'
                 className='m-0 w-full p-0'
-                initialValue='Phungnguyen@2771'
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
                 <Input.Password
