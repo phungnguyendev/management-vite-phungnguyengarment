@@ -63,6 +63,13 @@ const SampleSewingPage = () => {
     quantityPO: (record: CuttingGroupTableDataType) => {
       return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
     },
+    productGroup: (record: CuttingGroupTableDataType) => {
+      return (
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
+      )
+    },
     quantityRealCut: (record: CuttingGroupTableDataType) => {
       return (
         <EditableStateCell
@@ -565,6 +572,15 @@ const SampleSewingPage = () => {
       }
     },
     {
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
+      responsive: ['xl'],
+      render: (_value: any, record: CuttingGroupTableDataType) => {
+        return columns.productGroup(record)
+      }
+    },
+    {
       title: 'SL thực cắt',
       dataIndex: 'quantityRealCut',
       width: '10%',
@@ -670,6 +686,11 @@ const SampleSewingPage = () => {
                     {!(width >= breakpoint.md) && (
                       <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
                         {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productGroup(record)}
                       </SkyTableExpandableItemRow>
                     )}
                     {!(width >= breakpoint.lg) && (

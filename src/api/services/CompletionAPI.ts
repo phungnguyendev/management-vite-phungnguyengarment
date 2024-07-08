@@ -6,18 +6,11 @@ const NAMESPACE = 'completions'
 export default {
   createItem: async (newItem: Completion, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}`,
-        {
-          ...newItem,
-          status: newItem.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}`, newItem, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -88,20 +81,6 @@ export default {
   ): Promise<ResponseDataType> => {
     return client
       .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItems: async (itemsToUpdate: Completion[], accessToken: string): Promise<ResponseDataType> => {
-    return client
-      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

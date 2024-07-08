@@ -1,5 +1,5 @@
-import { ColorPicker, Flex, Space } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { Flex, Space } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
 import useDevice from '~/components/hooks/useDevice'
@@ -7,6 +7,8 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
@@ -15,29 +17,21 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isValidNumber,
+  isValidObject,
   numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
+import CompletionProgressItem from './components/CompletionProgressItem'
 import useCompletionViewModel from './hooks/useCompletionViewModel'
 import { CompletionTableDataType } from './type'
-import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 
 const FinishPage = () => {
   useTitle('Hoàn thành - Phung Nguyen')
-  const { state, action, table } = useCompletionViewModel()
-  const { newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } = state
-  const {
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useCompletionViewModel()
   const { width } = useDevice()
 
   const columns = {
@@ -50,7 +44,7 @@ const FinishPage = () => {
         numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion?.quantityPackaged) <= 0
       const success = ironedSuccess && checkPassSuccess && packageSuccess
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required={true}>
+        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
           <Space size={2} direction='horizontal'>
             <SkyTableTypography strong status={'active'}>
               {textValidatorDisplay(record.productCode)}
@@ -64,13 +58,7 @@ const FinishPage = () => {
     },
     quantityPO: (record: CompletionTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={false}
-          dataIndex='quantityPO'
-          title='Số lượng PO'
-          inputType='number'
-          required={true}
-        >
+        <EditableStateCell isEditing={false} dataIndex='quantityPO' title='Số lượng PO' inputType='number' required>
           <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
         </EditableStateCell>
       )
@@ -87,44 +75,51 @@ const FinishPage = () => {
         </EditableStateCell>
       )
     },
+    productGroup: (record: CompletionTableDataType) => {
+      return (
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
+      )
+    },
     ironed: {
       quantityIroned: (record: CompletionTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key)}
+            isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='quantityIroned'
             title='SL ủi được'
             inputType='number'
-            required={true}
-            defaultValue={record.completion && numberValidatorInit(record.completion.quantityIroned)}
-            value={newRecord?.quantityIroned}
+            required
+            placeholder='Ví dụ: 1000'
+            defaultValue={numberValidatorInit(record.completion?.quantityIroned)}
+            value={viewModel.state.newRecord?.quantityIroned}
             onValueChange={(val: number) =>
-              setNewRecord((prev) => {
-                return { ...prev, quantityIroned: numberValidatorChange(val > 0 ? val : 0) }
+              viewModel.state.setNewRecord((prev) => {
+                return { ...prev, quantityIroned: numberValidatorChange(val) }
               })
             }
           >
-            <SkyTableTypography status={record.completion?.status}>
-              {numberValidatorDisplay(record.completion?.quantityIroned)}
-            </SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(record.completion?.quantityIroned)}</SkyTableTypography>
           </EditableStateCell>
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount = record.completion?.quantityIroned
-          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityIroned)
-          : 0
+        const amount =
+          isValidObject(record.completion) && isValidNumber(record.completion.quantityIroned)
+            ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityIroned)
+            : numberValidatorCalc(record.quantityPO)
 
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
             title='Còn lại'
-            isEditing={table.isEditing(record.key)}
-            editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
+            isEditing={viewModel.table.isEditing(record.key)}
+            editableRender={<SkyTableTypography>{amount}</SkyTableTypography>}
             defaultValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -133,39 +128,39 @@ const FinishPage = () => {
       quantityCheckPassed: (record: CompletionTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key)}
+            isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='quantityCheckPassed'
             title='SL kiểm đạt'
             inputType='number'
-            required={true}
-            defaultValue={record.completion && numberValidatorInit(record.completion.quantityCheckPassed)}
-            value={newRecord?.quantityCheckPassed}
+            required
+            placeholder='Ví dụ: 1000'
+            defaultValue={numberValidatorInit(record.completion?.quantityCheckPassed)}
+            value={viewModel.state.newRecord?.quantityCheckPassed}
             onValueChange={(val: number) =>
-              setNewRecord((prev) => {
-                return { ...prev, quantityCheckPassed: numberValidatorChange(val > 0 ? val : 0) }
+              viewModel.state.setNewRecord((prev) => {
+                return { ...prev, quantityCheckPassed: numberValidatorChange(val) }
               })
             }
           >
-            <SkyTableTypography status={record.completion?.status}>
-              {numberValidatorDisplay(record.completion?.quantityCheckPassed)}
-            </SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(record.completion?.quantityCheckPassed)}</SkyTableTypography>
           </EditableStateCell>
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount = record.completion?.quantityCheckPassed
-          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityCheckPassed)
-          : 0
+        const amount =
+          isValidObject(record.completion) && isValidNumber(record.completion.quantityCheckPassed)
+            ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityCheckPassed)
+            : numberValidatorCalc(record.quantityPO)
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
             title='Còn lại'
-            isEditing={table.isEditing(record.key)}
-            editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
+            isEditing={viewModel.table.isEditing(record.key)}
+            editableRender={<SkyTableTypography>{amount}</SkyTableTypography>}
             defaultValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -174,16 +169,17 @@ const FinishPage = () => {
       quantityPackaged: (record: CompletionTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key)}
+            isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='quantityPackaged'
-            title='SL kiểm đạt'
+            title='SL đóng gói'
             inputType='number'
-            required={true}
-            defaultValue={record.completion && numberValidatorInit(record.completion.quantityPackaged)}
-            value={newRecord?.quantityPackaged}
+            required
+            placeholder='Ví dụ: 1000'
+            defaultValue={numberValidatorInit(record.completion?.quantityPackaged)}
+            value={viewModel.state.newRecord?.quantityPackaged}
             onValueChange={(val: number) =>
-              setNewRecord((prev) => {
-                return { ...prev, quantityPackaged: numberValidatorChange(val > 0 ? val : 0) }
+              viewModel.state.setNewRecord((prev) => {
+                return { ...prev, quantityPackaged: numberValidatorChange(val) }
               })
             }
           >
@@ -194,19 +190,20 @@ const FinishPage = () => {
         )
       },
       remainingAmount: (record: CompletionTableDataType) => {
-        const amount = record.completion?.quantityPackaged
-          ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityPackaged)
-          : 0
+        const amount =
+          isValidObject(record.completion) && isValidNumber(record.completion.quantityPackaged)
+            ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityPackaged)
+            : numberValidatorCalc(record.quantityPO)
         return (
           <EditableStateCell
             dataIndex='remainingAmount'
             title='Còn lại'
-            isEditing={table.isEditing(record.key)}
+            isEditing={viewModel.table.isEditing(record.key)}
             editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
             defaultValue={amount}
             inputType='number'
           >
-            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amount)}</SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -214,45 +211,95 @@ const FinishPage = () => {
     exportedDate: (record: CompletionTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='exportedDate'
           title='Ngày xuất hàng'
           inputType='datepicker'
-          required={true}
-          defaultValue={record.completion && dateValidatorInit(record.completion.exportedDate)}
+          required
+          defaultValue={dateValidatorInit(record.completion?.exportedDate)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               exportedDate: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {(record.completion && dateValidatorDisplay(record.completion.exportedDate)) ?? '--/--/----'}
-          </SkyTableTypography>
+          <SkyTableTypography>{dateValidatorDisplay(record.completion?.exportedDate)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
     passFIDate: (record: CompletionTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='passFIDate'
           title='Pass FI'
           inputType='datepicker'
-          required={true}
-          defaultValue={record.completion && dateValidatorInit(record.completion.passFIDate)}
+          required
+          defaultValue={dateValidatorInit(record.completion?.passFIDate)}
           onValueChange={(val: Dayjs) =>
-            setNewRecord({
-              ...newRecord,
+            viewModel.state.setNewRecord({
+              ...viewModel.state.newRecord,
               passFIDate: dateValidatorChange(val)
             })
           }
         >
-          <SkyTableTypography status={record.status}>
-            {(record.completion && dateValidatorDisplay(record.completion.passFIDate)) ?? '--/--/----'}
-          </SkyTableTypography>
+          <SkyTableTypography>{dateValidatorDisplay(record.completion?.passFIDate)}</SkyTableTypography>
         </EditableStateCell>
+      )
+    },
+    actionCol: (record: CompletionTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              if (isValidObject(record.completion)) {
+                viewModel.state.setNewRecord({
+                  ...record.completion
+                })
+              }
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted,
+            disabled: !isValidObject(record.completion)
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore()}
+          // Show hide action col
+        />
       )
     }
   }
@@ -266,15 +313,15 @@ const FinishPage = () => {
         return columns.productCode(record)
       }
     },
-    // {
-    //   title: 'Số lượng PO',
-    //   dataIndex: 'quantityPO',
-    //   width: '10%',
-    //   responsive: ['sm'],
-    //   render: (_value: any, record: CompletionTableDataType) => {
-    //     return columns.quantityPO(record)
-    //   }
-    // },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '10%',
+      responsive: ['sm'],
+      render: (_value: any, record: CompletionTableDataType) => {
+        return columns.quantityPO(record)
+      }
+    },
     {
       title: 'Màu',
       dataIndex: 'colorID',
@@ -285,8 +332,17 @@ const FinishPage = () => {
       }
     },
     {
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
+      responsive: ['xl'],
+      render: (_value: any, record: CompletionTableDataType) => {
+        return columns.productGroup(record)
+      }
+    },
+    {
       title: 'Ủi',
-      responsive: ['md'],
+      responsive: ['xxl'],
       children: [
         {
           title: 'SL ủi được',
@@ -308,7 +364,7 @@ const FinishPage = () => {
     },
     {
       title: 'Kiểm',
-      responsive: ['lg'],
+      responsive: ['xxl'],
       children: [
         {
           title: 'SL kiểm đạt',
@@ -330,7 +386,7 @@ const FinishPage = () => {
     },
     {
       title: 'Đóng gói',
-      responsive: ['xl'],
+      responsive: ['xxl'],
       children: [
         {
           title: 'SL đóng được',
@@ -353,7 +409,7 @@ const FinishPage = () => {
     {
       title: 'Ngày xuất hàng',
       dataIndex: 'exportedDate',
-      responsive: ['xxl'],
+      responsive: ['xl'],
       width: '10%',
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.exportedDate(record)
@@ -362,168 +418,113 @@ const FinishPage = () => {
     {
       title: 'Pass FI',
       dataIndex: 'passFIDate',
-      responsive: ['xxl'],
-      width: '15%',
+      responsive: ['xl'],
+      width: '10%',
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.passFIDate(record)
       }
     }
   ]
 
+  const actionCol: ColumnType<CompletionTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: CompletionTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <BaseLayout
         title='Hoàn thành'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
-          placeholder: 'Ví dụ: APEX1234',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
         }}
         sortProps={{
-          onChange: handleSortChange
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: setShowDeleted
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
       >
         <SkyTable
           bordered
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
-          actionProps={{
-            onEdit: {
-              handleClick: (record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record.key)
-              },
-              isShow: !showDeleted
-            },
-            onSave: {
-              handleClick: (record) => handleUpdate(record),
-              isShow: !showDeleted
-            },
-            onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
-            },
-            onDeleteForever: {
-              isShow: showDeleted
-            },
-            onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
-            },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
-            isShow: true
+          loading={viewModel.table.loading}
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol,
+            showAction: !viewModel.state.showDeleted
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record) => {
               return (
                 <SkyTableExpandableLayout>
                   {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
+                    <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.productColor(record)}
                     </SkyTableExpandableItemRow>
                   )}
-                  {!(width >= breakpoint.md) && (
-                    <Flex vertical align='center' gap={10}>
-                      <SkyTableTypography strong className='w-fit'>
-                        Ủi
-                      </SkyTableTypography>
-                      <Flex className='w-full' gap={10} wrap='wrap'>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Ủi được:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.ironed.quantityIroned(record)}
-                        </SkyTableExpandableItemRow>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Còn lại:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.ironed.remainingAmount(record)}
-                        </SkyTableExpandableItemRow>
-                      </Flex>
-                    </Flex>
-                  )}
-                  {!(width >= breakpoint.lg) && (
-                    <Flex vertical align='center' gap={10}>
-                      <SkyTableTypography strong className='w-fit'>
-                        Kiểm
-                      </SkyTableTypography>
-                      <Flex className='w-full' gap={10} wrap='wrap'>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Kiểm đạt:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.checkPass.quantityCheckPassed(record)}
-                        </SkyTableExpandableItemRow>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Còn lại:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.checkPass.remainingAmount(record)}
-                        </SkyTableExpandableItemRow>
-                      </Flex>
-                    </Flex>
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.productGroup(record)}
+                    </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.xl) && (
-                    <Flex vertical align='center' gap={10}>
-                      <SkyTableTypography strong className='w-fit'>
-                        Đóng gói
-                      </SkyTableTypography>
-                      <Flex className='w-full' gap={10} wrap='wrap'>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Đóng được:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.packaged.quantityPackaged(record)}
-                        </SkyTableExpandableItemRow>
-                        <SkyTableExpandableItemRow
-                          className='w-1/2 pr-5'
-                          title='Còn lại:'
-                          isEditing={table.isEditing(record.id!)}
-                        >
-                          {columns.packaged.remainingAmount(record)}
-                        </SkyTableExpandableItemRow>
-                      </Flex>
-                    </Flex>
-                  )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Pass FI:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
+                    <SkyTableExpandableItemRow title='Pass FI:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.passFIDate(record)}
                     </SkyTableExpandableItemRow>
                   )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow
-                      className='w-1/2'
-                      title='Ngày xuất:'
-                      isEditing={table.isEditing(record.id!)}
-                    >
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow title='Ngày xuất:' isEditing={viewModel.table.isEditing(record.key)}>
                       {columns.exportedDate(record)}
                     </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <CompletionProgressItem
+                      title='Ủi'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                      top={{
+                        title: 'Ủi được:',
+                        children: columns.ironed.quantityIroned(record)
+                      }}
+                      bottom={{
+                        title: 'Còn lại:',
+                        children: columns.ironed.remainingAmount(record)
+                      }}
+                    />
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <CompletionProgressItem
+                      title='Kiểm'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                      top={{
+                        title: 'Kiểm đạt:',
+                        children: columns.checkPass.quantityCheckPassed(record)
+                      }}
+                      bottom={{
+                        title: 'Còn lại:',
+                        children: columns.checkPass.remainingAmount(record)
+                      }}
+                    />
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <CompletionProgressItem
+                      title='Đóng gói'
+                      isEditing={viewModel.table.isEditing(record.key)}
+                      top={{
+                        title: 'Đóng được:',
+                        children: columns.packaged.quantityPackaged(record)
+                      }}
+                      bottom={{
+                        title: 'Còn lại:',
+                        children: columns.packaged.remainingAmount(record)
+                      }}
+                    />
                   )}
                 </SkyTableExpandableLayout>
               )

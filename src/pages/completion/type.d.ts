@@ -1,9 +1,10 @@
-import { Completion, Product, ProductColor } from '~/typing'
+import { Completion, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CompletionTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  completion: Completion
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  completion?: Completion
 }
 
 export interface CompletionNewRecordProps {
@@ -13,5 +14,4 @@ export interface CompletionNewRecordProps {
   quantityPackaged?: number
   exportedDate?: string
   passFIDate?: string
-  status?: ItemStatusType
 }

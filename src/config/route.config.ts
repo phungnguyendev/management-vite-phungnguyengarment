@@ -102,15 +102,15 @@ const routes: SideType[] = [
   //   component: SewingLineDeliveryPage,
   //   icon: DeliveryIcon
   // },
-  // {
-  //   key: '6',
-  //   name: 'Hoàn thành',
-  //   path: 'finish',
-  //   component: FinishPage,
-  //   isGroup: false,
-  //   role: 'completion_manager',
-  //   icon: PackageSuccessIcon
-  // },
+  {
+    key: '6',
+    name: 'Hoàn thành',
+    path: 'finish',
+    component: FinishPage,
+    isGroup: false,
+    role: 'completion_manager',
+    icon: PackageSuccessIcon
+  },
   {
     key: '9',
     name: 'Định nghĩa',
