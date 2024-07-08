@@ -4,14 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'printable-places'
 
 export default {
-  createNewItem: async (items: PrintablePlace, accessToken: string): Promise<ResponseDataType | undefined> => {
-    return client
+  createItem: async (newItem: PrintablePlace, accessToken: string): Promise<ResponseDataType> => {
+    return await client
       .post(
         `${NAMESPACE}`,
         {
-          printID: items.printID,
-          productID: items.productID,
-          status: items.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -26,67 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  createOrUpdateItemByPk: async (
-    id: number,
-    item: PrintablePlace,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate`,
-        {
-          id: id,
-          printID: item.printID,
-          productID: item.productID,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: PrintablePlace,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${query.field}/${query.key}`,
-        query.field === 'productID'
-          ? {
-              printID: item.printID,
-              status: item.status ?? 'active'
-            }
-          : {
-              productID: item.productID,
-              status: item.status ?? 'active'
-            },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -100,12 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -117,19 +53,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}/find`, bodyRequest, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -137,23 +67,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    item: PrintablePlace,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: PrintablePlace, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -162,25 +82,16 @@ export default {
       })
   },
   updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: PrintablePlace,
+    query: { field: string; id: number },
+    itemToUpdate: PrintablePlace,
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -188,9 +99,23 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  deleteItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
+    return client
+      .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }

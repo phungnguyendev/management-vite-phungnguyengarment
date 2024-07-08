@@ -1,16 +1,16 @@
-import { Collapse, ColorPicker, Divider, Flex, Space, Typography } from 'antd'
+import { Flex } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import {
   breakpoint,
   dateValidatorChange,
@@ -23,52 +23,33 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import ImportationTable from '../importation/components/ImportationTable'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
-import useProduct from './hooks/useProduct'
+import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
-const ProductPage: React.FC = () => {
-  const currentUser = useSelector((state: RootState) => state.user)
-  const table = useTable<ProductTableDataType>([])
+const ProductPage = () => {
+  useTitle('Products | Phung Nguyen')
   const { width } = useDevice()
-  const {
-    searchText,
-    setSearchText,
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handleConfirmDeleteForever,
-    handleConfirmRestore,
-    handlePageChange,
-    productService,
-    prints,
-    groups,
-    colors
-  } = useProduct(table)
-  useTitle('Sản phẩm')
+  const viewModel = useProductViewModel()
 
   const columns = {
-    productCode: (record: ProductTableDataType) => {
+    title: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='productCode'
           title='Mã hàng'
           inputType='text'
-          required={true}
-          initialValue={textValidatorInit(record.productCode)}
-          value={newRecord.productCode}
-          onValueChange={(val) => setNewRecord({ ...newRecord, productCode: textValidatorChange(val) })}
+          required
+          defaultValue={textValidatorInit(record.productCode)}
+          value={viewModel.state.newRecord.productCode}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, productCode: textValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography strong status={'active'}>
+          <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -77,14 +58,18 @@ const ProductPage: React.FC = () => {
     quantityPO: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='quantityPO'
           title='Số lượng PO'
           inputType='number'
-          required={true}
-          initialValue={numberValidatorInit(record.quantityPO)}
-          value={newRecord.quantityPO}
-          onValueChange={(val) => setNewRecord({ ...newRecord, quantityPO: numberValidatorChange(val) })}
+          required
+          defaultValue={numberValidatorInit(record.quantityPO)}
+          value={viewModel.state.newRecord.quantityPO}
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, quantityPO: numberValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
         </EditableStateCell>
@@ -93,27 +78,28 @@ const ProductPage: React.FC = () => {
     productColor: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='colorID'
           title='Màu'
+          required
           inputType='colorselector'
-          required={false}
-          onValueChange={(val) => setNewRecord({ ...newRecord, colorID: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, colorID: numberValidatorChange(val) }
+            })
+          }
+          defaultValue={numberValidatorInit(record.productColor?.colorID)}
           selectProps={{
-            options: colors.map((i) => {
-              return { label: i.name, value: i.id, key: i.hexColor }
-            }),
-            defaultValue: numberValidatorInit(record.productColor?.colorID),
-            value: newRecord.colorID
+            options: viewModel.state.colors.map((color) => {
+              return { label: color.name, value: color.id, key: color.hexColor }
+            })
           }}
         >
-          <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
+          <Flex wrap='wrap' justify='space-between' align='center' gap={10}>
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}
             </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
+            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
           </Flex>
         </EditableStateCell>
       )
@@ -121,19 +107,21 @@ const ProductPage: React.FC = () => {
     productGroup: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='groupID'
           title='Nhóm'
+          required
           inputType='select'
-          required={false}
           onValueChange={(val) => {
-            setNewRecord({ ...newRecord, groupID: numberValidatorChange(val) })
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, groupID: numberValidatorChange(val) }
+            })
           }}
+          defaultValue={numberValidatorInit(record.productGroup?.groupID)}
           selectProps={{
-            options: groups.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            }),
-            defaultValue: textValidatorInit(record.productGroup?.group?.name)
+            options: viewModel.state.groups.map((i) => {
+              return { label: i.name, value: i.id }
+            })
           }}
         >
           <SkyTableTypography status={record.productGroup?.group?.status}>
@@ -142,20 +130,23 @@ const ProductPage: React.FC = () => {
         </EditableStateCell>
       )
     },
-    productPrint: (record: ProductTableDataType) => {
+    printablePlace: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='printID'
           title='Nơi in'
           inputType='select'
-          required={true}
-          onValueChange={(val: number) => setNewRecord({ ...newRecord, printID: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, printID: numberValidatorChange(val) }
+            })
+          }
+          defaultValue={numberValidatorInit(record.printablePlace?.printID)}
           selectProps={{
-            options: prints.map((i) => {
-              return { label: i.name, value: i.id, optionData: i.id }
-            }),
-            defaultValue: textValidatorInit(record.printablePlace?.print?.name)
+            options: viewModel.state.prints.map((i) => {
+              return { label: i.name, value: i.id }
+            })
           }}
         >
           <SkyTableTypography status={record.printablePlace?.print?.status}>
@@ -167,13 +158,17 @@ const ProductPage: React.FC = () => {
     dateInputNPL: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateInputNPL'
           title='NPL'
           inputType='datepicker'
-          required={true}
-          initialValue={dateValidatorInit(record.dateInputNPL)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateInputNPL: dateValidatorChange(val) })}
+          required
+          defaultValue={dateValidatorInit(record.dateInputNPL)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateInputNPL: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateInputNPL)}</SkyTableTypography>
         </EditableStateCell>
@@ -182,16 +177,77 @@ const ProductPage: React.FC = () => {
     dateOutputFCR: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='dateOutputFCR'
           title='FCR'
           inputType='datepicker'
-          required={true}
-          initialValue={dateValidatorInit(record.dateOutputFCR)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateOutputFCR: dateValidatorChange(val) })}
+          required
+          defaultValue={dateValidatorInit(record.dateOutputFCR)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateOutputFCR: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={'active'}>{dateValidatorDisplay(record.dateOutputFCR)}</SkyTableTypography>
         </EditableStateCell>
+      )
+    },
+    actionCol: (record: ProductTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                productCode: record.productCode,
+                quantityPO: record.quantityPO,
+                colorID: record.productColor?.colorID,
+                groupID: record.productGroup?.groupID,
+                printID: record.printablePlace?.printID,
+                dateInputNPL: record.dateInputNPL,
+                dateOutputFCR: record.dateOutputFCR
+              })
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: true
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore(record)}
+          // Show hide action col
+        />
       )
     }
   }
@@ -202,16 +258,7 @@ const ProductPage: React.FC = () => {
       dataIndex: 'productCode',
       width: '10%',
       render: (_value: any, record: ProductTableDataType) => {
-        return columns.productCode(record)
-      }
-    },
-    {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '10%',
-      responsive: ['sm'],
-      render: (_value: any, record: ProductTableDataType) => {
-        return columns.quantityPO(record)
+        return columns.title(record)
       }
     },
     {
@@ -224,23 +271,32 @@ const ProductPage: React.FC = () => {
       }
     },
     {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '7%',
+      responsive: ['sm'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.quantityPO(record)
+      }
+    },
+    {
       title: 'Nhóm',
       dataIndex: 'groupID',
-      width: '10%',
+      width: '7%',
       responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productGroup(record)
       }
     },
-    // {
-    //   title: 'Nơi in',
-    //   dataIndex: 'printID',
-    //   width: '10%',
-    //   responsive: ['xl'],
-    //   render: (_value: any, record: ProductTableDataType) => {
-    //     return columns.productPrint(record)
-    //   }
-    // },
+    {
+      title: 'Nơi in',
+      dataIndex: 'printID',
+      width: '10%',
+      responsive: ['xxl'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.printablePlace(record)
+      }
+    },
     {
       title: 'Ngày nhập NPL',
       dataIndex: 'dateInputNPL',
@@ -261,139 +317,95 @@ const ProductPage: React.FC = () => {
     }
   ]
 
+  const actionCol: ColumnType<ProductTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ProductTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <BaseLayout
-        searchPlaceHolder='Mã hàng...'
         title='Danh sách sản phẩm'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked) => handleSortChange(checked)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={viewModel.table.loading}
+        searchProps={{
+          // Search Input
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
         }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+        sortProps={{
+          // Sort Switch Button
+          onChange: viewModel.action.handleSwitchSortChange
+        }}
+        deleteProps={{
+          // Show delete list Switch Button
+          onChange: viewModel.action.handleSwitchDeleteChange
+        }}
+        addNewProps={{
+          // Add new Button
+          onClick: () => viewModel.state.setOpenModal(true)
         }}
       >
         <SkyTable
-          bordered
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          metaData={productService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
-              },
-              isShow: !table.showDeleted
-            },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onDeleteForever: {
-              onClick: (_e, record) => handleConfirmDeleteForever(record!.id!),
-              isShow: table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
-            },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            onConfirmRestore: (record) => handleConfirmRestore(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+          loading={viewModel.table.loading}
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (
-                <Flex className='overflow-hidden' vertical gap={10}>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Số lượng PO:' isEditing={table.isEditing(record.id!)}>
-                        {columns.quantityPO(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productColor(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <ExpandableItemRow className='w-1/2' title='Nhóm:' isEditing={table.isEditing(record.id!)}>
-                        {columns.productGroup(record)}
-                      </ExpandableItemRow>
-                    )}
-                    <ExpandableItemRow className='w-1/2' title='Nơi in:' isEditing={table.isEditing(record.id!)}>
-                      {columns.productPrint(record)}
-                    </ExpandableItemRow>
-                    {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow
-                        title='Ngày nhập NPL:'
-                        className='flex w-1/2 lg:hidden'
-                        isEditing={table.isEditing(record.id!)}
-                      >
-                        {columns.dateInputNPL(record)}
-                      </ExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.lg) && (
-                      <ExpandableItemRow
-                        className='w-1/2'
-                        title='Ngày xuất FCR:'
-                        isEditing={table.isEditing(record.id!)}
-                      >
-                        {columns.dateInputNPL(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                  <Collapse
-                    items={[
-                      {
-                        key: '1',
-                        label: (
-                          <Typography.Title className='m-0' level={5} type='secondary'>
-                            Nhập khẩu
-                          </Typography.Title>
-                        ),
-                        children: <ImportationTable productRecord={record} />
-                      }
-                    ]}
-                  />
-                </Flex>
+                <SkyTableExpandableLayout>
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.quantityPO(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.sm) && (
+                    <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.productColor(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xl) && (
+                    <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.productGroup(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.xxl) && (
+                    <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.printablePlace(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.md) && (
+                    <SkyTableExpandableItemRow title='Ngày nhập NPL:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.dateInputNPL(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                  {!(width >= breakpoint.lg) && (
+                    <SkyTableExpandableItemRow title='Ngày xuất FCR:' isEditing={viewModel.table.isEditing(record.key)}>
+                      {columns.dateInputNPL(record)}
+                    </SkyTableExpandableItemRow>
+                  )}
+                </SkyTableExpandableLayout>
               )
             },
-            columnWidth: '0.001%'
+            columnWidth: '0.001%',
+            onExpand: (expanded, record: ProductTableDataType) =>
+              viewModel.table.handleStartExpanding(expanded, record.key),
+            expandedRowKeys: viewModel.table.expandingKeys
           }}
         />
       </BaseLayout>
-      {openModal && (
+      {viewModel.state.openModal && (
         <ModalAddNewProduct
-          setLoading={table.setLoading}
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
+          okButtonProps={{ loading: viewModel.table.loading }}
+          open={viewModel.state.openModal}
+          setOpenModal={viewModel.state.setOpenModal}
+          onAddNew={viewModel.action.handleAddNew}
         />
       )}
     </>

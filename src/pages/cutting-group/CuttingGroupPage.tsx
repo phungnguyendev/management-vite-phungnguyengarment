@@ -1,154 +1,153 @@
-import { Checkbox, ColorPicker, Divider, Flex, Space } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { Checkbox, Flex, Space } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
+import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
+import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { RootState } from '~/store/store'
 import {
+  booleanValidatorInit,
   breakpoint,
+  dateTimeValidatorChange,
   dateTimeValidatorDisplay,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isValidObject,
   numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
   textValidatorDisplay
 } from '~/utils/helpers'
-import useCuttingGroup from './hooks/useCuttingGroup'
+import CuttingGroupExpandableItemRow from './components/CuttingGroupExpandableItemRow'
+import useCuttingGroupViewModel from './hooks/useCuttingGroupViewModel'
 import { CuttingGroupTableDataType } from './type'
 
 const SampleSewingPage = () => {
-  const table = useTable<CuttingGroupTableDataType>([])
+  useTitle('Cutting Group - Phung Nguyen')
+  const viewModel = useCuttingGroupViewModel()
   const { width } = useDevice()
-  const {
-    searchText,
-    setSearchText,
-    newRecord,
-    setNewRecord,
-    handleResetClick,
-    handleSortChange,
-    handleSearch,
-    handleSaveClick,
-    handleConfirmDelete,
-    handlePageChange,
-    productService
-  } = useCuttingGroup(table)
-  const currentUser = useSelector((state: RootState) => state.user)
-  useTitle('Tổ cắt')
 
   const columns = {
     productCode: (record: CuttingGroupTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
+        <Space direction='horizontal'>
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
-        </EditableStateCell>
+          {viewModel.action.isChecked(record) && (
+            <SkyTableTypography type='success' code>
+              In thêu
+            </SkyTableTypography>
+          )}
+        </Space>
       )
     },
     productColor: (record: CuttingGroupTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-          <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
-            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor?.color?.name)}
-            </SkyTableTypography>
-            {record.productColor && (
-              <ColorPicker size='middle' format='hex' value={record.productColor?.color?.hexColor} disabled />
-            )}
-          </Flex>
-        </EditableStateCell>
+        <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
+          <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
+            {textValidatorDisplay(record.productColor?.color?.name)}
+          </SkyTableTypography>
+          <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
+        </Flex>
       )
     },
     quantityPO: (record: CuttingGroupTableDataType) => {
+      return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+    },
+    productGroup: (record: CuttingGroupTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='quantityPO' title='Số lượng PO' inputType='number' required>
-          <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
       )
     },
     quantityRealCut: (record: CuttingGroupTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='quantityRealCut'
           title='Thực cắt'
           inputType='number'
           required
-          initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
-          value={newRecord?.quantityRealCut}
-          onValueChange={(val) => setNewRecord({ ...newRecord, quantityRealCut: numberValidatorChange(val) })}
+          placeholder='Ví dụ: 1000'
+          defaultValue={numberValidatorInit(record.cuttingGroup?.quantityRealCut)}
+          value={viewModel.state.newRecord?.quantityRealCut}
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, quantityRealCut: numberValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography status={record.status}>
-            {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)) ?? '-'}
-          </SkyTableTypography>
+          <SkyTableTypography>{numberValidatorDisplay(record.cuttingGroup?.quantityRealCut)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
-    timeCut: (record: CuttingGroupTableDataType) => {
+    dateTimeCut: (record: CuttingGroupTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='timeCut'
+          isEditing={viewModel.table.isEditing(record.key!)}
+          dataIndex='dateTimeCut'
           title='Ngày giờ cắt'
-          inputType='datepicker'
+          inputType='dateTimePicker'
           required
-          initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.timeCut)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, timeCut: dateValidatorChange(val) })}
+          defaultValue={dateValidatorInit(record.cuttingGroup?.dateTimeCut)}
+          onValueChange={(val: Dayjs) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, dateTimeCut: dateTimeValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography status={record.status}>
-            {(record.cuttingGroup && dateTimeValidatorDisplay(record.cuttingGroup.timeCut)) ?? '--/--/----'}
-          </SkyTableTypography>
+          <SkyTableTypography>{dateTimeValidatorDisplay(record.cuttingGroup?.dateTimeCut)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
+    // Số lượng cắt còn lại
     remainingAmount: (record: CuttingGroupTableDataType) => {
       const totalAmount = (record.quantityPO ?? 0) - (record.cuttingGroup?.quantityRealCut ?? 0)
       return (
         <EditableStateCell isEditing={false} dataIndex='remainingAmount' title='Còn lại' inputType='number'>
-          <SkyTableTypography status={record.status}>
+          <SkyTableTypography>
             {numberValidatorDisplay(totalAmount < 0 ? totalAmount * -1 : totalAmount)}{' '}
             <span>{totalAmount < 0 && '(Dư)'}</span>
           </SkyTableTypography>
         </EditableStateCell>
       )
     },
+    // In thêu
     embroidered: {
       dateSendEmbroidered: (record: CuttingGroupTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
+            isEditing={viewModel.table.isEditing(record.key!)}
             dataIndex='dateSendEmbroidered'
             title='Ngày gửi in thêu'
             inputType='datepicker'
             required
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
-            initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateSendEmbroidered)}
+            disabled={viewModel.action.isDisableRecord(record)}
+            defaultValue={dateValidatorInit(record.cuttingGroup?.dateSendEmbroidered)}
             onValueChange={(val: Dayjs) =>
-              setNewRecord({
-                ...newRecord,
+              viewModel.state.setNewRecord({
+                ...viewModel.state.newRecord,
                 dateSendEmbroidered: dateValidatorChange(val)
               })
             }
           >
-            <SkyTableTypography
-              disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
-              status={record.status}
-            >
-              {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateSendEmbroidered)) ?? '--/--/----'}
+            <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+              {dateValidatorDisplay(record.cuttingGroup?.dateSendEmbroidered)}
             </SkyTableTypography>
           </EditableStateCell>
         )
       },
+      // SL in thêu còn lại
       amountQuantityEmbroidered: (record: CuttingGroupTableDataType) => {
         const totalAmount = record.cuttingGroup
           ? numberValidatorCalc(record.cuttingGroup.quantityArrived1Th) +
@@ -161,74 +160,68 @@ const SampleSewingPage = () => {
         return (
           <EditableStateCell
             dataIndex='amountQuantityEmbroidered'
-            title='Còn lại'
-            isEditing={table.isEditing(record.id!)}
+            title='SL In thêu còn lại'
+            isEditing={viewModel.table.isEditing(record.key)}
             editableRender={
-              <SkyTableTypography
-                status={record.status}
-                disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
-              >
-                {total}
-              </SkyTableTypography>
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>{total}</SkyTableTypography>
             }
-            disabled={(newRecord.syncStatus && table.isEditing(record.id!)) ?? false}
-            initialValue={total}
+            disabled={viewModel.action.isDisableRecord(record)}
+            defaultValue={total}
             inputType='number'
           >
-            <SkyTableTypography
-              status={record.status}
-              disabled={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? false}
-            >
+            <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
               {numberValidatorDisplay(total)}
             </SkyTableTypography>
           </EditableStateCell>
         )
       },
+      // Có in thêu hay không
       syncStatus: (record: CuttingGroupTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
+            isEditing={viewModel.table.isEditing(record.key!)}
             dataIndex='syncStatus'
             title='Option'
             inputType='checkbox'
             required
-            initialValue={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
-            value={newRecord.syncStatus}
+            defaultValue={booleanValidatorInit(record.cuttingGroup?.syncStatus)}
+            value={viewModel.state.newRecord?.syncStatus}
             onValueChange={(val: boolean) =>
-              setNewRecord({
-                ...newRecord,
+              viewModel.state.setNewRecord({
+                ...viewModel.state.newRecord,
                 syncStatus: val
               })
             }
           >
-            <Checkbox
-              name='syncStatus'
-              checked={(record.cuttingGroup && record.cuttingGroup.syncStatus) ?? undefined}
-              disabled
-            />
+            <Checkbox name='syncStatus' checked={record.cuttingGroup?.syncStatus} disabled />
           </EditableStateCell>
         )
       }
     },
+    // Bán thành phẩm
     btp: {
+      // Số lượng giao BTP
       quantityDeliveredBTP: (record: CuttingGroupTableDataType) => {
         return (
           <EditableStateCell
-            isEditing={table.isEditing(record.key!)}
+            isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='quantityDeliveredBTP'
             title='SL Giao BTP'
             inputType='number'
             required
-            initialValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
-            value={newRecord && numberValidatorCalc(newRecord?.quantityDeliveredBTP)}
-            onValueChange={(val) => setNewRecord({ ...newRecord, quantityDeliveredBTP: val })}
+            defaultValue={record.cuttingGroup ? record.cuttingGroup.quantityDeliveredBTP : ''}
+            value={viewModel.state.newRecord && numberValidatorCalc(viewModel.state.newRecord?.quantityDeliveredBTP)}
+            onValueChange={(val) =>
+              viewModel.state.setNewRecord((prev) => {
+                return { ...prev, quantityDeliveredBTP: val }
+              })
+            }
           >
-            <SkyTableTypography status={record.status}>
-              {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)) ?? '-'}
-            </SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(record.cuttingGroup?.quantityDeliveredBTP)}</SkyTableTypography>
           </EditableStateCell>
         )
       },
+      // SL BTP Còn lại
       amountQuantityDeliveredBTP: (record: CuttingGroupTableDataType) => {
         const amountQuantityBTP =
           numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.cuttingGroup?.quantityDeliveredBTP)
@@ -236,31 +229,38 @@ const SampleSewingPage = () => {
           <EditableStateCell
             isEditing={false}
             dataIndex='amountQuantityDeliveredBTP'
-            title='SL Còn lại'
+            title='SL BTP Còn lại'
             inputType='number'
             required
           >
-            <SkyTableTypography status={record.status}>{numberValidatorDisplay(amountQuantityBTP)}</SkyTableTypography>
+            <SkyTableTypography>{numberValidatorDisplay(amountQuantityBTP)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
     },
+    // In thêu về
     embroideringArrived: {
       th1: {
         quantityArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='quantityArrived'
-              title='Thực cắt'
+              title='SL Về'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived1Th)}
-              value={newRecord?.quantityArrived1Th}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived1Th: numberValidatorChange(val) })}
+              placeholder='Ví dụ: 500'
+              defaultValue={numberValidatorInit(record.cuttingGroup?.quantityArrived1Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              value={viewModel.state.newRecord?.quantityArrived1Th}
+              onValueChange={(val) =>
+                viewModel.state.setNewRecord((prev) => {
+                  return { ...prev, quantityArrived1Th: numberValidatorChange(val) }
+                })
+              }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)) ?? '-'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {numberValidatorDisplay(record.cuttingGroup?.quantityArrived1Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -268,21 +268,22 @@ const SampleSewingPage = () => {
         dateArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='dateArrived'
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived1Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={dateValidatorInit(record.cuttingGroup?.dateArrived1Th)}
               onValueChange={(val: Dayjs) =>
-                setNewRecord({
-                  ...newRecord,
+                viewModel.state.setNewRecord({
+                  ...viewModel.state.newRecord,
                   dateArrived1Th: dateValidatorChange(val)
                 })
               }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived1Th)) ?? '--/--/----'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {dateValidatorDisplay(record.cuttingGroup?.dateArrived1Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -292,17 +293,23 @@ const SampleSewingPage = () => {
         quantityArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='quantityArrived'
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived2Th)}
-              value={newRecord?.quantityArrived2Th}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived2Th: numberValidatorChange(val) })}
+              placeholder='Ví dụ: 500'
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={numberValidatorInit(record.cuttingGroup?.quantityArrived2Th)}
+              value={viewModel.state.newRecord?.quantityArrived2Th}
+              onValueChange={(val) =>
+                viewModel.state.setNewRecord((prev) => {
+                  return { ...prev, quantityArrived2Th: numberValidatorChange(val) }
+                })
+              }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)) ?? '-'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {numberValidatorDisplay(record.cuttingGroup?.quantityArrived2Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -310,21 +317,22 @@ const SampleSewingPage = () => {
         dateArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='dateArrived'
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived2Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={dateValidatorInit(record.cuttingGroup?.dateArrived2Th)}
               onValueChange={(val: Dayjs) =>
-                setNewRecord({
-                  ...newRecord,
+                viewModel.state.setNewRecord({
+                  ...viewModel.state.newRecord,
                   dateArrived2Th: dateValidatorChange(val)
                 })
               }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived2Th)) ?? '--/--/----'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {dateValidatorDisplay(record.cuttingGroup?.dateArrived2Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -334,17 +342,23 @@ const SampleSewingPage = () => {
         quantityArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='quantityArrived'
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived3Th)}
-              value={newRecord?.quantityArrived3Th}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived3Th: numberValidatorChange(val) })}
+              disabled={viewModel.action.isDisableRecord(record)}
+              placeholder='Ví dụ: 500'
+              defaultValue={numberValidatorInit(record.cuttingGroup?.quantityArrived3Th)}
+              value={viewModel.state.newRecord?.quantityArrived3Th}
+              onValueChange={(val) =>
+                viewModel.state.setNewRecord((prev) => {
+                  return { ...prev, quantityArrived3Th: numberValidatorChange(val) }
+                })
+              }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)) ?? '-'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {numberValidatorDisplay(record.cuttingGroup?.quantityArrived3Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -352,21 +366,22 @@ const SampleSewingPage = () => {
         dateArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='dateArrived'
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived3Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={dateValidatorInit(record.cuttingGroup?.dateArrived3Th)}
               onValueChange={(val: Dayjs) =>
-                setNewRecord({
-                  ...newRecord,
+                viewModel.state.setNewRecord({
+                  ...viewModel.state.newRecord,
                   dateArrived3Th: dateValidatorChange(val)
                 })
               }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived3Th)) ?? '--/--/----'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {dateValidatorDisplay(record.cuttingGroup?.dateArrived3Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -376,17 +391,23 @@ const SampleSewingPage = () => {
         quantityArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='quantityArrived'
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived4Th)}
-              value={newRecord?.quantityArrived4Th}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived4Th: numberValidatorChange(val) })}
+              disabled={viewModel.action.isDisableRecord(record)}
+              placeholder='Ví dụ: 500'
+              defaultValue={numberValidatorInit(record.cuttingGroup?.quantityArrived4Th)}
+              value={viewModel.state.newRecord?.quantityArrived4Th}
+              onValueChange={(val) =>
+                viewModel.state.setNewRecord((prev) => {
+                  return { ...prev, quantityArrived4Th: numberValidatorChange(val) }
+                })
+              }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)) ?? '-'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {numberValidatorDisplay(record.cuttingGroup?.quantityArrived4Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -394,21 +415,22 @@ const SampleSewingPage = () => {
         dateArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='dateArrived'
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived4Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={dateValidatorInit(record.cuttingGroup?.dateArrived4Th)}
               onValueChange={(val: Dayjs) =>
-                setNewRecord({
-                  ...newRecord,
+                viewModel.state.setNewRecord({
+                  ...viewModel.state.newRecord,
                   dateArrived4Th: dateValidatorChange(val)
                 })
               }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived4Th)) ?? '--/--/----'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {dateValidatorDisplay(record.cuttingGroup?.dateArrived4Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -418,17 +440,23 @@ const SampleSewingPage = () => {
         quantityArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='quantityArrived'
               title='Thực cắt'
               inputType='number'
               required
-              initialValue={record.cuttingGroup && numberValidatorInit(record.cuttingGroup.quantityArrived5Th)}
-              value={newRecord?.quantityArrived5Th}
-              onValueChange={(val) => setNewRecord({ ...newRecord, quantityArrived5Th: numberValidatorChange(val) })}
+              disabled={viewModel.action.isDisableRecord(record)}
+              placeholder='Ví dụ: 500'
+              defaultValue={numberValidatorInit(record.cuttingGroup?.quantityArrived5Th)}
+              value={viewModel.state.newRecord?.quantityArrived5Th}
+              onValueChange={(val) =>
+                viewModel.state.setNewRecord((prev) => {
+                  return { ...prev, quantityArrived5Th: numberValidatorChange(val) }
+                })
+              }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)) ?? '-'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {numberValidatorDisplay(record.cuttingGroup?.quantityArrived5Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
@@ -436,26 +464,83 @@ const SampleSewingPage = () => {
         dateArrived: (record: CuttingGroupTableDataType) => {
           return (
             <EditableStateCell
-              isEditing={table.isEditing(record.key!)}
+              isEditing={viewModel.table.isEditing(record.key!)}
               dataIndex='dateArrived'
               title='Ngày về'
               inputType='datepicker'
               required
-              initialValue={record.cuttingGroup && dateValidatorInit(record.cuttingGroup.dateArrived5Th)}
+              disabled={viewModel.action.isDisableRecord(record)}
+              defaultValue={dateValidatorInit(record.cuttingGroup?.dateArrived5Th)}
               onValueChange={(val: Dayjs) =>
-                setNewRecord({
-                  ...newRecord,
+                viewModel.state.setNewRecord({
+                  ...viewModel.state.newRecord,
                   dateArrived5Th: dateValidatorChange(val)
                 })
               }
             >
-              <SkyTableTypography status={record.status}>
-                {(record.cuttingGroup && dateValidatorDisplay(record.cuttingGroup.dateArrived5Th)) ?? '--/--/----'}
+              <SkyTableTypography disabled={viewModel.action.isDisableRecord(record)}>
+                {dateValidatorDisplay(record.cuttingGroup?.dateArrived5Th)}
               </SkyTableTypography>
             </EditableStateCell>
           )
         }
       }
+    },
+    actionCol: (record: CuttingGroupTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              if (isValidObject(record.cuttingGroup)) {
+                viewModel.state.setNewRecord({
+                  ...record.cuttingGroup,
+                  cuttingGroupID: isValidObject(record.cuttingGroup) ? record.cuttingGroup.id : null, // Using for compare check box
+                  productColorID: isValidObject(record.productColor) ? record.productColor.colorID : null // Using for compare check box
+                })
+              }
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted,
+            disabled: !isValidObject(record.cuttingGroup)
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore()}
+          // Show hide action col
+        />
+      )
     }
   }
 
@@ -463,7 +548,7 @@ const SampleSewingPage = () => {
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
-      width: '10%',
+      width: '12%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.productCode(record)
       }
@@ -487,7 +572,16 @@ const SampleSewingPage = () => {
       }
     },
     {
-      title: 'SL Thực cắt',
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
+      responsive: ['xl'],
+      render: (_value: any, record: CuttingGroupTableDataType) => {
+        return columns.productGroup(record)
+      }
+    },
+    {
+      title: 'SL thực cắt',
       dataIndex: 'quantityRealCut',
       width: '10%',
       responsive: ['lg'],
@@ -496,7 +590,7 @@ const SampleSewingPage = () => {
       }
     },
     {
-      title: 'SL Còn lại',
+      title: 'SL còn lại (Cắt)',
       dataIndex: 'remainingAmount',
       width: '10%',
       responsive: ['lg'],
@@ -506,11 +600,11 @@ const SampleSewingPage = () => {
     },
     {
       title: 'Ngày giờ cắt',
-      dataIndex: 'timeCut',
+      dataIndex: 'dateTimeCut',
       width: '15%',
       responsive: ['xl'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
-        return columns.timeCut(record)
+        return columns.dateTimeCut(record)
       }
     },
     {
@@ -526,7 +620,7 @@ const SampleSewingPage = () => {
           }
         },
         {
-          title: 'SL còn lại',
+          title: 'SL in thêu còn lại',
           dataIndex: 'amountQuantityEmbroidered',
           width: '10%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
@@ -545,268 +639,198 @@ const SampleSewingPage = () => {
     }
   ]
 
+  const actionCol: ColumnType<CuttingGroupTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: CuttingGroupTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
       <BaseLayout
         title='Tổ cắt'
-        searchValue={searchText}
-        onDeletedRecordStateChange={
-          currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-            ? (enable) => table.setDeletedRecordState(enable)
-            : undefined
-        }
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        onSearch={(value) => handleSearch(value)}
-        onSortChange={(checked, e) => handleSortChange(checked, e)}
-        onResetClick={{
-          onClick: () => handleResetClick(),
-          isShow: true
+        loading={viewModel.table.loading}
+        searchProps={{
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
+        }}
+        sortProps={{
+          onChange: viewModel.action.handleSwitchSortChange
+        }}
+        deleteProps={{
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
       >
         <SkyTable
           bordered
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          metaData={productService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({
-                  ...record?.cuttingGroup,
-                  cuttingGroupID: record?.cuttingGroup ? record?.cuttingGroup.id : null, // Using for compare check box
-                  productColorID: record?.productColor?.colorID // Using for compare check box
-                })
-                table.handleStartEditing(record!.key!)
-              },
-              isShow: !table.showDeleted
-            },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: table.showDeleted
-            },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('cutting_group_manager')
+          loading={viewModel.table.loading}
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol,
+            showAction: !viewModel.state.showDeleted
           }}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record) => {
               return (
-                <Flex gap={30} vertical className='overflow-hidden'>
-                  <Flex vertical>
-                    <Space direction='vertical' size={10} split={<Divider className='my-0 w-full py-0' />}>
-                      {!(width >= breakpoint.sm) && (
-                        <ExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.id!)}>
-                          {columns.productColor(record)}
-                        </ExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.md) && (
-                        <ExpandableItemRow
-                          className='w-1/2'
-                          title='Số lượng PO:'
-                          isEditing={table.isEditing(record.id!)}
+                <>
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.lg) && (
+                      <>
+                        <SkyTableExpandableItemRow
+                          title='SL thực cắt:'
+                          isEditing={viewModel.table.isEditing(record.key)}
                         >
-                          {columns.quantityPO(record)}
-                        </ExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.lg) && (
-                        <>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='SL thực cắt:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.quantityRealCut(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='SL còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.remainingAmount(record)}
-                          </ExpandableItemRow>
-                        </>
-                      )}
-                      {!(width >= breakpoint.xl) && (
-                        <ExpandableItemRow
-                          className='w-1/2'
-                          title='Ngày giờ cắt:'
-                          isEditing={table.isEditing(record.id!)}
+                          {columns.quantityRealCut(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          title='SL còn lại (Cắt):'
+                          isEditing={viewModel.table.isEditing(record.key)}
                         >
-                          {columns.timeCut(record)}
-                        </ExpandableItemRow>
-                      )}
-                      {!(width >= breakpoint.xxl) && (
-                        <>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='Ngày gửi in thêu:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroidered.dateSendEmbroidered(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='SL còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroidered.amountQuantityEmbroidered(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='In thêu?:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroidered.syncStatus(record)}
-                          </ExpandableItemRow>
-                        </>
-                      )}
-                      {!(width >= breakpoint.xxl) && (
-                        <>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='SL Giao BTP:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.btp.quantityDeliveredBTP(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-1/2'
-                            title='Số lượng BTP còn lại:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.btp.amountQuantityDeliveredBTP(record)}
-                          </ExpandableItemRow>
-                        </>
-                      )}
-                    </Space>
-                  </Flex>
-                  <Flex vertical className=''>
-                    <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                      <Flex justify='center' align='center' className='max-w-screen flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 1:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th1.quantityArrived(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th1.dateArrived(record)}
-                          </ExpandableItemRow>
-                        </Flex>
-                      </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 2:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th2.quantityArrived(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th2.dateArrived(record)}
-                          </ExpandableItemRow>
-                        </Flex>
-                      </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 3:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th3.quantityArrived(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th3.dateArrived(record)}
-                          </ExpandableItemRow>
-                        </Flex>
-                      </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 4:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th4.quantityArrived(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th4.dateArrived(record)}
-                          </ExpandableItemRow>
-                        </Flex>
-                      </Flex>
-                      <Flex justify='center' align='center' className='flex-col md:flex-row' gap={10}>
-                        <SkyTableTypography code strong className='w-fit'>
-                          Lần 5:
-                        </SkyTableTypography>
-                        <Flex className='w-full' gap={20}>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='SL về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th5.quantityArrived(record)}
-                          </ExpandableItemRow>
-                          <ExpandableItemRow
-                            className='w-fit pr-5'
-                            title='Ngày về:'
-                            isEditing={table.isEditing(record.id!)}
-                          >
-                            {columns.embroideringArrived.th5.dateArrived(record)}
-                          </ExpandableItemRow>
-                        </Flex>
-                      </Flex>
-                    </Space>
-                  </Flex>
-                </Flex>
+                          {columns.remainingAmount(record)}
+                        </SkyTableExpandableItemRow>
+                      </>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow
+                        title='Ngày giờ cắt:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {columns.dateTimeCut(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <>
+                        <SkyTableExpandableItemRow
+                          title='Ngày gửi in thêu:'
+                          isEditing={viewModel.table.isEditing(record.key)}
+                        >
+                          {columns.embroidered.dateSendEmbroidered(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          title='SL in thêu còn lại:'
+                          isEditing={viewModel.table.isEditing(record.key)}
+                        >
+                          {columns.embroidered.amountQuantityEmbroidered(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow title='In thêu?:' isEditing={viewModel.table.isEditing(record.key)}>
+                          {columns.embroidered.syncStatus(record)}
+                        </SkyTableExpandableItemRow>
+                      </>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <>
+                        <SkyTableExpandableItemRow
+                          title='SL giao BTP:'
+                          isEditing={viewModel.table.isEditing(record.key)}
+                        >
+                          {columns.btp.quantityDeliveredBTP(record)}
+                        </SkyTableExpandableItemRow>
+                        <SkyTableExpandableItemRow
+                          title='SL BTP còn lại:'
+                          isEditing={viewModel.table.isEditing(record.key)}
+                        >
+                          {columns.btp.amountQuantityDeliveredBTP(record)}
+                        </SkyTableExpandableItemRow>
+                      </>
+                    )}
+                    <SkyTableExpandableLayout className='w-full flex-col md:flex-row'>
+                      <SkyTableExpandableLayout>
+                        <CuttingGroupExpandableItemRow
+                          index={1}
+                          isEditing
+                          disabled={viewModel.action.isDisableRecord(record)}
+                          quantityArrivedRender={columns.embroideringArrived.th1.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th1.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={2}
+                          isEditing
+                          disabled={viewModel.action.isDisableRecord(record)}
+                          quantityArrivedRender={columns.embroideringArrived.th2.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th2.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={3}
+                          isEditing
+                          disabled={viewModel.action.isDisableRecord(record)}
+                          quantityArrivedRender={columns.embroideringArrived.th3.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th3.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={4}
+                          isEditing
+                          disabled={viewModel.action.isDisableRecord(record)}
+                          quantityArrivedRender={columns.embroideringArrived.th4.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th4.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={5}
+                          isEditing
+                          disabled={viewModel.action.isDisableRecord(record)}
+                          quantityArrivedRender={columns.embroideringArrived.th5.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th5.dateArrived(record)}
+                        />
+                      </SkyTableExpandableLayout>
+                      {/* <SkyTableExpandableLayout>
+                        <CuttingGroupExpandableItemRow
+                          index={6}
+                          isEditing
+                          quantityArrivedRender={columns.embroideringArrived.th6.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th6.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={7}
+                          isEditing
+                          quantityArrivedRender={columns.embroideringArrived.th7.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th7.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={8}
+                          isEditing
+                          quantityArrivedRender={columns.embroideringArrived.th8.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th8.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={9}
+                          isEditing
+                          quantityArrivedRender={columns.embroideringArrived.th9.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th9.dateArrived(record)}
+                        />
+                        <CuttingGroupExpandableItemRow
+                          index={10}
+                          isEditing
+                          quantityArrivedRender={columns.embroideringArrived.th10.quantityArrived(record)}
+                          dateArrivedRender={columns.embroideringArrived.th10.dateArrived(record)}
+                        />
+                      </SkyTableExpandableLayout> */}
+                    </SkyTableExpandableLayout>
+                  </SkyTableExpandableLayout>
+                </>
               )
             },
             columnWidth: '0.001%'
+            // onExpand: (expanded, record: CuttingGroupTableDataType) =>
+            //   viewModel.table.handleStartExpanding(expanded, record.key),
+            // expandedRowKeys: viewModel.table.expandingKeys
           }}
         />
       </BaseLayout>

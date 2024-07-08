@@ -1,8 +1,10 @@
 import { createAction } from '@reduxjs/toolkit'
 import { User, UserRoleType } from '~/typing'
 
-export const setUserAction = createAction<User>('user/setUser')
+export const setUser = createAction<User | null>('auth/user')
 
-export const setUserRoleAction = createAction<UserRoleType[]>('user/setUserRoles')
+export const setUserRole = createAction<UserRoleType[]>('auth/userRole')
 
-export const setUserResetPasswordAction = createAction<{ user: User; isResetPassword: boolean }>('user/isResetPassword')
+export const setLoading = createAction<boolean>('app/loading')
+
+export const setLanguage = createAction<'vi' | 'en'>('app/language')

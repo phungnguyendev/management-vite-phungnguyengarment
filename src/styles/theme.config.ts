@@ -2,7 +2,8 @@ import { ThemeConfig } from 'antd'
 
 const theme: ThemeConfig = {
   token: {
-    colorPrimary: '#ff6b00'
+    colorPrimary: '#ff6b00',
+    colorError: '#F5222D'
   },
   components: {
     Layout: {

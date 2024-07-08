@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
-import { SideType, appRoutes } from '~/utils/route'
+import routes from '~/config/route.config'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
@@ -28,11 +28,11 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
 
 const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
-  const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
+  const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
   const currentUser = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
-    const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
+    const keyFound = routes.find((route) => route.path === lastPath(pathname))
     if (keyFound) {
       setSelectedKey(keyFound.key)
     }
@@ -44,15 +44,9 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
     return path
   }
 
-  const routes = (appRoutes: SideType[]): SideType[] => {
-    const routesMapping = appRoutes.filter((route) => {
-      return currentUser.userRoles.includes('admin') ? route : route.role !== 'admin'
-    })
+  const getRoutes = currentUser.user?.isAdmin ? routes : routes.filter((item) => item.role !== 'admin')
 
-    return routesMapping
-  }
-
-  const items: MenuProps['items'] = routes(appRoutes).map((route) => {
+  const items: MenuProps['items'] = getRoutes.map((route) => {
     if (route.isGroup) {
       return getItem(SideItem(route), route.key, null, 'group')
     } else {
@@ -60,7 +54,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
     }
   })
 
-  const onClick: MenuProps['onClick'] = (e) => {
+  const handleClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
     setOpenDrawer(!openDrawer)
   }
@@ -71,7 +65,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
         <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
       </Flex>
       <Menu
-        onClick={onClick}
+        onClick={handleClick}
         selectedKeys={[selectedKey]}
         defaultSelectedKeys={[selectedKey]}
         mode='inline'

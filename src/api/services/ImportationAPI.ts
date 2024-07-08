@@ -5,13 +5,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'importations'
 
 export default {
-  createNewItem: async (item: Importation, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: Importation, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -26,32 +26,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  createOrUpdateItemByPk: async (
-    id: number,
-    item: Importation,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${id}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -65,12 +40,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -82,19 +54,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}/find`, bodyRequest, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -102,19 +68,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: Importation, accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: Importation, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -123,25 +83,16 @@ export default {
       })
   },
   updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: Importation,
+    query: { field: string; id: number },
+    itemToUpdate: Importation,
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -149,9 +100,23 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  deleteItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
+    return client
+      .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }

@@ -1,183 +1,177 @@
-import { Flex, Form, Modal, Spin } from 'antd'
+import { App, Form, Spin } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import PrintAPI from '~/api/services/PrintAPI'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
-import DayJS from '~/utils/date-formatter'
+import DayJS, { dateFormatter } from '~/utils/date-formatter'
+import { ProductAddNewProps } from '../type'
 
-export interface ProductAddNewProps {
-  productCode?: string | null
-  quantityPO?: number | null
-  colorID?: number | null
-  groupID?: number | null
-  printID?: number | null
-  dateInputNPL?: string
-  dateOutputFCR?: string | null
+interface Props extends SkyModalProps {
+  onAddNew: (recordToAddNew: ProductAddNewProps, setLoading?: (enable: boolean) => void) => void
 }
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  loading: boolean
-  setOpenModal: (enable: boolean) => void
-  setLoading: (enable: boolean) => void
-  onAddNew: (recordToAddNew: ProductAddNewProps) => void
-}
-
-const ModalAddNewProduct: React.FC<Props> = ({ loading, openModal, setOpenModal, setLoading, onAddNew, ...props }) => {
+const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
+  const [loading, setLoading] = useState<boolean>(false)
   const colorService = useAPIService<Color>(ColorAPI)
   const groupService = useAPIService<Group>(GroupAPI)
   const printService = useAPIService<Print>(PrintAPI)
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [prints, setPrints] = useState<Print[]>([])
-  console.log('Load AddNewProduct...')
 
   useEffect(() => {
-    const loadData = async () => {
-      await colorService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setColors(meta.data as Color[])
-          }
-        }
-      )
-      await groupService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setGroups(meta.data as Group[])
-          }
-        }
-      )
-      await printService.getListItems(
-        { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setPrints(meta.data as Print[])
-          }
-        }
-      )
-    }
     loadData()
   }, [])
 
-  async function handleOk() {
-    const row = await form.validateFields()
-    onAddNew(row)
+  const loadData = async () => {
+    await colorService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setColors(meta.data as Color[])
+      }
+    })
+    await groupService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setGroups(meta.data as Group[])
+      }
+    })
+    await printService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+      if (meta?.success) {
+        setPrints(meta.data as Print[])
+      }
+    })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
+  async function handleOk() {
+    await form
+      .validateFields()
+      .then((values) => {
+        onAddNew({
+          ...values,
+          dateInputNPL: dateFormatter(values.dateInputNPL, 'iso8601'),
+          dateOutputFCR: dateFormatter(values.dateOutputFCR, 'iso8601')
+        })
+      })
+      .catch(() => {
+        message.error(define('error_valid_form'))
+      })
   }
 
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      centered
-      width='auto'
-      onCancel={handleCancel}
-    >
+    <SkyModal {...props} title='Thêm mã sản phẩm' okText='Create' onOk={handleOk}>
       <Spin spinning={loading} tip='loading'>
-        <Form labelCol={{ span: 8 }} labelAlign='left' labelWrap form={form} {...props}>
-          <Flex vertical gap={20} className='w-full sm:w-[400px]'>
-            <EditableFormCell
-              isEditing={true}
-              title='Mã Code'
-              placeholder='Mã Code...'
-              dataIndex='productCode'
-              inputType='text'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Số lượng PO'
-              dataIndex='quantityPO'
-              placeholder='Số lượng PO...'
-              inputType='number'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Mã màu:'
-              dataIndex='colorID'
-              inputType='colorselector'
-              placeholder='Chọn mã màu...'
-              selectProps={{
-                options: colors.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.hexColor
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Nhóm:'
-              dataIndex='groupID'
-              inputType='select'
-              placeholder='Chọn nhóm...'
-              selectProps={{
-                options: groups.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.id
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Nơi in:'
-              dataIndex='printID'
-              inputType='select'
-              placeholder='Chọn nơi in...'
-              selectProps={{
-                options: prints.map((item) => {
-                  return {
-                    label: item.name,
-                    value: item.id,
-                    key: item.id
-                  }
-                })
-              }}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Ngày nhập NPL:'
-              dataIndex='dateInputNPL'
-              inputType='datepicker'
-              required
-              placeholder='Ngày nhập NPL...'
-              initialValue={DayJS(Date.now())}
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Ngày xuất FCR:'
-              dataIndex='dateOutputFCR'
-              inputType='datepicker'
-              required
-              placeholder='Ngày xuất FCR...'
-              initialValue={DayJS(Date.now())}
-            />
-          </Flex>
+        <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+          <SkyModalRow>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Mã Code'
+                placeholder='Ví dụ: GAC021254'
+                dataIndex='productCode'
+                inputType='text'
+                required
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Số lượng PO'
+                dataIndex='quantityPO'
+                placeholder='Ví dụ: 1000'
+                inputType='number'
+                required
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Mã màu:'
+                required
+                dataIndex='colorID'
+                inputType='colorselector'
+                placeholder='Ví dụ: Black'
+                selectProps={{
+                  options: colors.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.hexColor
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Nhóm:'
+                required
+                dataIndex='groupID'
+                inputType='select'
+                placeholder='Ví dụ: G1-4'
+                selectProps={{
+                  options: groups.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Nơi in:'
+                dataIndex='printID'
+                inputType='select'
+                placeholder='Ví dụ: T THINH, TIẾN THẮNG..'
+                selectProps={{
+                  options: prints.map((item) => {
+                    return {
+                      label: item.name,
+                      value: item.id,
+                      key: item.id
+                    }
+                  })
+                }}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Ngày nhập NPL:'
+                dataIndex='dateInputNPL'
+                inputType='datepicker'
+                required
+                placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
+                defaultValue={DayJS(Date.now())}
+              />
+            </SkyModalRowItem>
+            <SkyModalRowItem>
+              <EditableFormCell
+                isEditing={true}
+                title='Ngày xuất FCR:'
+                dataIndex='dateOutputFCR'
+                inputType='datepicker'
+                required
+                placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
+                defaultValue={DayJS(Date.now())}
+              />
+            </SkyModalRowItem>
+          </SkyModalRow>
         </Form>
       </Spin>
-    </Modal>
+    </SkyModal>
   )
 }
 

@@ -3,6 +3,7 @@ import ColorIcon from './color.svg'
 import CutIcon from './cut.svg'
 import DashboardIcon from './dashboard.svg'
 import DeliveryIcon from './delivery.svg'
+import ImportExportIcon from './import-export.svg'
 import ImportIcon from './import.svg'
 import NoteIcon from './note.svg'
 import PackageSearchIcon from './package-search.svg'
@@ -20,6 +21,7 @@ export {
   CutIcon,
   DashboardIcon,
   DeliveryIcon,
+  ImportExportIcon,
   ImportIcon,
   NoteIcon,
   PackageSearchIcon,

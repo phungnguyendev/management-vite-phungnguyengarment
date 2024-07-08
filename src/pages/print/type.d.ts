@@ -1,6 +1,9 @@
-import React from 'react'
 import { Print } from '~/typing'
 
-export interface PrintTableDataType extends Print {
-  key?: React.Key
+export interface PrintableTableDataType extends Print {
+  key: string
+}
+
+export interface PrintAddNewProps {
+  name?: string
 }

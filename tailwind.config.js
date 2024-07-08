@@ -18,6 +18,11 @@ module.exports = {
         error: 'var(--error)',
         success: 'var(--success)',
         blue: 'var(--blue)',
+        notActivated: 'var(--not-activated-color)',
+        activated: 'var(--activated-color)',
+        fixing: 'var(--fixing-color)',
+        completed: 'var(--completed-color)',
+        deleted: 'var(--deleted-color)',
         primary: {
           DEFAULT: 'var(--primary)',
           foreground: 'var(--primary-foreground)'

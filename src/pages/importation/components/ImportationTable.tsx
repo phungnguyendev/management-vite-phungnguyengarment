@@ -1,18 +1,12 @@
-import { Divider, Flex, Space } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { useSelector } from 'react-redux'
-import useDevice from '~/components/hooks/useDevice'
-import useTable from '~/components/hooks/useTable'
-import BaseLayout from '~/components/layout/BaseLayout'
+import React from 'react'
+import { UseTableProps } from '~/components/hooks/useTable'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { ProductTableDataType } from '~/pages/product/type'
-import { RootState } from '~/store/store'
 import {
-  breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
@@ -20,173 +14,158 @@ import {
   numberValidatorDisplay,
   numberValidatorInit
 } from '~/utils/helpers'
-import useImportationTable from '../hooks/useImportationTable'
-import { ImportationTableDataType } from '../type'
-import ModalAddNewImportation from './ModalAddNewImportation'
+import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
 interface Props {
-  productRecord: ProductTableDataType
+  productRecord: ImportationTableDataType
+  viewModelProps: {
+    tableProps: UseTableProps<ImportationTableDataType>
+    showDeleted: boolean
+    newRecord: ImportationExpandableAddNewProps
+    setNewRecord: React.Dispatch<React.SetStateAction<ImportationExpandableAddNewProps>>
+    handleUpdate: (productRecord: ImportationTableDataType, record: ImportationExpandableTableDataType) => void
+    handleDelete: (productRecord: ImportationTableDataType, record: ImportationExpandableTableDataType) => void
+    handleDeleteForever: (productRecord: ImportationTableDataType, record: ImportationExpandableTableDataType) => void
+    handleRestore: (record: ImportationExpandableTableDataType) => void
+    handlePageChange: (page: number, pageSize: number) => void
+  }
 }
 
-const ImportationTable: React.FC<Props> = ({ productRecord }) => {
-  const table = useTable<ImportationTableDataType>([])
+const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) => {
   const {
-    searchText,
-    setSearchText,
+    tableProps,
+    showDeleted,
     newRecord,
     setNewRecord,
-    openModal,
-    setOpenModal,
-    // handleResetClick,
-    // handleSortChange,
-    // handleSearch,
-    handleSaveClick,
-    handleConfirmDelete,
-    handleAddNewItem,
-    handlePageChange,
-    importationService
-  } = useImportationTable(table, productRecord)
-  const { width } = useDevice()
-  const currentUser = useSelector((state: RootState) => state.user)
+    handleUpdate,
+    handleDeleteForever,
+    handleRestore,
+    handlePageChange
+  } = viewModelProps
 
   const columns = {
-    quantity: (record: ImportationTableDataType) => {
+    quantity: (record: ImportationExpandableTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={tableProps.isEditing(record.key!)}
           dataIndex='quantity'
           title='Lô nhập'
           inputType='number'
-          required={true}
-          initialValue={numberValidatorInit(record.quantity)}
+          required
+          defaultValue={numberValidatorInit(record.quantity)}
           value={newRecord.quantity}
-          onValueChange={(val: number) => setNewRecord({ ...newRecord, quantity: numberValidatorChange(val) })}
+          onValueChange={(val: number) =>
+            setNewRecord((prev) => {
+              return { ...prev, quantity: numberValidatorChange(val) }
+            })
+          }
+          inputNumberProps={{
+            addonAfter: 'Kiện'
+          }}
         >
-          <SkyTableTypography status={record.status}>{numberValidatorDisplay(record.quantity)}</SkyTableTypography>
+          <SkyTableTypography status={record.status}>
+            {numberValidatorDisplay(record.quantity)} (Kiện)
+          </SkyTableTypography>
         </EditableStateCell>
       )
     },
-    dateImported: (record: ImportationTableDataType) => {
+    dateImported: (record: ImportationExpandableTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={tableProps.isEditing(record.key!)}
           dataIndex='dateImported'
           title='Ngày nhập'
           inputType='datepicker'
-          required={true}
-          initialValue={dateValidatorInit(record.dateImported)}
-          onValueChange={(val: Dayjs) => setNewRecord({ ...newRecord, dateImported: dateValidatorChange(val) })}
+          required
+          defaultValue={dateValidatorInit(record.dateImported)}
+          onValueChange={(val: Dayjs) =>
+            setNewRecord((prev) => {
+              return { ...prev, dateImported: dateValidatorChange(val) }
+            })
+          }
         >
           <SkyTableTypography status={record.status}>{dateValidatorDisplay(record.dateImported)}</SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    actionCol: (record: ImportationExpandableTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          addingKey={tableProps.addingKey.key}
+          editingKey={tableProps.editingKey}
+          deletingKey={tableProps.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              setNewRecord({ ...record, productID: productRecord.id })
+              tableProps.handleStartEditing(record.key)
+            },
+            isShow: !showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => handleUpdate(productRecord, record),
+            isShow: true
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => tableProps.handleStartDeleting(record.key),
+            isShow: !showDeleted
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => tableProps.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => tableProps.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => handleDeleteForever(productRecord, record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => tableProps.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => handleRestore(record)}
+          // Show hide action col
+        />
+      )
     }
   }
 
-  const tableColumns: ColumnsType<ImportationTableDataType> = [
+  const tableColumns: ColumnsType<ImportationExpandableTableDataType> = [
     {
       title: 'Lô nhập',
-      dataIndex: 'quantity',
-      width: '15%',
-      // responsive: ['md'],
-      render: (_value: any, record: ImportationTableDataType) => {
+      dataIndex: 'quantityPO',
+      render: (_value: any, record: ImportationExpandableTableDataType) => {
         return columns.quantity(record)
       }
     },
     {
       title: 'Ngày nhập',
-      dataIndex: 'dateImported',
-      width: '15%',
-      responsive: ['sm'],
-      render: (_value: any, record: ImportationTableDataType) => {
+      dataIndex: 'dateImportation',
+      render: (_value: any, record: ImportationExpandableTableDataType) => {
         return columns.dateImported(record)
       }
     }
   ]
 
+  const actionCol: ColumnType<ImportationExpandableTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: ImportationExpandableTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
-      <BaseLayout
-        searchPlaceHolder='Mã hàng...'
-        searchValue={searchText}
-        // onDeletedRecordStateChange={(enable) => table.setDeletedRecordState(enable)}
-        onSearchChange={(e) => setSearchText(e.target.value)}
-        // onSearch={(value) => handleSearch(value)}
-        // onSortChange={(checked) => handleSortChange(checked)}
-        // onResetClick={{
-        //   onClick: () => handleResetClick(),
-        //   isShow: true
-        // }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
+      <SkyTable
+        loading={tableProps.loading}
+        columns={tableColumns}
+        tableColumns={{
+          columns: tableColumns,
+          actionColumn: actionCol,
+          showAction: !showDeleted
         }}
-      >
-        <SkyTable
-          size='small'
-          bordered
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          metaData={importationService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actions={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({
-                  ...record
-                })
-                table.handleStartEditing(record!.key!)
-              }
-            },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!)
-            },
-            onConfirmCancelEditing: () => table.handleConfirmCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            isShow: currentUser.userRoles.includes('admin') || currentUser.userRoles.includes('product_manager')
-          }}
-          expandable={{
-            expandedRowRender: (record) => {
-              return (
-                <Flex vertical>
-                  <Space direction='vertical' size={10} split={<Divider className='my-0 py-0' />}>
-                    {/* {!(width >= breakpoint.md) && (
-                      <ExpandableItemRow title='Lô nhập:' isEditing={table.isEditing(record.id!)}>
-                        {columns.quantity(record)}
-                      </ExpandableItemRow>
-                    )} */}
-                    {!(width >= breakpoint.sm) && (
-                      <ExpandableItemRow className='w-1/2' title='Ngày nhập:' isEditing={table.isEditing(record.id!)}>
-                        {columns.dateImported(record)}
-                      </ExpandableItemRow>
-                    )}
-                  </Space>
-                </Flex>
-              )
-            },
-            showExpandColumn: !(width >= breakpoint.sm),
-            columnWidth: '0.001%'
-          }}
-        />
-      </BaseLayout>
-      {openModal && (
-        <ModalAddNewImportation
-          setLoading={table.setLoading}
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
-        />
-      )}
+        dataSource={productRecord.expandableImportationTableDataTypes}
+        pagination={{ pageSize: 5, onChange: handlePageChange }}
+      />
     </>
   )
 }

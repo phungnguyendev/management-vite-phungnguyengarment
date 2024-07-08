@@ -1,57 +1,42 @@
-import { Flex, Form, Input, Modal, Typography } from 'antd'
+import { Form } from 'antd'
 import React, { memo } from 'react'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
-import { Color } from '~/typing'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { GroupAddNewProps } from '../type'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: Color) => void
+interface Props extends SkyModalProps {
+  onAddNew: (formAddNew: GroupAddNewProps) => void
 }
 
-const ModalAddNewGroup: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+const ModalAddNewGroup: React.FC<Props> = ({ onAddNew, ...props }) => {
   const [form] = Form.useForm()
 
-  async function handleOk() {
+  const handleOk = async () => {
     const row = await form.validateFields()
     onAddNew({
       name: row.name
     })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal
-      title={<AddNewTitle title='Add new' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width='auto'
-    >
-      <Form form={form} {...props}>
-        <Flex vertical gap={10}>
-          <Flex align='center' gap={5}>
-            <Typography.Text className='w-24 flex-shrink-0'>Group name:</Typography.Text>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: `Please input this field!`
-                }
-              ]}
-              name='name'
-              className='m-0'
-            >
-              <Input className='w-52' allowClear placeholder='G13+, G1-4,...' />
-            </Form.Item>
-          </Flex>
-        </Flex>
+    <SkyModal {...props} title='Thêm nhóm' okText='Create' onOk={handleOk}>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
+            <EditableFormCell
+              isEditing={true}
+              title='Tên nhóm:'
+              placeholder='Ví dụ: G1-4'
+              dataIndex='name'
+              inputType='text'
+              required
+            />
+          </SkyModalRowItem>
+        </SkyModalRow>
       </Form>
-    </Modal>
+    </SkyModal>
   )
 }
 

@@ -5,11 +5,11 @@ import { cn } from '~/utils/helpers'
 import DotRequired from '../DotRequired'
 
 export interface SkyTableTypographyProps extends BlockProps {
-  status?: ItemStatusType | null
+  status?: ItemStatusType
   required?: boolean
 }
 
-const SkyTableTypography = ({ status, required, ...props }: SkyTableTypographyProps) => {
+const SkyTableTypography: React.FC<SkyTableTypographyProps> = ({ status, required, ...props }) => {
   return (
     <Typography.Text
       {...props}

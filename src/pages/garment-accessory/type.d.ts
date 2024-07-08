@@ -1,8 +1,22 @@
-import { GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
+import { AccessoryNote, GarmentAccessory, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface GarmentAccessoryTableDataType extends Product {
-  key?: React.Key
+  key: string
   productColor?: ProductColor
-  garmentAccessory?: GarmentAccessory
-  garmentAccessoryNotes?: GarmentAccessoryNote[]
+  productGroup?: ProductGroup
+  printablePlace?: PrintablePlace
+  expandableGarmentAccessory?: ExpandableGarmentAccessoryTableDataType
+}
+
+export interface ExpandableGarmentAccessoryTableDataType extends GarmentAccessory {
+  accessoryNotes?: AccessoryNote[]
+}
+
+export interface GarmentAccessoryAddNewProps {
+  id?: number
+  amountCutting?: number
+  passingDeliveryDate?: string
+  syncStatus?: boolean
+  accessoryNoteIDs?: number[] // Danh sách id ghi chú phụ liệu
+  notes?: string
 }

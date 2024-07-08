@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-const useLocalStorage = <T>(key: string, initialValue?: T | null) => {
+const useLocalStorage = <T>(key: string, initialValue?: T) => {
   // Sử dụng useState để lấy giá trị từ local storage, nếu không có thì sử dụng giá trị khởi tạo
-  const [storedValue, setStoredValue] = useState<T | null>(() => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       // Lấy dữ liệu từ local storage bằng key
       const item = window.localStorage.getItem(key)
@@ -16,7 +16,7 @@ const useLocalStorage = <T>(key: string, initialValue?: T | null) => {
   })
 
   // Hàm để thiết lập giá trị mới cho local storage
-  const setValue = (value?: T | null) => {
+  const setValue = (value: T) => {
     try {
       if (value) {
         // Nếu value là một hàm, thì cập nhật giá trị mới bằng cách sử dụng hàm đó

@@ -1,0 +1,269 @@
+import { App as AntApp } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import CompletionAPI from '~/api/services/CompletionAPI'
+import ProductAPI from '~/api/services/ProductAPI'
+import ProductColorAPI from '~/api/services/ProductColorAPI'
+import ProductGroupAPI from '~/api/services/ProductGroupAPI'
+import useTable from '~/components/hooks/useTable'
+import define from '~/constants'
+import useAPIService from '~/hooks/useAPIService'
+import { Completion, Product, ProductColor, ProductGroup } from '~/typing'
+import { dateComparator, isValidObject, numberComparator } from '~/utils/helpers'
+import { CompletionNewRecordProps, CompletionTableDataType } from '../type'
+
+export default function useCompletionViewModel() {
+  const { message } = AntApp.useApp()
+  const table = useTable<CompletionTableDataType>([])
+
+  // Services
+  const productService = useAPIService<Product>(ProductAPI)
+  const productColorService = useAPIService<ProductColor>(ProductColorAPI)
+  const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
+  const completionService = useAPIService<Completion>(CompletionAPI)
+  // UI
+
+  // State changes
+  const [showDeleted, setShowDeleted] = useState<boolean>(false)
+  const [openModal, setOpenModal] = useState<boolean>(false)
+  const [searchTextChange, setSearchTextChange] = useState<string>('')
+  const [searchText, setSearchText] = useState<string>('')
+  const [newRecord, setNewRecord] = useState<CompletionNewRecordProps | null>(null)
+  // List
+  const [productColors, setProductColors] = useState<ProductColor[]>([])
+  const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
+  const [completions, setCompletions] = useState<Completion[]>([])
+
+  useEffect(() => {
+    initialize()
+  }, [])
+
+  useEffect(() => {
+    loadDataEditingChange()
+  }, [table.editingKey])
+
+  /**
+   * Function convert data list of model to dataSource of table and other attributes
+   */
+  const dataMapped = (
+    products: Product[],
+    productColors: ProductColor[],
+    productGroups: ProductGroup[],
+    completions: Completion[]
+  ) => {
+    const newDataSource = products.map((product) => {
+      return {
+        ...product,
+        key: `${product.id}`,
+        productColor: productColors.find((item) => item.productID === product.id),
+        productGroup: productGroups.find((item) => item.productID === product.id),
+        completion: completions.find((item) => item.productID === product.id)
+      } as CompletionTableDataType
+    })
+    table.setDataSource(newDataSource)
+  }
+
+  /**
+   * Initialize function
+   */
+  const initialize = useCallback(async () => {
+    try {
+      const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      if (!productsResult.success) throw new Error(define('dataLoad_failed'))
+      const newProducts = productsResult.data as Product[]
+
+      const productColorsResult = await productColorService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      if (!productColorsResult.success) throw new Error(define('dataLoad_failed'))
+      const newProductColors = productColorsResult.data as ProductColor[]
+      setProductColors(newProductColors)
+
+      const productGroupsResult = await productGroupService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      if (!productGroupsResult.success) throw new Error(define('dataLoad_failed'))
+      const newProductGroups = productGroupsResult.data as ProductGroup[]
+      setProductGroups(newProductGroups)
+
+      const completionResult = await completionService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      if (!completionResult.success) throw new Error(define('dataLoad_failed'))
+      const newCompletions = completionResult.data as Completion[]
+      setCompletions(newCompletions)
+
+      dataMapped(newProducts, newProductColors, newProductGroups, newCompletions)
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }, [])
+
+  /**
+   * Function query data whenever paginator (page change), isDeleted (Switch) and searchText change
+   */
+  const loadData = async (query: { isDeleted: boolean; searchTerm: string }) => {
+    try {
+      await productService.getItemsSync(
+        {
+          paginator: { page: 1, pageSize: -1 },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          search: { field: 'productCode', term: query.searchTerm }
+        },
+        table.setLoading,
+        (meta) => {
+          if (!meta.success) throw new Error(define('dataLoad_failed'))
+          const newProducts = meta.data as Product[]
+          dataMapped(newProducts, productColors, productGroups, completions)
+        }
+      )
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
+
+  /**
+   * Function will be load data whenever edit button clicked
+   */
+  const loadDataEditingChange = async () => {}
+
+  const handleUpdate = async (record: CompletionTableDataType) => {
+    try {
+      // Update Completion
+      if (
+        isValidObject(record.completion) &&
+        newRecord &&
+        (numberComparator(newRecord.quantityIroned, record.completion.quantityIroned) ||
+          numberComparator(newRecord.quantityCheckPassed, record.completion.quantityCheckPassed) ||
+          numberComparator(newRecord.quantityPackaged, record.completion.quantityPackaged) ||
+          dateComparator(newRecord.exportedDate, record.completion.exportedDate) ||
+          dateComparator(newRecord.passFIDate, record.completion.passFIDate))
+      ) {
+        const completionResult = await completionService.updateItemBy(
+          { field: 'productID', id: record.id! },
+          {
+            ...newRecord
+          },
+          table.setLoading
+        )
+        if (!completionResult.success) throw new Error(define('update_failed'))
+        const updatedCompletion = completionResult.data as Completion
+        table.handleUpdate(record.key, { ...record, completion: updatedCompletion })
+      }
+
+      // Create Completion
+      if (!isValidObject(record.completion) && newRecord) {
+        const completionResult = await completionService.createItem(
+          {
+            ...newRecord,
+            productID: record.id!
+          },
+          table.setLoading
+        )
+        if (!completionResult.success) throw new Error(define('create_failed'))
+        const newCompletion = completionResult.data as Completion
+        table.handleUpdate(record.key, { ...record, completion: newCompletion })
+      }
+
+      message.success(define('success'))
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      setNewRecord(null)
+      table.setLoading(false)
+      table.handleCancelEditing()
+    }
+  }
+
+  const handleDelete = async () => {}
+
+  const handleDeleteForever = async (record: CompletionTableDataType) => {
+    try {
+      await completionService.deleteItemBySync({ field: 'productID', id: record.id! }, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('delete_failed'))
+        delete record.completion
+        table.handleUpdate(record.key, record)
+      })
+      message.success(define('deleted_success'))
+    } catch (error: any) {
+      message.error(`${error.message}`)
+    } finally {
+      table.setLoading(false)
+    }
+  }
+
+  /**
+   * Function restore record
+   */
+  const handleRestore = async () => {}
+
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageChange = () => {}
+
+  /**
+   * Function handle switch delete button
+   */
+  const handleSwitchDeleteChange = (checked: boolean) => {
+    setShowDeleted(checked)
+    loadData({ isDeleted: checked, searchTerm: searchText })
+  }
+
+  /**
+   * Function handle switch sort button
+   */
+  const handleSwitchSortChange = (checked: boolean) => {
+    table.setDataSource((prevDataSource) => {
+      return checked
+        ? [...prevDataSource.sort((a, b) => a.id! - b.id!)]
+        : [...prevDataSource.sort((a, b) => b.id! - a.id!)]
+    })
+  }
+
+  /**
+   * Function handle search button
+   */
+  const handleSearch = (value: string) => {
+    setSearchText(value)
+    loadData({ isDeleted: showDeleted, searchTerm: value })
+  }
+
+  return {
+    state: {
+      productColors,
+      completions,
+      showDeleted,
+      setShowDeleted,
+      searchTextChange,
+      setSearchTextChange,
+      openModal,
+      newRecord,
+      setNewRecord,
+      setOpenModal
+    },
+    service: {
+      productService,
+      productColorService,
+      completionService
+    },
+    action: {
+      loadData,
+      handleUpdate,
+      handleSwitchDeleteChange,
+      handleSwitchSortChange,
+      handleSearch,
+      handlePageChange,
+      handleDelete,
+      handleDeleteForever,
+      handleRestore
+    },
+    table
+  }
+}

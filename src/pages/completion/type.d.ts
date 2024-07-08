@@ -1,9 +1,17 @@
-import { Completion, Product, ProductColor } from '~/typing'
+import { Completion, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CompletionTableDataType extends Product {
-  key?: React.Key
+  key: string
   productColor?: ProductColor
+  productGroup?: ProductGroup
   completion?: Completion
 }
 
-export interface CompletionNewRecordProps extends Completion {}
+export interface CompletionNewRecordProps {
+  productID?: number
+  quantityIroned?: number
+  quantityCheckPassed?: number
+  quantityPackaged?: number
+  exportedDate?: string
+  passFIDate?: string
+}

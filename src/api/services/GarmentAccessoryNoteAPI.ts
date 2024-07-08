@@ -4,13 +4,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'garment-accessory-notes'
 
 export default {
-  createNewItem: async (item: GarmentAccessoryNote, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: GarmentAccessoryNote, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(
         `${NAMESPACE}`,
         {
-          ...item,
-          status: item.status ?? 'active'
+          ...newItem,
+          status: newItem.status ?? 'active'
         },
         {
           headers: {
@@ -25,71 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  createNewItems: async (items: GarmentAccessoryNote[], accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/items`, items, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemByPk: async (
-    id: number,
-    item: GarmentAccessoryNote,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/${id}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  createOrUpdateItemByProductID: async (
-    productID: number,
-    item: GarmentAccessoryNote,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(
-        `${NAMESPACE}/createOrUpdate/productID/${productID}`,
-        {
-          ...item,
-          status: item.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -103,12 +39,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  getItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -120,19 +53,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}/find`, bodyRequest, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -142,46 +69,15 @@ export default {
   },
   updateItemByPk: async (
     id: number,
-    item: GarmentAccessoryNote,
+    itemToUpdate: GarmentAccessoryNote,
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${id}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
-      .then((res) => {
-        return responseFormatter(res)
       })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItemsBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    recordsToUpdate: GarmentAccessoryNote[],
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .post(
-        `${NAMESPACE}/updateItems/${query.field}/${query.key}`,
-        { garmentAccessoryNotes: recordsToUpdate },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
       .then((res) => {
         return responseFormatter(res)
       })
@@ -190,25 +86,16 @@ export default {
       })
   },
   updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: GarmentAccessoryNote,
+    query: { field: string; id: number },
+    itemToUpdate: GarmentAccessoryNote,
     accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  ): Promise<ResponseDataType> => {
     return client
-      .put(
-        `${NAMESPACE}/${query.field}/${query.key}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .patch(`${NAMESPACE}/${query.field}/${query.id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -216,7 +103,25 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: GarmentAccessoryNote[],
+    accessToken: string
+  ): Promise<ResponseDataType> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {
@@ -230,12 +135,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  deleteItemBy: async (query: { field: string; id: number }, accessToken: string): Promise<ResponseDataType> => {
     return client
-      .delete(`${NAMESPACE}/${query.field}/${query.key}`, {
+      .delete(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }

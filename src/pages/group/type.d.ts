@@ -1,12 +1,9 @@
-import React from 'react'
-import { ItemStatusType } from '~/typing'
+import { Group } from '~/typing'
 
-export type GroupTableDataType = {
-  key?: React.Key
-  id?: number
+export interface GroupTableDataType extends Group {
+  key: string
+}
+
+export interface GroupAddNewProps {
   name?: string
-  status?: ItemStatusType
-  createdAt?: string
-  updatedAt?: string
-  orderNumber?: number
 }

@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { cn } from '~/utils/helpers'
 import { EditableStateCellProps } from './EditableStateCell'
 
-export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
+export type EditableCellRequiredType = { key: string; name?: string; id?: number }
 
 export interface EditableFormCellProps extends EditableStateCellProps {}
 
@@ -24,7 +24,7 @@ function EditableFormCell({
   textAreaProps,
   inputProps,
   selectProps,
-  initialValue,
+  defaultValue,
   onValueChange,
   required,
   inputType,
@@ -55,15 +55,17 @@ function EditableFormCell({
             disabled={disabled}
             optionRender={(ori, info) => {
               return (
-                <Flex justify='space-between' align='center' key={info.index}>
-                  <Typography.Text>{ori.label}</Typography.Text>
-                  <div
-                    className='h-6 w-6 rounded-sm'
-                    style={{
-                      backgroundColor: `${ori.key}`
-                    }}
-                  />
-                </Flex>
+                <>
+                  <Flex justify='space-between' align='center' key={info.index}>
+                    <Typography.Text>{ori.label}</Typography.Text>
+                    <div
+                      className='h-6 w-6 rounded-sm'
+                      style={{
+                        backgroundColor: `${ori.key}`
+                      }}
+                    />
+                  </Flex>
+                </>
               )
             }}
             className={cn('w-full', restProps.className)}
@@ -202,7 +204,7 @@ function EditableFormCell({
         <Form.Item
           name={dataIndex}
           className={cn('w-full', restProps.className)}
-          initialValue={initialValue}
+          initialValue={defaultValue}
           required={required}
           label={title}
           validateTrigger='onBlur'
@@ -210,7 +212,7 @@ function EditableFormCell({
           rules={[
             {
               required: required,
-              message: subtitle
+              message: `Vui lòng nhập "${subtitle ?? title}"`
             }
           ]}
         >

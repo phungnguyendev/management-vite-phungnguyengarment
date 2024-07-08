@@ -8,19 +8,17 @@ import EditableStateCell, { EditableStateCellProps } from '../SkyTable/EditableS
 import SkyTableTypography from '../SkyTable/SkyTableTypography'
 
 export interface SkyListItemProps<
-  T extends { key?: React.Key; status?: ItemStatusType | null; createdAt?: string; updatedAt?: string }
+  T extends { key: string; status?: ItemStatusType; createdAt?: string; updatedAt?: string }
 > extends EditableStateCellProps {
   record: T
-  label?: string | null
+  label?: string
   labelEditing?: boolean
   isShowDeleted?: boolean
   actions?: ActionProps<T>
   children?: React.ReactNode
 }
 
-const SkyListItem = <
-  T extends { key?: React.Key; status?: ItemStatusType | null; createdAt?: string; updatedAt?: string }
->({
+const SkyListItem = <T extends { key: string; status?: ItemStatusType; createdAt?: string; updatedAt?: string }>({
   record,
   label,
   labelEditing,

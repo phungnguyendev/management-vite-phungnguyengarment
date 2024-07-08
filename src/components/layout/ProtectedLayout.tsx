@@ -1,49 +1,23 @@
-import { Spin } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import UserAPI from '~/api/services/UserAPI'
-import useLocalStorage from '~/hooks/useLocalStorage'
-import { UserRole, UserRoleType } from '~/typing'
+import { RootState } from '~/store/store'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const ProtectedLayout: React.FC<Props> = ({ children }) => {
-  const [loading, setLoading] = useState<boolean>(true)
-  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
+  const userState = useSelector((state: RootState) => state.user)
   const navigate = useNavigate()
 
   useEffect(() => {
-    const callApi = async () => {
-      try {
-        setLoading(true)
-        if (accessTokenStored) {
-          UserAPI.userRolesFromAccessToken(accessTokenStored)
-            .then((meta) => {
-              if (!meta?.success) {
-                throw new Error(meta?.message)
-              }
-              const userRoles = meta.data as UserRole[]
-              const userRolesType = userRoles.map((userRole) => {
-                return userRole.role?.role as UserRoleType
-              })
-              if (!userRolesType.includes('admin')) navigate('/')
-            })
-            .catch((error) => {
-              console.error(error)
-            })
-        } else {
-          navigate('/login')
-        }
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    callApi()
+    initialize()
   }, [])
 
-  return <>{loading ? <Spin /> : children}</>
+  const initialize = () => {
+    if (!userState.user?.isAdmin) navigate('/')
+  }
+
+  return children
 }
 
 export default ProtectedLayout

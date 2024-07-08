@@ -1,11 +1,14 @@
-import { Product, ProductColor, SewingLineDelivery } from '~/typing'
-
-export interface ExpandableTableDataType extends SewingLineDelivery {
-  key?: React.Key
-}
+import { Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
 
 export interface SewingLineDeliveryTableDataType extends Product {
-  key?: React.Key
+  key: string
   productColor?: ProductColor
+  productGroup?: ProductGroup
   sewingLineDeliveries?: SewingLineDelivery[]
 }
+
+// export interface SewingLineDeliveryRecordProps extends Product {
+//   key: string
+//   productColor: ProductColor
+//   sewingLineDeliveries: SewingLineDelivery[]
+// }

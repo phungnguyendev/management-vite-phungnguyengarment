@@ -1,11 +1,9 @@
-import React from 'react'
-import { ItemStatusType } from '~/typing'
+import { SewingLine } from '~/typing'
 
-export type SewingLineTableDataType = {
-  key?: React.Key
-  id?: number
+export interface SewingLineTableDataType extends SewingLine {
+  key: string
+}
+
+export interface SewingLineAddNewProps {
   name?: string
-  status?: ItemStatusType
-  createdAt?: string
-  updatedAt?: string
 }

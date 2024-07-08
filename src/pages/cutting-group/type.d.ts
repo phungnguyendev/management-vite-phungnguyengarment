@@ -1,9 +1,10 @@
-import { CuttingGroup, Product, ProductColor } from '~/typing'
+import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CuttingGroupTableDataType extends Product {
-  key: React.Key
-  productColor: ProductColor
-  cuttingGroup: CuttingGroup
+  key: string
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  cuttingGroup?: CuttingGroup
 }
 
 export interface CuttingGroupNewRecordProps extends CuttingGroup {

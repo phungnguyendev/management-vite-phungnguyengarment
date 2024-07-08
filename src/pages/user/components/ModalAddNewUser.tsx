@@ -1,138 +1,133 @@
-import { Flex, Form, Modal, Spin } from 'antd'
+import { App as AntApp, Form } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
-import { defaultRequestBody } from '~/api/client'
 import RoleAPI from '~/api/services/RoleAPI'
-import AddNewTitle from '~/components/sky-ui/AddNewTitle'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import SkyModalRow from '~/components/sky-ui/SkyModalRow'
+import SkyModalRowItem from '~/components/sky-ui/SkyModalRowItem'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import useAPIService from '~/hooks/useAPIService'
-import { Role, User } from '~/typing'
+import { Role } from '~/typing'
+import { UserAddNewProps } from '../type'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  openModal: boolean
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (itemToAddNew: User) => void
+interface Props extends SkyModalProps {
+  onAddNew: (formAddNew: UserAddNewProps) => void
 }
 
-const ModalAddNewUser: React.FC<Props> = ({ openModal, setOpenModal, onAddNew, ...props }) => {
+const ModalAddNewUser: React.FC<Props> = ({ onAddNew, ...props }) => {
+  const { message } = AntApp.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState<boolean>(false)
   const roleService = useAPIService<Role>(RoleAPI)
   const [roles, setRoles] = useState<Role[]>([])
 
-  const loadData = async () => {
-    await roleService.getListItems(
-      { ...defaultRequestBody, paginator: { pageSize: -1, page: 1 } },
-      setLoading,
-      (meta) => {
-        if (meta?.success) {
-          setRoles(meta.data as Role[])
-        }
-      }
-    )
-  }
-
   useEffect(() => {
     loadData()
   }, [])
 
-  async function handleOk() {
+  const loadData = async () => {
+    try {
+      await roleService.getItemsSync({ paginator: { pageSize: -1, page: 1 } }, setLoading, (meta) => {
+        if (!meta?.success) throw new Error(`${meta.message}`)
+        const data = meta.data as Role[]
+        setRoles(data)
+      })
+    } catch (error: any) {
+      message.error(error.message)
+    }
+  }
+
+  const handleOk = async () => {
     const row = await form.validateFields()
     onAddNew({
       ...row
     })
   }
 
-  function handleCancel() {
-    setOpenModal(false)
-  }
-
   return (
-    <Modal
-      title={<AddNewTitle title='New user' />}
-      open={openModal}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      centered
-      width='450px'
-    >
-      {loading ? (
-        <Flex justify='center' className='' align='center'>
-          <Spin />
-        </Flex>
-      ) : (
-        <Form form={form} {...props} autoComplete='aaa' labelWrap labelCol={{ flex: '100px' }} labelAlign='left'>
-          <Flex vertical gap={10}>
+    <SkyModal {...props} loading={loading} title='Thêm người dùng' okText='Create' onOk={handleOk}>
+      <Form form={form} labelCol={{ xs: 24, md: 6 }} labelAlign='left' labelWrap>
+        <SkyModalRow>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Email'
               required
               dataIndex='email'
-              subtitle='Please enter email!'
               inputType='text'
-              placeholder='Enter email'
+              placeholder='Ví dụ: nguyenvana@gmail.com'
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Password'
               required
               dataIndex='password'
-              subtitle='Please enter password!'
               inputType='password'
-              placeholder='Enter password'
+              placeholder='Ví dụ: Abc@@123??'
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Full name'
               required
-              subtitle='Please enter full name!'
               dataIndex='fullName'
               inputType='text'
-              placeholder='Enter full name'
+              placeholder='Ví dụ: Nguyễn Văn A'
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Role'
               required
-              subtitle='Please select role!'
-              dataIndex='roles'
+              dataIndex='roleIDs'
               inputType='multipleselect'
               placeholder='Select role'
               selectProps={{
                 options: roles.map((role) => {
                   return {
-                    label: role.desc,
+                    label: <SkyTableRowHighLightItem title={role.desc} role={role.role} />,
                     value: role.id,
                     key: role.id
                   }
                 })
               }}
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Phone'
               dataIndex='phone'
               inputType='text'
-              placeholder='Enter phone'
+              placeholder='Ví dụ: 0123456789'
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Work description'
               dataIndex='workDescription'
               inputType='textarea'
-              placeholder='Enter description'
+              placeholder='Ví dụ: Nhân viên'
             />
+          </SkyModalRowItem>
+          <SkyModalRowItem>
             <EditableFormCell
               isEditing={true}
               title='Birthday'
               dataIndex='birthday'
               inputType='datepicker'
-              // placeholder=''
-              // initialValue={DayJS(Date.now())}
+              placeholder='Ví dụ: 01/01/1990'
+              // defaultValue={DayJS(Date.now())}
             />
-          </Flex>
-        </Form>
-      )}
-    </Modal>
+          </SkyModalRowItem>
+        </SkyModalRow>
+      </Form>
+    </SkyModal>
   )
 }
 
