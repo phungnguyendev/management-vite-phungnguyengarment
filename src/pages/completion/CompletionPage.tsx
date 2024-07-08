@@ -46,7 +46,7 @@ const FinishPage = () => {
       return (
         <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
           <Space size={2} direction='horizontal'>
-            <SkyTableTypography strong status={'active'}>
+            <SkyTableTypography strong status={record.status}>
               {textValidatorDisplay(record.productCode)}
               {success && (
                 <Check size={16} color='#ffffff' className='relative top-[2px] mx-1 rounded-full bg-success p-[2px]' />
@@ -347,7 +347,7 @@ const FinishPage = () => {
         {
           title: 'SL ủi được',
           dataIndex: 'quantityIroned',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.ironed.quantityIroned(record)
           }
@@ -355,7 +355,7 @@ const FinishPage = () => {
         {
           title: 'Còn lại',
           dataIndex: 'remainingAmount',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.ironed.remainingAmount(record)
           }
@@ -369,7 +369,7 @@ const FinishPage = () => {
         {
           title: 'SL kiểm đạt',
           dataIndex: 'quantityCheckPassed',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.checkPass.quantityCheckPassed(record)
           }
@@ -377,7 +377,7 @@ const FinishPage = () => {
         {
           title: 'Còn lại',
           dataIndex: 'remainingAmount',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.checkPass.remainingAmount(record)
           }
@@ -391,7 +391,7 @@ const FinishPage = () => {
         {
           title: 'SL đóng được',
           dataIndex: 'quantityCheckPassed',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.packaged.quantityPackaged(record)
           }
@@ -399,7 +399,7 @@ const FinishPage = () => {
         {
           title: 'Còn lại',
           dataIndex: 'remainingAmount',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CompletionTableDataType) => {
             return columns.packaged.remainingAmount(record)
           }

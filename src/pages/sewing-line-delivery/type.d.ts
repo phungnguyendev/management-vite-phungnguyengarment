@@ -1,9 +1,10 @@
-import { Product, ProductColor, SewingLineDelivery } from '~/typing'
+import { Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
 
 export interface SewingLineDeliveryTableDataType extends Product {
   key: string
-  productColor: ProductColor
-  sewingLineDeliveries: SewingLineDelivery[]
+  productColor?: ProductColor
+  productGroup?: ProductGroup
+  sewingLineDeliveries?: SewingLineDelivery[]
 }
 
 // export interface SewingLineDeliveryRecordProps extends Product {
@@ -11,7 +12,3 @@ export interface SewingLineDeliveryTableDataType extends Product {
 //   productColor: ProductColor
 //   sewingLineDeliveries: SewingLineDelivery[]
 // }
-
-export interface ExpandableTableDataType extends SewingLineDelivery {
-  key: string
-}

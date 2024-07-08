@@ -3,7 +3,6 @@ import { cn } from '~/utils/helpers'
 import SkyTableTypography, { SkyTableTypographyProps } from './SkyTableTypography'
 
 interface Props extends SkyTableTypographyProps {
-  title?: string
   background?: boolean
   index?: number
 }
@@ -16,7 +15,7 @@ const SkyTableRowHighLightItem: React.FC<Props> = ({ title, background, ...props
         'bg-black px-2': background
       })}
     >
-      {title}
+      {props.children ?? title}
     </SkyTableTypography>
   )
 }

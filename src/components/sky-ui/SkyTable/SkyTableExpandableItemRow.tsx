@@ -4,17 +4,29 @@ import SkyTableTypography, { SkyTableTypographyProps } from './SkyTableTypograph
 
 interface Props extends SkyTableTypographyProps {
   isEditing: boolean
+  subTitle?: string
 }
 
-const SkyTableSkyTableExpandableItemRow = ({ ...props }: Props) => {
+const SkyTableExpandableItemRow = ({ ...props }: Props) => {
   return (
-    <Flex className='' gap={5}>
-      <SkyTableTypography strong className={cn('w-1/2', props.className)} disabled={props.disabled} code={props.code}>
-        {props.title}
-      </SkyTableTypography>
+    <Flex className='w-full' gap={5}>
+      <Flex vertical className='w-full'>
+        <SkyTableTypography strong className={cn('w-1/2', props.className)} disabled={props.disabled} code={props.code}>
+          {props.title}
+        </SkyTableTypography>
+        {props.subTitle && (
+          <SkyTableTypography
+            className={cn('w-1/2 text-sm font-medium', props.className)}
+            disabled={props.disabled}
+            type='secondary'
+          >
+            {props.subTitle}
+          </SkyTableTypography>
+        )}
+      </Flex>
       <Flex className='h-fit w-full'>{props.children}</Flex>
     </Flex>
   )
 }
 
-export default SkyTableSkyTableExpandableItemRow
+export default SkyTableExpandableItemRow

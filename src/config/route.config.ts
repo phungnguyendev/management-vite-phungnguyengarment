@@ -20,7 +20,6 @@ const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
 const NotePage = lazy(() => import('~/pages/accessory-note/AccessoryNotePage'))
 const UserPage = lazy(() => import('~/pages/user/UserPage'))
-const RolePage = lazy(() => import('~/pages/role/RolePage'))
 const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
 const PrintPage = lazy(() => import('~/pages/print/PrintPage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
@@ -94,14 +93,14 @@ const routes: SideType[] = [
     component: CuttingGroupPage,
     icon: CutIcon
   },
-  // {
-  //   key: '5',
-  //   name: 'Chuyền may',
-  //   path: 'sewing-line-deliveries',
-  //   role: 'sample_sewing_manager',
-  //   component: SewingLineDeliveryPage,
-  //   icon: DeliveryIcon
-  // },
+  {
+    key: '5',
+    name: 'Chuyền may',
+    path: 'sewing-line-deliveries',
+    role: 'sample_sewing_manager',
+    component: SewingLineDeliveryPage,
+    icon: DeliveryIcon
+  },
   {
     key: '6',
     name: 'Hoàn thành',

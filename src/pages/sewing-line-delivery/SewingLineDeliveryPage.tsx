@@ -1,144 +1,172 @@
-import { Collapse, Flex, Space, Typography } from 'antd'
-import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import { Flex, Space } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
+import SkyTableErrorItem from '~/components/sky-ui/SkyTable/SkyTableErrorItem'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import {
   breakpoint,
   dateValidatorDisplay,
-  numberValidator,
-  numberValidatorCalc,
+  isExpiredDate,
+  isValidArray,
   numberValidatorDisplay,
   textValidatorDisplay
 } from '~/utils/helpers'
+import SewingLineDeliveryExpandableList from './components/SewingLineDeliveryExpandableList'
 import useSewingLineDeliveryViewModel from './hooks/useSewingLineDeliveryViewModel'
 import { SewingLineDeliveryTableDataType } from './type'
 
 const SewingLineDeliveryPage = () => {
   useTitle('Chuyền may | Phung Nguyen')
-  const { state, action, table } = useSewingLineDeliveryViewModel()
-  const { sewingLines, newRecord, setNewRecord, showDeleted, setShowDeleted, searchTextChange, setSearchTextChange } =
-    state
-  const {
-    handleUpdate,
-    handleDelete,
-    handleDeleteForever,
-    handlePageChange,
-    handleRestore,
-    handleSearch,
-    handleSortChange
-  } = action
+  const viewModel = useSewingLineDeliveryViewModel()
   const { width } = useDevice()
-
-  const expiredDateStatus = (date1?: string | undefined, date2?: string | undefined): boolean => {
-    return date1 && date2 ? (dayjs(date1).diff(date2, 'days') < 5 ? true : false) : false
-  }
 
   const columns = {
     productCode: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
-          <SkyTableTypography status={'active'} className='flex gap-[2px] font-bold'>
-            {textValidatorDisplay(record.productCode)}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    quantityPO: (record: SewingLineDeliveryTableDataType) => {
-      return (
-        <EditableStateCell isEditing={false} dataIndex='quantityPO' title='Số lượng PO' inputType='number' required>
-          <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    dateOutputFCR: (record: SewingLineDeliveryTableDataType) => {
-      return (
-        <EditableStateCell isEditing={false} dataIndex='dateOutputFCR' title='FCR' inputType='datepicker' required>
-          <SkyTableTypography status={'active'}>
-            {record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography strong status={record.status}>
+          {textValidatorDisplay(record.productCode)}
+        </SkyTableTypography>
       )
     },
     productColor: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
-          <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
-            <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
-              {textValidatorDisplay(record.productColor?.color?.name)}
-            </SkyTableTypography>
-            <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
-          </Flex>
-        </EditableStateCell>
+        <Flex wrap='wrap' justify='space-between' align='center' gap={10}>
+          <SkyTableTypography className='w-fit'>
+            {textValidatorDisplay(record.productColor?.color?.name)}
+          </SkyTableTypography>
+          <SkyTableColorPicker value={record.productColor?.color?.hexColor} disabled />
+        </Flex>
+      )
+    },
+    quantityPO: (record: SewingLineDeliveryTableDataType) => {
+      return <SkyTableTypography>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+    },
+    dateOutputFCR: (record: SewingLineDeliveryTableDataType) => {
+      return (
+        <SkyTableTypography>{record.dateOutputFCR && dateValidatorDisplay(record.dateOutputFCR)}</SkyTableTypography>
+      )
+    },
+    productGroup: (record: SewingLineDeliveryTableDataType) => {
+      return (
+        <SkyTableTypography status={record.productGroup?.group?.status}>
+          {textValidatorDisplay(record.productGroup?.group?.name)}
+        </SkyTableTypography>
       )
     },
     sewingLines: (record: SewingLineDeliveryTableDataType) => {
-      const sewingLinesFiltered = sewingLines.filter(
-        (item) =>
-          record.sewingLineDeliveries &&
-          record.sewingLineDeliveries.some((recorded) => recorded.sewingLineID === item.id)
-      )
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='sewingLines'
+          isEditing={viewModel.table.isEditing(record.key!)}
+          dataIndex='sewingLineDeliveries'
           title='Chuyền may'
           inputType='multipleselect'
           required
           selectProps={{
-            options: sewingLines.map((item) => {
-              return {
-                value: item.id,
-                label: item.name
-              }
-            }),
-            defaultValue: sewingLinesFiltered.map((item) => {
-              return {
-                value: item.id,
-                label: item.name
-              }
-            })
+            options: viewModel.state.sewingLines
+              .sort((a, b) => a.id! - b.id!)
+              .map((item) => {
+                return {
+                  value: item.id,
+                  label: item.name
+                }
+              }),
+            defaultValue: isValidArray(record.sewingLineDeliveries)
+              ? record.sewingLineDeliveries.map((item) => {
+                  return {
+                    value: item.sewingLine?.id,
+                    label: item.sewingLine?.name
+                  }
+                })
+              : undefined
           }}
           onValueChange={(values: number[]) => {
-            setNewRecord(
+            viewModel.state.setNewRecord(
               values.map((sewingLineID) => {
-                return {
-                  sewingLineID: sewingLineID
-                } as SewingLineDelivery
+                return { productID: record.id, sewingLineID: sewingLineID } as SewingLineDelivery
               })
             )
           }}
         >
-          <Space size='small' wrap>
-            {sewingLinesFiltered.map((item, index) => {
-              return (
-                <SkyTableTypography
-                  key={index}
-                  className='my-[2px] h-6 rounded-sm bg-lightGrey px-2 py-1'
-                  type={
-                    expiredDateStatus(
-                      record.dateOutputFCR,
-                      record.sewingLineDeliveries?.find((i) => i.sewingLineID === item.id)?.expiredDate
-                    )
-                      ? 'danger'
-                      : undefined
-                  }
-                  status={item.status}
-                >
-                  {textValidatorDisplay(item.name)}
-                </SkyTableTypography>
-              )
-            })}
+          <Space wrap>
+            {record.sewingLineDeliveries
+              ?.sort((a, b) => a.sewingLineID! - b.sewingLineID!)
+              ?.map((item, index) => {
+                return (
+                  <SkyTableRowHighLightItem key={index} background>
+                    {item.sewingLine?.name}{' '}
+                    {isExpiredDate(record.dateOutputFCR, item.expiredDate) && <SkyTableErrorItem title='(Bể)' />}
+                  </SkyTableRowHighLightItem>
+                )
+              })}
           </Space>
         </EditableStateCell>
+      )
+    },
+    actionCol: (record: SewingLineDeliveryTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              if (isValidArray(record.sewingLineDeliveries)) {
+                viewModel.state.setNewRecord(
+                  record.sewingLineDeliveries.map((item) => {
+                    delete item.product
+                    return item
+                  })
+                )
+              }
+              viewModel.table.handleStartEditing(record.key)
+            },
+            isShow: !viewModel.state.showDeleted
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record),
+            isShow: !viewModel.state.showDeleted
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key),
+            isShow: !viewModel.state.showDeleted,
+            disabled: !isValidArray(record.sewingLineDeliveries)
+          }}
+          // Start delete forever
+          buttonDeleteForever={{
+            onClick: () => {},
+            isShow: viewModel.state.showDeleted
+          }}
+          // Start restore
+          buttonRestore={{
+            onClick: () => viewModel.table.handleStartRestore(record.key),
+            isShow: viewModel.state.showDeleted
+          }}
+          // Delete forever
+          onConfirmDeleteForever={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDeleteForever(record)}
+          // Cancel restore
+          onConfirmCancelRestore={() => viewModel.table.handleCancelRestore()}
+          // Restore
+          onConfirmRestore={() => viewModel.action.handleRestore()}
+          // Show hide action col
+        />
       )
     }
   }
@@ -153,21 +181,21 @@ const SewingLineDeliveryPage = () => {
       }
     },
     {
-      title: 'Số lượng PO',
-      dataIndex: 'quantityPO',
-      width: '10%',
-      responsive: ['md'],
-      render: (_value: any, record: SewingLineDeliveryTableDataType) => {
-        return columns.quantityPO(record)
-      }
-    },
-    {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '15%',
       responsive: ['sm'],
       render: (_value: any, record: SewingLineDeliveryTableDataType) => {
         return columns.productColor(record)
+      }
+    },
+    {
+      title: 'Số lượng PO',
+      dataIndex: 'quantityPO',
+      width: '10%',
+      responsive: ['md'],
+      render: (_value: any, record: SewingLineDeliveryTableDataType) => {
+        return columns.quantityPO(record)
       }
     },
     {
@@ -189,96 +217,11 @@ const SewingLineDeliveryPage = () => {
     }
   ]
 
-  const expandableListColumn = {
-    quantityOriginal: (record: SewingLineDeliveryTableDataType, item: SewingLineDelivery) => {
-      return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key)}
-          dataIndex='quantityOriginal'
-          title='SL Vào chuyền'
-          inputType='number'
-          required
-          defaultValue={item.quantityOriginal && numberValidatorDisplay(item.quantityOriginal)}
-          value={
-            newRecord && numberValidator(newRecord.find((i) => i.sewingLineID === item.sewingLineID)?.quantityOriginal)
-          }
-          onValueChange={(val) => {
-            const index = newRecord.findIndex((j) => j.sewingLineID === item.sewingLineID)
-            if (index !== -1) {
-              newRecord[index].quantityOriginal = val
-              setNewRecord([...newRecord])
-            }
-          }}
-        >
-          <SkyTableTypography status={record.status}>
-            {numberValidatorDisplay(item?.quantityOriginal)}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    quantitySewed: (record: SewingLineDeliveryTableDataType, item: SewingLineDelivery) => {
-      return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key)}
-          dataIndex='quantitySewed'
-          title='May được'
-          inputType='number'
-          required
-          defaultValue={item.quantitySewed && numberValidatorDisplay(item.quantitySewed)}
-          value={
-            newRecord && numberValidator(newRecord.find((i) => i.sewingLineID === item.sewingLine?.id)?.quantitySewed)
-          }
-          onValueChange={(val) => {
-            const index = newRecord.findIndex((j) => j.sewingLineID === item.sewingLineID)
-            if (index !== -1) {
-              newRecord[index].quantitySewed = val
-              setNewRecord([...newRecord])
-            }
-          }}
-        >
-          <SkyTableTypography status={record.status}>{numberValidatorDisplay(item?.quantitySewed)}</SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    amountQuantity: (record: SewingLineDeliveryTableDataType, item: SewingLineDelivery) => {
-      return (
-        <EditableStateCell isEditing={false} dataIndex='amountQuantity' title='SL còn lại' inputType='number' required>
-          <SkyTableTypography status={record.status}>
-            {numberValidatorDisplay(
-              numberValidatorCalc(item?.quantityOriginal) - numberValidatorCalc(item?.quantitySewed)
-            )}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
-    },
-    expiredDate: (record: SewingLineDeliveryTableDataType, item: SewingLineDelivery) => {
-      return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key)}
-          dataIndex='expiredDate'
-          title='Ngày dự kiến hoàn thành'
-          inputType='datepicker'
-          required
-          defaultValue={item.expiredDate && dayjs(item.expiredDate)}
-          datePickerProps={{
-            format: 'DD/MM/YYYY'
-          }}
-          onValueChange={(val) => {
-            const index = newRecord.findIndex((j) => j.sewingLineID === item.sewingLineID)
-            if (index !== -1) {
-              newRecord[index].expiredDate = val
-              setNewRecord([...newRecord])
-            }
-          }}
-        >
-          <SkyTableTypography
-            type={expiredDateStatus(record.dateOutputFCR, item.expiredDate) ? 'danger' : undefined}
-            status={record.status}
-          >
-            {dateValidatorDisplay(item?.expiredDate)}
-          </SkyTableTypography>
-        </EditableStateCell>
-      )
+  const actionCol: ColumnType<SewingLineDeliveryTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: SewingLineDeliveryTableDataType) => {
+      return columns.actionCol(record)
     }
   }
 
@@ -286,179 +229,60 @@ const SewingLineDeliveryPage = () => {
     <>
       <BaseLayout
         title='Chuyền may'
-        loading={table.loading}
+        loading={viewModel.table.loading}
         searchProps={{
-          onSearch: handleSearch,
-          placeholder: 'Chuyền..',
-          value: searchTextChange,
-          onChange: (e) => setSearchTextChange(e.target.value)
+          onSearch: viewModel.action.handleSearch,
+          placeholder: 'Mã hàng..'
         }}
         sortProps={{
-          onChange: handleSortChange
+          onChange: viewModel.action.handleSwitchSortChange
         }}
         deleteProps={{
-          onChange: setShowDeleted
+          onChange: viewModel.action.handleSwitchDeleteChange
         }}
       >
         <SkyTable
-          bordered
-          loading={table.loading}
-          columns={tableColumns}
-          className='relative'
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          dataSource={table.dataSource}
-          rowClassName='editable-row'
-          onPageChange={handlePageChange}
-          isShowDeleted={showDeleted}
-          actionProps={{
-            onEdit: {
-              handleClick: (record) => {
-                // setNewRecord({ ...record } )
-                table.handleStartEditing(record.key)
-              },
-              isShow: !showDeleted
-            },
-            onSave: {
-              handleClick: (record) => handleUpdate(record),
-              isShow: !showDeleted
-            },
-            onDelete: {
-              handleClick: (record) => table.handleStartDeleting(record.key),
-              isShow: !showDeleted
-            },
-            onDeleteForever: {
-              isShow: showDeleted
-            },
-            onRestore: {
-              handleClick: (record) => table.handleStartRestore(record.key),
-              isShow: showDeleted
-            },
-            onConfirmDeleteForever: (record) => handleDeleteForever(record.id!),
-            onConfirmCancelEditing: () => table.handleCancelEditing(),
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            onConfirmRestore: (record) => handleRestore(record),
-            isShow: true
+          loading={viewModel.table.loading}
+          tableColumns={{
+            columns: tableColumns,
+            actionColumn: actionCol,
+            showAction: !viewModel.state.showDeleted
           }}
+          columns={tableColumns}
+          dataSource={viewModel.table.dataSource}
+          onPageChange={viewModel.action.handlePageChange}
           expandable={{
             expandedRowRender: (record: SewingLineDeliveryTableDataType) => {
               return (
                 <>
                   <SkyTableExpandableLayout>
-                    {!(width >= breakpoint.sm) && (
-                      <SkyTableExpandableItemRow className='w-1/2' title='Màu:' isEditing={table.isEditing(record.key)}>
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
                         {columns.productColor(record)}
                       </SkyTableExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.md) && (
-                      <SkyTableExpandableItemRow className='w-1/2' title='Số lượng PO:' isEditing={false}>
+
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow
+                        title='Số lượng PO:'
+                        isEditing={viewModel.table.isEditing(`${record.id}`)}
+                      >
                         {columns.quantityPO(record)}
                       </SkyTableExpandableItemRow>
                     )}
-                    {!(width >= breakpoint.lg) && (
-                      <SkyTableExpandableItemRow
-                        className='w-1/2'
-                        title='Ngày xuất FCR:'
-                        isEditing={table.isEditing(record.key)}
-                      >
-                        {columns.dateOutputFCR(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    {!(width >= breakpoint.xl) && (
-                      <SkyTableExpandableItemRow
-                        className='w-1/2'
-                        title='Chuyền may:'
-                        isEditing={table.isEditing(record.key)}
-                      >
-                        {columns.sewingLines(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-                    <Collapse
-                      items={[
-                        {
-                          key: '1',
-                          label: (
-                            <Typography.Title className='m-0' level={5} type='secondary'>
-                              Danh sách chuyền may
-                            </Typography.Title>
-                          )
-                          // children: (
-                          //   <List
-                          //     // grid={{ gutter: 16, xs: 1, sm: 2, md: 4, lg: 4, xl: 6, xxl: 3 }}
-                          //     itemLayout='vertical'
-                          //     dataSource={record.sewingLineDeliveries}
-                          //     renderItem={(recordItem, index) => (
-                          //       <List.Item key={index}>
-                          //         <Flex vertical gap={20} align='center' className='w-full'>
-                          //           <SkyTableTypography className='w-fit' strong>
-                          //             {textValidatorDisplay(recordItem.sewingLine?.name)}{' '}
-                          //             {expiredDateStatus(record.dateOutputFCR, recordItem.expiredDate) ? (
-                          //               <span className='text-error'>{'(Bị bể)'}</span>
-                          //             ) : (
-                          //               ''
-                          //             )}
-                          //           </SkyTableTypography>
-                          //           <SkyTableExpandableItemRow
-                          //             className='w-1/2'
-                          //             title='SL vào chuyền:'
-                          //             isEditing={table.isEditing(recordItem.id!)}
-                          //           >
-                          //             {expandableListColumn.quantityOriginal(record, recordItem)}
-                          //           </SkyTableExpandableItemRow>
-                          //           <SkyTableExpandableItemRow
-                          //             className='w-1/2'
-                          //             title='SL may được:'
-                          //             isEditing={table.isEditing(recordItem.id!)}
-                          //           >
-                          //             {expandableListColumn.quantitySewed(record, recordItem)}
-                          //           </SkyTableExpandableItemRow>
-                          //           <SkyTableExpandableItemRow
-                          //             className='w-1/2'
-                          //             title='SL còn lại:'
-                          //             isEditing={table.isEditing(recordItem.id!)}
-                          //           >
-                          //             {expandableListColumn.amountQuantity(record, recordItem)}
-                          //           </SkyTableExpandableItemRow>
-                          //           <SkyTableExpandableItemRow
-                          //             className='w-1/2'
-                          //             title='Ngày dự kiến hoàn thành:'
-                          //             isEditing={table.isEditing(recordItem.id!)}
-                          //           >
-                          //             {expandableListColumn.expiredDate(record, recordItem)}
-                          //           </SkyTableExpandableItemRow>
-                          //         </Flex>
-                          //       </List.Item>
-                          //     )}
-                          //   />
-                          // )
-                        }
-                      ]}
-                    />
 
-                    {/* <Flex className='z-[999] h-[200px] scroll-smooth p-2'>
-                      <SkyTable
-                        bordered
-                        virtual
-                        className='absolute'
-                        scroll={{
-                          x: expandableTableColumns(record).length > 2 ? 1500 : true,
-                          y: 400
-                        }}
-                        rowKey='id'
-                        scrollTo={3}
-                        loading={table.loading}
-                        columns={expandableTableColumns(record)}
-                        rowClassName='editable-row'
-                        dataSource={table.dataSource.filter((item) => item.id === record.id)}
-                        metaData={productService.metaData}
-                        pagination={false}
-                        isShowDeleted={table.showDeleted}
-                        editingKey={table.editingKey}
-                        deletingKey={table.deletingKey}
-                      />
-                    </Flex> */}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+
+                    <SewingLineDeliveryExpandableList
+                      parentRecord={record}
+                      isEditing={viewModel.table.isEditing(record.key)}
+                      newRecord={viewModel.state.newRecord}
+                      setNewRecord={viewModel.state.setNewRecord}
+                    />
                   </SkyTableExpandableLayout>
                 </>
               )

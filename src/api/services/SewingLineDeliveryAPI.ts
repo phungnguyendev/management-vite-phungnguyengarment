@@ -6,18 +6,11 @@ const NAMESPACE = 'sewing-line-deliveries'
 export default {
   createItem: async (newItem: SewingLineDelivery, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}`,
-        {
-          ...newItem,
-          status: newItem.status ?? 'active'
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}`, newItem, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -68,7 +61,7 @@ export default {
       })
   },
   updateItemByPk: async (
-    id?: number,
+    id: number,
     itemToUpdate: SewingLineDelivery,
     accessToken: string
   ): Promise<ResponseDataType> => {
@@ -103,9 +96,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: SewingLineDelivery[], accessToken: string): Promise<ResponseDataType> => {
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: SewingLineDelivery[],
+    accessToken: string
+  ): Promise<ResponseDataType> => {
     return client
-      .put(`${NAMESPACE}`, itemsToUpdate, {
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

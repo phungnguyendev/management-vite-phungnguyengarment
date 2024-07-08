@@ -68,12 +68,14 @@ export default function useCompletionViewModel() {
   const initialize = useCallback(async () => {
     try {
       const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      if (!productsResult.success) throw new Error(define('dataLoad_failed'))
       const newProducts = productsResult.data as Product[]
 
       const productColorsResult = await productColorService.getItems(
         { paginator: { page: 1, pageSize: -1 } },
         table.setLoading
       )
+      if (!productColorsResult.success) throw new Error(define('dataLoad_failed'))
       const newProductColors = productColorsResult.data as ProductColor[]
       setProductColors(newProductColors)
 
@@ -81,6 +83,7 @@ export default function useCompletionViewModel() {
         { paginator: { page: 1, pageSize: -1 } },
         table.setLoading
       )
+      if (!productGroupsResult.success) throw new Error(define('dataLoad_failed'))
       const newProductGroups = productGroupsResult.data as ProductGroup[]
       setProductGroups(newProductGroups)
 
@@ -88,6 +91,7 @@ export default function useCompletionViewModel() {
         { paginator: { page: 1, pageSize: -1 } },
         table.setLoading
       )
+      if (!completionResult.success) throw new Error(define('dataLoad_failed'))
       const newCompletions = completionResult.data as Completion[]
       setCompletions(newCompletions)
 

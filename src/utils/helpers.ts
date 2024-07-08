@@ -154,7 +154,7 @@ export function isValidBoolean(value?: boolean | null | undefined): value is boo
   return typeof value === 'boolean'
 }
 
-export function isValidDate(value?: string | undefined | Date | dayjs.Dayjs): boolean {
+export function isValidDate(value?: string | undefined | null | Date | dayjs.Dayjs): boolean {
   return value ? dayjs(value).isValid() : false
 }
 
@@ -172,4 +172,19 @@ export const extractEmailName = (email: string): string => {
 
   // Trả về phần username
   return username
+}
+
+export const isExpiredDate = (date1?: string | undefined | null, date2?: string | undefined | null): boolean => {
+  if (!isValidDate(date1) || !isValidDate(date2)) return false
+  // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
+  return dayjs(date1).diff(date2, 'days') < 5
+}
+
+export const expiredDate = (
+  date1?: string | undefined | null,
+  date2?: string | undefined | null
+): string | undefined => {
+  if (!isValidDate(date1) || !isValidDate(date2)) return undefined
+  // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
+  return `${dayjs(date1).diff(date2, 'days')}`.replace('-', '')
 }
