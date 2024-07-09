@@ -1,5 +1,5 @@
 import { App as AntApp, Drawer, Layout } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { HTMLAttributes, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet, useNavigate } from 'react-router-dom'
 import AuthAPI from '~/api/services/AuthAPI'
@@ -13,7 +13,7 @@ import SideNav from './sidenav/SideNav'
 
 const { Sider, Content } = Layout
 
-const Main: React.FC = () => {
+const Main: React.FC<HTMLAttributes<HTMLElement>> = () => {
   const { message } = AntApp.useApp()
   const [loading, setLoading] = useState(false)
   const [openDrawer, setOpenDrawer] = useState(false)
@@ -75,23 +75,6 @@ const Main: React.FC = () => {
           </Sider>
         </Layout>
       </Drawer>
-      {/* <Sider
-        breakpoint='lg'
-        collapsedWidth={0}
-        collapsible
-        trigger={null}
-        width={100}
-        style={{
-          position: 'fixed',
-          left: '0px',
-          top: '0px',
-          bottom: '0px',
-          overflow: 'auto',
-          height: '100vh'
-        }}
-      >
-        <SideNav />
-      </Sider> */}
       <Layout>
         <Header onMenuClick={() => setOpenDrawer(!openDrawer)} />
         <Content className='min-h-screen bg-background p-5'>{!loading && <Outlet />}</Content>

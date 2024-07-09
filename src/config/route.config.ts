@@ -71,7 +71,7 @@ const routes: SideType[] = [
   {
     key: '2',
     name: 'May mẫu',
-    path: 'sample-sewing',
+    path: '/sample-sewing',
     component: SampleSewingPage,
     isGroup: false,
     role: 'sample_sewing_manager',
@@ -80,7 +80,7 @@ const routes: SideType[] = [
   {
     key: '3',
     name: 'Phụ liệu',
-    path: 'garment-accessories',
+    path: '/garment-accessories',
     component: GarmentAccessoryPage,
     isGroup: false,
     role: 'accessory_manager',
@@ -89,7 +89,7 @@ const routes: SideType[] = [
   {
     key: '4',
     name: 'Tổ cắt',
-    path: 'cutting-groups',
+    path: '/cutting-groups',
     isGroup: false,
     role: 'cutting_group_manager',
     component: CuttingGroupPage,
@@ -98,7 +98,7 @@ const routes: SideType[] = [
   {
     key: '5',
     name: 'Chuyền may',
-    path: 'sewing-line-deliveries',
+    path: '/sewing-line-deliveries',
     role: 'sample_sewing_manager',
     component: SewingLineDeliveryPage,
     icon: DeliveryIcon
@@ -106,7 +106,7 @@ const routes: SideType[] = [
   {
     key: '6',
     name: 'Hoàn thành',
-    path: 'finish',
+    path: '/completions',
     component: FinishPage,
     isGroup: false,
     role: 'completion_manager',
@@ -124,7 +124,7 @@ const routes: SideType[] = [
   {
     key: '10',
     name: 'Màu',
-    path: 'colors',
+    path: '/colors',
     role: 'admin',
     component: ColorPage,
     icon: ColorIcon
@@ -132,7 +132,7 @@ const routes: SideType[] = [
   {
     key: '11',
     name: 'Nhóm',
-    path: 'groups',
+    path: '/groups',
     role: 'admin',
     component: GroupPage,
     icon: AgeGroupIcon
@@ -140,15 +140,15 @@ const routes: SideType[] = [
   {
     key: '12',
     name: 'Chuyền may',
+    path: '/sewing-lines',
     role: 'admin',
-    path: 'sewing-line',
     component: SewingLinePage,
     icon: DeliveryIcon
   },
   {
     key: '13',
     name: 'Nơi in - Thêu',
-    path: 'prints',
+    path: '/prints',
     role: 'admin',
     component: PrintPage,
     icon: PrintIcon
@@ -156,7 +156,7 @@ const routes: SideType[] = [
   {
     key: '14',
     name: 'Ghi chú phụ liệu',
-    path: 'accessory-notes',
+    path: '/accessory-notes',
     role: 'admin',
     component: NotePage,
     icon: NoteIcon
@@ -173,7 +173,7 @@ const routes: SideType[] = [
   {
     key: '8',
     name: 'Người dùng',
-    path: 'users',
+    path: '/users',
     role: 'admin',
     component: UserPage,
     icon: UserIcon

@@ -149,6 +149,7 @@ export default function useAPIService<T extends RequiredDataType>(apiService: AP
       const res = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored)
       return res
     } catch (err) {
+      console.log(err)
       throw err
     } finally {
       setLoading?.(false)
