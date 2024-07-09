@@ -1,6 +1,5 @@
 import { Flex } from 'antd'
 import React from 'react'
-import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 
 interface Props {
@@ -25,17 +24,22 @@ const CuttingGroupExpandableItemRow: React.FC<Props> = ({
           Lần {index}:
         </SkyTableTypography>
         <Flex vertical className='w-full' gap={20}>
-          <SkyTableExpandableItemRow
-            title='SL in thêu về:'
-            isEditing={isEditing}
-            className='w-[150px]'
-            disabled={disabled}
-          >
-            {quantityArrivedRender}
-          </SkyTableExpandableItemRow>
-          <SkyTableExpandableItemRow title='Ngày về:' isEditing={isEditing} className='w-[150px]' disabled={disabled}>
-            {dateArrivedRender}
-          </SkyTableExpandableItemRow>
+          <Flex className='w-full flex-col md:flex-row' gap={5}>
+            <Flex vertical className='w-full'>
+              <SkyTableTypography strong disabled={disabled}>
+                SL in thêu về:
+              </SkyTableTypography>
+            </Flex>
+            <Flex className='h-fit w-full'>{quantityArrivedRender}</Flex>
+          </Flex>
+          <Flex className='w-full flex-col md:flex-row' gap={5}>
+            <Flex vertical className='w-full'>
+              <SkyTableTypography strong disabled={disabled}>
+                Ngày về:
+              </SkyTableTypography>
+            </Flex>
+            <Flex className='h-fit w-full'>{dateArrivedRender}</Flex>
+          </Flex>
         </Flex>
       </Flex>
     </>

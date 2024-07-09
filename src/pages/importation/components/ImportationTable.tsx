@@ -156,6 +156,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
   return (
     <>
       <SkyTable
+        size='small'
         loading={tableProps.loading}
         columns={tableColumns}
         tableColumns={{
