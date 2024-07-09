@@ -12,7 +12,7 @@ import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductAddNewProps, ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
-import { dateComparator, isValidNumber, numberComparator, textComparator } from '~/utils/helpers'
+import { dateComparator, isValidNumber, isValidObject, numberComparator, textComparator } from '~/utils/helpers'
 
 export default function useProductViewModel() {
   const { message } = AntApp.useApp()
@@ -210,7 +210,23 @@ export default function useProductViewModel() {
         )
       }
 
-      if (!record.printablePlace) {
+      if (isValidObject(record.printablePlace) && numberComparator(record.printablePlace.id, newRecord.printID)) {
+        await printablePlaceService.updateItemBySync(
+          { field: 'productID', id: record.id! },
+          { printID: newRecord.printID },
+          table.setLoading,
+          (meta) => {
+            if (!meta.success) throw new Error(define('update_failed'))
+            const newPrintablePlace = meta.data as PrintablePlace
+            updatedProduct = {
+              ...updatedProduct,
+              printablePlace: newPrintablePlace
+            }
+          }
+        )
+      }
+
+      if (!isValidObject(record.printablePlace) && isValidNumber(newRecord.printID)) {
         await printablePlaceService.createItemSync(
           { productID: record.id!, printID: newRecord.printID },
           table.setLoading,
