@@ -22,7 +22,7 @@ const CuttingGroupExpandableItemRow: React.FC<Props> = ({
           Lần {index}:
         </SkyTableTypography>
         <Flex vertical className='w-full' gap={20}>
-          <Flex className='w-full flex-col md:flex-row' gap={5}>
+          <Flex className='w-full flex-col lg:flex-row' gap={5}>
             <Flex vertical className='w-full'>
               <SkyTableTypography strong disabled={disabled}>
                 SL in thêu về:
@@ -30,7 +30,7 @@ const CuttingGroupExpandableItemRow: React.FC<Props> = ({
             </Flex>
             <Flex className='h-fit w-full'>{quantityArrivedRender}</Flex>
           </Flex>
-          <Flex className='w-full flex-col md:flex-row' gap={5}>
+          <Flex className='w-full flex-col lg:flex-row' gap={5}>
             <Flex vertical className='w-full'>
               <SkyTableTypography strong disabled={disabled}>
                 Ngày về:
