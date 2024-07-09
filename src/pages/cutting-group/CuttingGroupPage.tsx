@@ -756,35 +756,30 @@ const SampleSewingPage = () => {
                       <SkyTableExpandableLayout>
                         <CuttingGroupExpandableItemRow
                           index={1}
-                          isEditing
                           disabled={viewModel.action.isDisableRecord(record)}
                           quantityArrivedRender={columns.embroideringArrived.th1.quantityArrived(record)}
                           dateArrivedRender={columns.embroideringArrived.th1.dateArrived(record)}
                         />
                         <CuttingGroupExpandableItemRow
                           index={2}
-                          isEditing
                           disabled={viewModel.action.isDisableRecord(record)}
                           quantityArrivedRender={columns.embroideringArrived.th2.quantityArrived(record)}
                           dateArrivedRender={columns.embroideringArrived.th2.dateArrived(record)}
                         />
                         <CuttingGroupExpandableItemRow
                           index={3}
-                          isEditing
                           disabled={viewModel.action.isDisableRecord(record)}
                           quantityArrivedRender={columns.embroideringArrived.th3.quantityArrived(record)}
                           dateArrivedRender={columns.embroideringArrived.th3.dateArrived(record)}
                         />
                         <CuttingGroupExpandableItemRow
                           index={4}
-                          isEditing
                           disabled={viewModel.action.isDisableRecord(record)}
                           quantityArrivedRender={columns.embroideringArrived.th4.quantityArrived(record)}
                           dateArrivedRender={columns.embroideringArrived.th4.dateArrived(record)}
                         />
                         <CuttingGroupExpandableItemRow
                           index={5}
-                          isEditing
                           disabled={viewModel.action.isDisableRecord(record)}
                           quantityArrivedRender={columns.embroideringArrived.th5.quantityArrived(record)}
                           dateArrivedRender={columns.embroideringArrived.th5.dateArrived(record)}

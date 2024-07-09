@@ -3,7 +3,6 @@ import React from 'react'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 
 interface Props {
-  isEditing: boolean
   disabled?: boolean
   index: number
   quantityArrivedRender: React.ReactNode
@@ -13,7 +12,6 @@ interface Props {
 const CuttingGroupExpandableItemRow: React.FC<Props> = ({
   quantityArrivedRender,
   dateArrivedRender,
-  isEditing,
   disabled,
   index
 }) => {
