@@ -6,6 +6,7 @@ import {
   CutIcon,
   DashboardIcon,
   DeliveryIcon,
+  ImportExportIcon,
   NoteIcon,
   PackageSearchIcon,
   PackageSuccessIcon,
@@ -66,7 +67,7 @@ const routes: SideType[] = [
     component: ImportationPage,
     isGroup: false,
     role: 'importation_manager',
-    icon: PackageSearchIcon
+    icon: ImportExportIcon
   },
   {
     key: '2',
@@ -79,7 +80,7 @@ const routes: SideType[] = [
   },
   {
     key: '3',
-    name: 'Phụ liệu',
+    name: 'Nguyên phụ liệu',
     path: '/garment-accessories',
     component: GarmentAccessoryPage,
     isGroup: false,

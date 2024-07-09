@@ -8,7 +8,7 @@ export interface SideIconProps extends React.HTMLAttributes<HTMLElement> {
 const SideIcon = (src: string) => {
   return (
     <div className=''>
-      <Avatar size='small' shape='square' src={<img src={src} alt='icon' />} />
+      <Avatar size={24} shape='square' src={<img src={src} alt='icon' />} />
     </div>
   )
 }

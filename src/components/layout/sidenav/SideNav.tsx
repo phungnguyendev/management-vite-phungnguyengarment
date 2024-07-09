@@ -62,7 +62,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   return (
     <Flex vertical gap={20} {...props} className={cn('bg-white', props.className)}>
       <Flex align='center' justify='center'>
-        <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
+        <img src={logo} alt='logo' className='h-16 w-16 object-contain' />
       </Flex>
       <Menu
         onClick={handleClick}

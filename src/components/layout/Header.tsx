@@ -70,9 +70,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
         justify='space-between'
         align='center'
       >
-        <Button type='link' className='text-foreground hover:text-primary' onClick={onMenuClick}>
-          <Menu size={20} />
-        </Button>
+        <Button type='primary' className='group' onClick={onMenuClick} icon={<Menu size={24} />} />
         <Space split={<Divider type='vertical' />} className='h-full'>
           <Flex>
             <Badge dot>
