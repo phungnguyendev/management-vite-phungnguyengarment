@@ -1,8 +1,9 @@
-import { Button, ButtonProps, Flex, Input, Spin, Switch, Typography } from 'antd'
+import { Button, ButtonProps, Flex, Spin, Switch, Typography } from 'antd'
 import { SearchProps } from 'antd/es/input'
 import { SwitchProps } from 'antd/lib'
 import { Plus } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
+import SearchBar from '../sky-ui/SearchBar'
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   loading?: boolean
@@ -12,8 +13,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
   deleteProps?: SwitchProps
   addNewProps?: ButtonProps
 }
-
-const { Search } = Input
 
 const BaseLayout: React.FC<Props> = ({
   searchProps,
@@ -25,47 +24,14 @@ const BaseLayout: React.FC<Props> = ({
   // onLoading,
   ...props
 }) => {
-  const [searchText, setSearchText] = useState<string>('')
-
   return (
     <div {...props} className='w-full'>
       <Flex vertical gap={20} className='w-full'>
         {props.title && <Typography.Title level={2}>{props.title}</Typography.Title>}
         <Flex vertical gap={20} className='w-full'>
-          {searchProps && (
-            <Search
-              {...searchProps}
-              placeholder={searchProps.placeholder ?? 'Search...'}
-              size='middle'
-              enterButton
-              value={searchProps.value ?? searchText}
-              onChange={(e) => {
-                props.onChange?.(e)
-                setSearchText(e.target.value)
-              }}
-              className='w-full lg:hidden'
-              name='search'
-              allowClear
-            />
-          )}
-          <Flex justify='space-between' className='w-full' align='start' gap={20}>
-            <Flex gap={20} align='start' className='w-full flex-col'>
-              {searchProps && (
-                <Search
-                  {...searchProps}
-                  placeholder={searchProps.placeholder ?? 'Search...'}
-                  size='middle'
-                  enterButton
-                  value={searchProps.value ?? searchText}
-                  onChange={(e) => {
-                    props.onChange?.(e)
-                    setSearchText(e.target.value)
-                  }}
-                  className='hidden w-full lg:block lg:w-2/3'
-                  name='search'
-                  allowClear
-                />
-              )}
+          <Flex gap={20} align='start' className='w-full flex-col'>
+            {searchProps && <SearchBar {...searchProps} />}
+            <Flex justify='space-between' className='w-full'>
               <Flex gap={10} className='w-full'>
                 {sortProps && (
                   <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sort' defaultChecked={false} />
@@ -74,8 +40,6 @@ const BaseLayout: React.FC<Props> = ({
                   <Switch {...deleteProps} checkedChildren='Showed delete' unCheckedChildren='Show delete' />
                 )}
               </Flex>
-            </Flex>
-            <Flex gap={10} align='center' justify='flex-end' className='w-fit'>
               {addNewProps && (
                 <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                   Add

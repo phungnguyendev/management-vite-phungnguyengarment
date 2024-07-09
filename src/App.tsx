@@ -6,8 +6,6 @@ import LoginPage from './pages/auth/LoginPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 
 function App() {
-  // const currentUser = useSelector((state: RootState) => state.user)
-
   return (
     <Routes>
       <Route path='/login' element={<LoginPage />} />
