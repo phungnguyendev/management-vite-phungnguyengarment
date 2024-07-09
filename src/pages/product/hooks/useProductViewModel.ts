@@ -241,23 +241,6 @@ export default function useProductViewModel() {
         )
       }
 
-      // Thêm mới hoặc cập nhật PrintablePlace vì không bắt buộc trong mục thêm mới
-      if (numberComparator(newRecord.printID, record.printablePlace?.printID)) {
-        await printablePlaceService.updateItemBySync(
-          { field: 'productID', id: record.id! },
-          { printID: newRecord.printID },
-          table.setLoading,
-          (meta) => {
-            if (!meta.success) throw new Error(define('update_failed'))
-            const newPrintablePlace = meta.data as PrintablePlace
-            updatedProduct = {
-              ...updatedProduct,
-              printablePlace: newPrintablePlace
-            }
-          }
-        )
-      }
-
       // Update record with newRecord
       table.handleUpdate(record.key, updatedProduct)
       message.success(define('updated_success'))
