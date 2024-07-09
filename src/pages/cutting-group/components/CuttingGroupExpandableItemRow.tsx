@@ -18,7 +18,7 @@ const CuttingGroupExpandableItemRow: React.FC<Props> = ({
   return (
     <>
       <Flex>
-        <SkyTableTypography strong className='w-1/2' code disabled={disabled}>
+        <SkyTableTypography strong className='w-2/3 md:w-1/2' code disabled={disabled}>
           Lần {index}:
         </SkyTableTypography>
         <Flex vertical className='w-full' gap={20}>
