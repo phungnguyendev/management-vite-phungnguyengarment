@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
+import routes from '~/config/route.config'
 import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
-import routes from '~/config/route.config'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
@@ -44,15 +44,15 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
     return path
   }
 
-  const getRoutes = currentUser.user?.isAdmin ? routes : routes.filter((item) => item.role !== 'admin')
-
-  const items: MenuProps['items'] = getRoutes.map((route) => {
-    if (route.isGroup) {
-      return getItem(SideItem(route), route.key, null, 'group')
-    } else {
-      return getItem(SideItem(route), route.key, SideIcon(route.icon))
-    }
-  })
+  const items: MenuProps['items'] = routes
+    .filter((item) => (currentUser.role?.includes('admin') ? true : currentUser.role?.includes(item.role)))
+    .map((route) => {
+      if (route.isGroup) {
+        return getItem(SideItem(route), route.key, null, 'group')
+      } else {
+        return getItem(SideItem(route), route.key, SideIcon(route.icon))
+      }
+    })
 
   const handleClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)

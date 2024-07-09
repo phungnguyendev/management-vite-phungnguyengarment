@@ -83,7 +83,6 @@ export default {
         return responseFormatter(res)
       })
       .catch(function (error) {
-        console.log(error)
         throwErrorFormatter(error)
       })
   }

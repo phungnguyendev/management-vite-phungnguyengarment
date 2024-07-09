@@ -16,10 +16,8 @@ export default function useAuthService(authService: AuthService) {
   const login = async (email: string, password: string, setLoading?: (enable: boolean) => void) => {
     try {
       setLoading?.(true)
-      const result = await authService.login(email, password)
-      return result
+      return await authService.login(email, password)
     } catch (err: any) {
-      console.log(err.data)
       throw err.data
     } finally {
       setLoading?.(false)
@@ -53,7 +51,6 @@ export default function useAuthService(authService: AuthService) {
       setLoading?.(true)
       return await authService.verifyOTPCode(emailToVerify, otp)
     } catch (err: any) {
-      console.log(err)
       throw err.data
     } finally {
       setLoading?.(false)

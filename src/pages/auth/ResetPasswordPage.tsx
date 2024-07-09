@@ -35,7 +35,6 @@ const ResetPasswordPage = () => {
       await authService.verifyEmailAndSendOTP(user.email, setLoading).then((result) => {
         if (!result.success) throw new Error(define('error_verify_email'))
         const resultUser = result.data as User
-        console.log(resultUser)
         setUserStored({ email: resultUser.email!, accessKey: '' })
         message.success(`The OTP code has been sent to your mailbox!`)
         setState('verify_otp')
@@ -50,7 +49,6 @@ const ResetPasswordPage = () => {
   const handleVerifyOTP = async (user: { otp: string[] }) => {
     try {
       await authService.verifyOTPCode(userStored.email, user.otp.join(''), setLoading).then((result) => {
-        console.log(result)
         if (!result.success) throw new Error(define('error_verify_otp'))
         const userResult = result.data as User
         dispatch(setUser(userResult))
@@ -77,9 +75,8 @@ const ResetPasswordPage = () => {
               setLoading
             )
             .then((result) => {
-              console.log(result)
               if (!result.success) throw new Error(`${result.message}`)
-              dispatch(setUser(null))
+              dispatch(setUser({}))
               message.success(define('password_reset_successful'))
               navigate('/login')
             })

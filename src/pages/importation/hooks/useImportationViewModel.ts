@@ -224,7 +224,6 @@ export default function useImportationViewModel() {
               ...newImportation,
               key: `${newImportation.id}`
             })
-            console.log(newImportationExpandableDataSource)
             // table.handleAddNew({
             //   ...prevDataSourceItem,
             //   key: `${formAddNew.productID}`,

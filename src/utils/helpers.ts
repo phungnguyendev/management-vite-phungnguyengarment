@@ -188,3 +188,14 @@ export const expiredDate = (
   // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
   return `${dayjs(date1).diff(date2, 'days')}`.replace('-', '')
 }
+
+// Tính phần trăm
+export const percentage = (totalCount: number, count: number): number => {
+  const percent = (count / totalCount) * 100
+  return parseFloat(percent.toFixed(0))
+}
+
+// Tính tổng các phần tử bên trong mảng
+export const sumCounts = (counts: number[]): number => {
+  return counts.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+}

@@ -182,9 +182,7 @@ export default function useGarmentAccessoryViewModel() {
         table.setLoading,
         (meta) => {
           if (!meta.success) throw new Error(define('dataLoad_failed'))
-          console.log(meta)
           const newProducts = meta.data as Product[]
-          console.log(newProducts)
           dataMapped(newProducts, productColors, productGroups, garmentAccessories, garmentAccessoryNotes)
         }
       )

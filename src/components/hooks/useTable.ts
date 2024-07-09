@@ -145,7 +145,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
         setEditingKey('')
       }
     } catch (errInfo) {
-      console.log('Validate Failed:', errInfo)
+      throw errInfo
     } finally {
       setLoading(false)
     }

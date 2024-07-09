@@ -154,7 +154,6 @@ export default function useSampleSewingViewModel() {
           !record.sampleSewing.dateSubmissionFifthTime ||
           dateComparator(newRecord.dateSubmissionFifthTime, record.sampleSewing.dateSubmissionFifthTime))
       ) {
-        console.log('Update')
         await sampleSewingService.updateItemBySync(
           { field: 'productID', id: record.id! },
           {
@@ -164,20 +163,16 @@ export default function useSampleSewingViewModel() {
           (meta) => {
             if (!meta?.success) throw new Error(define('update_failed'))
             const updatedItem = meta.data as SampleSewing
-            console.log(updatedItem)
             updatedRecord = { ...updatedRecord, sampleSewing: updatedItem }
           }
         )
       } else {
-        console.log('Create')
         await sampleSewingService.createItemSync({ ...newRecord, productID: record.id }, table.setLoading, (meta) => {
           if (!meta.success) throw new Error(define('create_failed'))
           const newItem = meta.data as SampleSewing
-          console.log(newItem)
           updatedRecord = { ...updatedRecord, sampleSewing: newItem }
         })
       }
-      console.log(updatedRecord)
       table.handleUpdate(record.key, updatedRecord)
       message.success(define('updated_success'))
     } catch (error: any) {

@@ -16,7 +16,7 @@ export interface SkyTableProps<T extends SkyTableRequiredDataType> extends Table
   dataSource: T[]
   tableColumns: {
     columns: ColumnsType<T>
-    actionColumn: ColumnType<T>
+    actionColumn?: ColumnType<T>
     showAction?: boolean
   }
   onPageChange?: (page: number, pageSize: number) => void
@@ -35,7 +35,9 @@ const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProp
           {...props}
           columns={
             props.tableColumns.showAction ?? true
-              ? [...props.tableColumns.columns, props.tableColumns.actionColumn]
+              ? props.tableColumns.actionColumn
+                ? [...props.tableColumns.columns, props.tableColumns.actionColumn]
+                : props.tableColumns.columns
               : props.tableColumns.columns
           }
           bordered

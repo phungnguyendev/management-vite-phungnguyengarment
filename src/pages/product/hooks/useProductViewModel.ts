@@ -153,7 +153,6 @@ export default function useProductViewModel() {
    */
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
-      console.log({ newRecord, record })
       let updatedProduct: ProductTableDataType = record
       if (
         textComparator(newRecord.productCode, record.productCode) ||
@@ -212,14 +211,12 @@ export default function useProductViewModel() {
       }
 
       if (!record.printablePlace) {
-        console.log('Create')
         await printablePlaceService.createItemSync(
           { productID: record.id!, printID: newRecord.printID },
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
             const newPrintablePlace = meta.data as PrintablePlace
-            console.log(newPrintablePlace)
             updatedProduct = {
               ...updatedProduct,
               printablePlace: newPrintablePlace
@@ -230,7 +227,6 @@ export default function useProductViewModel() {
 
       // Thêm mới hoặc cập nhật PrintablePlace vì không bắt buộc trong mục thêm mới
       if (numberComparator(newRecord.printID, record.printablePlace?.printID)) {
-        console.log('Update')
         await printablePlaceService.updateItemBySync(
           { field: 'productID', id: record.id! },
           { printID: newRecord.printID },
@@ -238,7 +234,6 @@ export default function useProductViewModel() {
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
             const newPrintablePlace = meta.data as PrintablePlace
-            console.log(newPrintablePlace)
             updatedProduct = {
               ...updatedProduct,
               printablePlace: newPrintablePlace
@@ -247,7 +242,6 @@ export default function useProductViewModel() {
         )
       }
 
-      console.log(updatedProduct)
       // Update record with newRecord
       table.handleUpdate(record.key, updatedProduct)
       message.success(define('updated_success'))
@@ -264,7 +258,6 @@ export default function useProductViewModel() {
    */
   const handleAddNew = async (formAddNew: ProductAddNewProps) => {
     try {
-      console.log(formAddNew)
       await productService.createItemSync(
         {
           productCode: formAddNew.productCode,

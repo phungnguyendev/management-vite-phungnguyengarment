@@ -4,6 +4,7 @@ import {
   AgeGroupIcon,
   ColorIcon,
   CutIcon,
+  DashboardIcon,
   DeliveryIcon,
   NoteIcon,
   PackageSearchIcon,
@@ -14,7 +15,7 @@ import {
   WarehouseIcon
 } from '~/assets/icons'
 import { UserRoleType } from '~/typing'
-// const Dashboard = lazy(() => import('~/pages/dashboard/Dashboard'))
+const DashboardPage = lazy(() => import('~/pages/dashboard/DashboardPage'))
 const CuttingGroupPage = lazy(() => import('~/pages/cutting-group/CuttingGroupPage'))
 const ColorPage = lazy(() => import('~/pages/color/ColorPage'))
 const GroupPage = lazy(() => import('~/pages/group/GroupPage'))
@@ -33,25 +34,26 @@ export type SideType = {
   key: string
   name: string
   path: string
-  role?: UserRoleType
+  role: UserRoleType
   component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
   isGroup?: boolean
   icon: string
 }
 
 const routes: SideType[] = [
-  // {
-  //   key: '0',
-  //   name: 'Dashboard',
-  //   path: '/',
-  //   component: Dashboard,
-  //   isGroup: false,
-  //   icon: DashboardIcon
-  // },
+  {
+    key: '0',
+    name: 'Dashboard',
+    path: '/',
+    component: DashboardPage,
+    isGroup: false,
+    role: 'staff',
+    icon: DashboardIcon
+  },
   {
     key: '1',
     name: 'Sản phẩm',
-    path: '/',
+    path: '/products',
     component: ProductPage,
     isGroup: false,
     role: 'product_manager',

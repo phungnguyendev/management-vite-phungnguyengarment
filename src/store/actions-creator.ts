@@ -1,7 +1,7 @@
 import { createAction } from '@reduxjs/toolkit'
 import { User, UserRoleType } from '~/typing'
 
-export const setUser = createAction<User | null>('auth/user')
+export const setUser = createAction<User>('auth/user')
 
 export const setUserRole = createAction<UserRoleType[]>('auth/userRole')
 

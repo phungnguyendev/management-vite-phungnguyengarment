@@ -59,9 +59,7 @@ const LoginPage: React.FC<Props> = () => {
     }
   }
 
-  const handleFinishFailure = (errorInfo: any) => {
-    console.log('Failed:', errorInfo)
-  }
+  const handleFinishFailure = () => {}
 
   const formItemLayout =
     formLayout === 'vertical'
@@ -105,6 +103,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Email'
                 name='email'
                 className='m-0 w-full p-0'
+                // initialValue='phungnguyengarment.dev@gmail.com'
                 rules={[
                   { required: true, message: 'Please input your email!', validateTrigger: 'onBlur', type: 'email' }
                 ]}
@@ -123,6 +122,7 @@ const LoginPage: React.FC<Props> = () => {
                 label='Password'
                 name='password'
                 className='m-0 w-full p-0'
+                // initialValue='Phungnguyen@2771'
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
                 <Input.Password
