@@ -18,7 +18,7 @@ module.exports = {
         error: 'var(--error)',
         success: 'var(--success)',
         blue: 'var(--blue)',
-        notActivated: 'var(--not-activated-color)',
+        notActivate: 'var(--not-activated-color)',
         activated: 'var(--activated-color)',
         fixing: 'var(--fixing-color)',
         completed: 'var(--completed-color)',

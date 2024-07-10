@@ -45,11 +45,16 @@
     /* Used for focus ring */
     --ring: #ff6b00;
 
-    --normal: rgba(42, 46, 54, 0.25);
+    --normal: #2a2e3640;
+    --normal-second: #8e8f9040;
     --warn: #faad14;
+    --warn-second: #fbdda2;
     --error: #f5222d;
+    --error-second: #f59ea3;
     --success: #52c41a;
-    --incoming-success: #1ac4bc;
+    --success-second: #bbf59e;
+    --incoming-success: #128c86;
+    --incoming-success-second: #78bdba;
     --blue: #1677ff;
     --light-grey: #f2f2f2;
 

@@ -195,68 +195,79 @@ const DashboardPage = () => {
 
   return (
     <>
-      <BaseLayout
-        title='Dashboard'
-        loading={viewModel.table.loading}
-        searchProps={{
-          // Search Input
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Mã hàng..'
-        }}
-        sortProps={{
-          // Sort Switch Button
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          // Show delete list Switch Button
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-      >
-        <SkyTable
+      <Flex vertical gap={40}>
+        {/* <StatisticWrapper>
+          <StatisticCard title='Tổng mã hàng' value={100} subTitle='100%' type='default' />
+          <StatisticCard title='Mã đang may' value={50} subTitle='Chiếm 50% (50/100)' type='success' />
+          <StatisticCard title='Mã đang sửa' value={30} subTitle='Chiếm 30% (30/100)' type='warning' />
+          <StatisticCard title='Mã bị bể' value={20} subTitle='Chiếm 20% (20/100)' type='danger' />
+        </StatisticWrapper> */}
+        <BaseLayout
+          title='Dashboard'
           loading={viewModel.table.loading}
-          tableColumns={{
-            columns:
-              width >= breakpoint.lg
-                ? [...tableColumns, ...progressHorizontalCol]
-                : [...tableColumns, ...progressVerticalCol]
+          searchProps={{
+            // Search Input
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Mã hàng..'
           }}
-          dataSource={viewModel.table.dataSource}
-          onPageChange={viewModel.action.handlePageChange}
-          expandable={{
-            expandedRowRender: (record: DashboardTableDataType) => {
-              return (
-                <SkyTableExpandableLayout>
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.quantityPO(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.productColor(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xl) && (
-                    <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.productGroup(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow title='Ngày xuất FCR:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.dateOutputFCR(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                </SkyTableExpandableLayout>
-              )
-            },
-            columnWidth: '0.001%',
-            onExpand: (expanded, record: DashboardTableDataType) =>
-              viewModel.table.handleStartExpanding(expanded, record.key),
-            expandedRowKeys: viewModel.table.expandingKeys,
-            showExpandColumn: !(width >= breakpoint.xl)
+          sortProps={{
+            // Sort Switch Button
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-        />
-      </BaseLayout>
+          deleteProps={{
+            // Show delete list Switch Button
+            onChange: viewModel.action.handleSwitchDeleteChange
+          }}
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns:
+                width >= breakpoint.lg
+                  ? [...tableColumns, ...progressHorizontalCol]
+                  : [...tableColumns, ...progressVerticalCol]
+            }}
+            dataSource={viewModel.table.dataSource}
+            onPageChange={viewModel.action.handlePageChange}
+            expandable={{
+              expandedRowRender: (record: DashboardTableDataType) => {
+                return (
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow
+                        title='Ngày xuất FCR:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {columns.dateOutputFCR(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                  </SkyTableExpandableLayout>
+                )
+              },
+              columnWidth: '0.001%',
+              onExpand: (expanded, record: DashboardTableDataType) =>
+                viewModel.table.handleStartExpanding(expanded, record.key),
+              expandedRowKeys: viewModel.table.expandingKeys,
+              showExpandColumn: !(width >= breakpoint.xl)
+            }}
+          />
+        </BaseLayout>
+      </Flex>
     </>
   )
 }
