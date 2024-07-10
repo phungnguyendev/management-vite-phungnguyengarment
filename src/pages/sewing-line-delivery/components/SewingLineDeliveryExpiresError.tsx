@@ -1,6 +1,6 @@
 import React from 'react'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { expiredDate, isExpiredDate, isValidDate } from '~/utils/helpers'
+import { expiredDate } from '~/utils/helpers'
 
 interface Props {
   date1?: string | undefined | null
@@ -8,15 +8,19 @@ interface Props {
 }
 
 const SewingLineDeliveryExpiresError: React.FC<Props> = ({ date1, date2 }) => {
+  const expiresDateNumber = expiredDate(date1, date2) ?? 0
+
+  const content = (): string => {
+    if (expiresDateNumber >= 0) {
+      return `(Còn ${expiresDateNumber} ngày)`
+    } else {
+      return `(Quá ${expiresDateNumber * -1} ngày)`
+    }
+  }
+
   return (
     <>
-      {isValidDate(date1) && isValidDate(date2) && (
-        <SkyTableTypography type={isExpiredDate(date1, date2) ? 'danger' : undefined}>
-          {isExpiredDate(date1, date2)
-            ? `(Quá ${expiredDate(date1, date2)} ngày)`
-            : `(Còn ${expiredDate(date1, date2)} ngày)`}
-        </SkyTableTypography>
-      )}
+      <SkyTableTypography type={expiresDateNumber >= 5 ? 'success' : 'danger'}>{content()}</SkyTableTypography>
     </>
   )
 }

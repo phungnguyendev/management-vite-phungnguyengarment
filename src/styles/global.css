@@ -45,24 +45,13 @@
     /* Used for focus ring */
     --ring: #ff6b00;
 
-    --normal: #2a2e3640;
-    --normal-second: #8e8f9040;
+    --normal: #808080;
     --warn: #faad14;
-    --warn-second: #fbdda2;
     --error: #f5222d;
-    --error-second: #f59ea3;
     --success: #52c41a;
-    --success-second: #bbf59e;
     --incoming-success: #128c86;
-    --incoming-success-second: #78bdba;
     --blue: #1677ff;
     --light-grey: #f2f2f2;
-
-    --not-activated-color: #808080;
-    --activated-color: #008000;
-    --fixing-color: #ffa500;
-    --completed-color: #0000ff;
-    --deleted-color: #ff0000;
 
     /* Border radius for card, input and buttons */
     --radius: 0.5rem;

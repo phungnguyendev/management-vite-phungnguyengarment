@@ -1,22 +1,27 @@
+import { Typography } from 'antd'
 import React from 'react'
 import { cn } from '~/utils/helpers'
-import SkyTableTypography, { SkyTableTypographyProps } from './SkyTableTypography'
+import { SkyTableTypographyProps } from './SkyTableTypography'
 
-interface Props extends SkyTableTypographyProps {
-  background?: boolean
-  index?: number
-}
+interface SkyTableRowHighLightItemProps extends SkyTableTypographyProps {}
 
-const SkyTableRowHighLightItem: React.FC<Props> = ({ title, background, ...props }) => {
+const SkyTableRowHighLightItem: React.FC<SkyTableRowHighLightItemProps> = ({ type = 'secondary', ...props }) => {
   return (
-    <SkyTableTypography
+    <Typography.Text
       {...props}
-      className={cn('my-[2px] h-6 rounded-sm bg-opacity-[0.06] py-1', {
-        'bg-black px-2': background
-      })}
+      className={cn(
+        'w-full flex-shrink-0 rounded-sm px-2 py-1',
+        {
+          'bg-lightGrey': type === 'secondary',
+          'bg-success text-white': type === 'success',
+          'bg-warn text-white': type === 'warning',
+          'bg-error text-white': type === 'danger'
+        },
+        props.className
+      )}
     >
-      {props.children ?? title}
-    </SkyTableTypography>
+      {props.children}
+    </Typography.Text>
   )
 }
 

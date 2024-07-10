@@ -183,10 +183,10 @@ export const isExpiredDate = (date1?: string | undefined | null, date2?: string 
 export const expiredDate = (
   date1?: string | undefined | null,
   date2?: string | undefined | null
-): string | undefined => {
+): number | undefined => {
   if (!isValidDate(date1) || !isValidDate(date2)) return undefined
   // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
-  return `${dayjs(date1).diff(date2, 'days')}`.replace('-', '')
+  return dayjs(date1).diff(date2, 'days')
 }
 
 // Tính phần trăm

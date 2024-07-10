@@ -2,9 +2,9 @@ import { Button, Collapse, Flex, List, Typography } from 'antd'
 import { ChevronUp } from 'lucide-react'
 import React, { useState } from 'react'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTableErrorItem from '~/components/sky-ui/SkyTable/SkyTableErrorItem'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -13,10 +13,10 @@ import {
   dateValidatorInit,
   isExpiredDate,
   isValidArray,
+  isValidDate,
   numberValidatorCalc,
   numberValidatorDisplay,
-  numberValidatorInit,
-  textValidatorDisplay
+  numberValidatorInit
 } from '~/utils/helpers'
 import { SewingLineDeliveryTableDataType } from '../type'
 import SewingLineDeliveryExpiresError from './SewingLineDeliveryExpiresError'
@@ -122,11 +122,11 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
             })
           }}
         >
-          <SkyTableTypography
-            type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : undefined}
-          >
+          <SkyTableTypography>
             {dateValidatorDisplay(record?.expiredDate)}{' '}
-            <SewingLineDeliveryExpiresError date1={parentRecord.dateOutputFCR} date2={record.expiredDate} />
+            {isValidDate(parentRecord.dateOutputFCR) && isValidDate(record.expiredDate) && (
+              <SewingLineDeliveryExpiresError date1={parentRecord.dateOutputFCR} date2={record.expiredDate} />
+            )}
           </SkyTableTypography>
         </EditableStateCell>
       )
@@ -156,43 +156,46 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                 <List
                   itemLayout='vertical'
                   dataSource={parentRecord.sewingLineDeliveries}
-                  renderItem={(recordItem, index) => (
+                  renderItem={(record, index) => (
                     <List.Item key={index}>
                       <Flex vertical gap={20} align='center' className='w-full'>
-                        <SkyTableTypography className='w-fit' strong code>
-                          {textValidatorDisplay(recordItem.sewingLine?.name)}{' '}
-                          {isExpiredDate(parentRecord.dateOutputFCR, recordItem.expiredDate) && (
-                            <SkyTableErrorItem title='(Bể)' />
-                          )}
-                        </SkyTableTypography>
+                        <SkyTableRowHighLightTextItem
+                          key={index}
+                          className='w-fit'
+                          type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : 'secondary'}
+                        >
+                          {isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
+                            ? `${record.sewingLine?.name} (Bể)`
+                            : record.sewingLine?.name}
+                        </SkyTableRowHighLightTextItem>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'
                           title='SL vào chuyền:'
                           isEditing={isEditing}
                         >
-                          {expandableListColumn.quantityOriginal(recordItem)}
+                          {expandableListColumn.quantityOriginal(record)}
                         </SkyTableExpandableItemRow>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'
                           title='SL may được:'
                           isEditing={isEditing}
                         >
-                          {expandableListColumn.quantitySewed(recordItem)}
+                          {expandableListColumn.quantitySewed(record)}
                         </SkyTableExpandableItemRow>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'
                           title='SL còn lại:'
                           isEditing={isEditing}
                         >
-                          {expandableListColumn.amountQuantity(recordItem)}
+                          {expandableListColumn.amountQuantity(record)}
                         </SkyTableExpandableItemRow>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'
                           title='Ngày dự kiến hoàn thành:'
-                          subTitle='(Phải cách ngày xuất FCR 5 ngày)'
+                          subTitle='(Phải cách FCR 5 ngày)'
                           isEditing={isEditing}
                         >
-                          {expandableListColumn.expiredDate(recordItem)}
+                          {expandableListColumn.expiredDate(record)}
                         </SkyTableExpandableItemRow>
                       </Flex>
                     </List.Item>

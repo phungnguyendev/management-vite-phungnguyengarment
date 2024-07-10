@@ -10,6 +10,7 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   booleanValidatorInit,
@@ -42,11 +43,7 @@ const SampleSewingPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
-          {viewModel.action.isChecked(record) && (
-            <SkyTableTypography type='success' code>
-              In thêu
-            </SkyTableTypography>
-          )}
+          {viewModel.action.isChecked(record) && <SkyTableStatusItem>In thêu</SkyTableStatusItem>}
         </Space>
       )
     },

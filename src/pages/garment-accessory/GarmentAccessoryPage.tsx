@@ -11,6 +11,7 @@ import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicke
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
+import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
@@ -40,11 +41,7 @@ const GarmentAccessoryPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
-          {viewModel.action.isChecked(record) && (
-            <SkyTableTypography type='success' code>
-              Synced
-            </SkyTableTypography>
-          )}
+          {viewModel.action.isChecked(record) && <SkyTableStatusItem>Sync</SkyTableStatusItem>}
         </Space>
       )
     },
@@ -207,9 +204,9 @@ const GarmentAccessoryPage = () => {
                           record.expandableGarmentAccessory.syncStatus
                         }
                         status={item.status}
-                        title={item.title}
-                        background
-                      />
+                      >
+                        {item.title}
+                      </SkyTableRowHighLightItem>
                     )
                   })}
                 </Space>

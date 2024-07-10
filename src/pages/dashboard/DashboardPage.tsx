@@ -21,6 +21,8 @@ import {
 } from '~/utils/helpers'
 import useDashboardViewModel from './hooks/useDashboardViewModel'
 import { DashboardTableDataType } from './type'
+import StatisticWrapper from './components/StatisticWapper'
+import StatisticCard from './components/StatisticCard'
 
 const DashboardPage = () => {
   useTitle('Dashboard | Phung Nguyen')
@@ -196,12 +198,12 @@ const DashboardPage = () => {
   return (
     <>
       <Flex vertical gap={40}>
-        {/* <StatisticWrapper>
+        <StatisticWrapper>
           <StatisticCard title='Tổng mã hàng' value={100} subTitle='100%' type='default' />
           <StatisticCard title='Mã đang may' value={50} subTitle='Chiếm 50% (50/100)' type='success' />
           <StatisticCard title='Mã đang sửa' value={30} subTitle='Chiếm 30% (30/100)' type='warning' />
           <StatisticCard title='Mã bị bể' value={20} subTitle='Chiếm 20% (20/100)' type='danger' />
-        </StatisticWrapper> */}
+        </StatisticWrapper>
         <BaseLayout
           title='Dashboard'
           loading={viewModel.table.loading}

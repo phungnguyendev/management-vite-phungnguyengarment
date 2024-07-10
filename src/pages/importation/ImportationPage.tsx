@@ -1,4 +1,4 @@
-import { Flex } from 'antd'
+import { Flex, Space } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
@@ -8,6 +8,7 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { breakpoint, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import ImportationTable from './components/ImportationTable'
@@ -23,18 +24,16 @@ const ImportationPage = () => {
   const columns = {
     productCode: (record: ImportationTableDataType) => {
       return (
-        <SkyTableTypography strong status={record.status}>
-          {textValidatorDisplay(record.productCode)}{' '}
-          {viewModel.action.isCheckImported(record) && (
-            <SkyTableTypography type='success' code>
-              Imported
-            </SkyTableTypography>
-          )}
-        </SkyTableTypography>
+        <Space direction='horizontal'>
+          <SkyTableTypography strong status={record.status}>
+            {textValidatorDisplay(record.productCode)}{' '}
+          </SkyTableTypography>
+          {viewModel.action.isCheckImported(record) && <SkyTableStatusItem>Imported</SkyTableStatusItem>}
+        </Space>
       )
     },
     quantityPO: (record: ImportationTableDataType) => {
-      return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+      return <SkyTableTypography>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
     },
     productColor: (record: ImportationTableDataType) => {
       return (
@@ -76,7 +75,7 @@ const ImportationPage = () => {
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
-      width: '10%',
+      width: '7%',
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productCode(record)
       }
@@ -85,7 +84,7 @@ const ImportationPage = () => {
       title: 'Màu',
       dataIndex: 'colorID',
       width: '10%',
-      responsive: ['md'],
+      responsive: ['sm'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productColor(record)
       }

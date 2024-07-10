@@ -7,10 +7,9 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
-import SkyTableErrorItem from '~/components/sky-ui/SkyTable/SkyTableErrorItem'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
-import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
+import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import {
@@ -97,18 +96,24 @@ const SewingLineDeliveryPage = () => {
             )
           }}
         >
-          <Space wrap>
-            {record.sewingLineDeliveries
-              ?.sort((a, b) => a.sewingLineID! - b.sewingLineID!)
-              ?.map((item, index) => {
-                return (
-                  <SkyTableRowHighLightItem key={index} background>
-                    {item.sewingLine?.name}{' '}
-                    {isExpiredDate(record.dateOutputFCR, item.expiredDate) && <SkyTableErrorItem title='(Bể)' />}
-                  </SkyTableRowHighLightItem>
-                )
-              })}
-          </Space>
+          {isValidArray(record.sewingLineDeliveries) && (
+            <Space wrap>
+              {record.sewingLineDeliveries
+                .sort((a, b) => a.sewingLineID! - b.sewingLineID!)
+                .map((item, index) => {
+                  return (
+                    <SkyTableRowHighLightTextItem
+                      key={index}
+                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : 'secondary'}
+                    >
+                      {isExpiredDate(record.dateOutputFCR, item.expiredDate)
+                        ? `${item.sewingLine?.name} (Bể)`
+                        : item.sewingLine?.name}
+                    </SkyTableRowHighLightTextItem>
+                  )
+                })}
+            </Space>
+          )}
         </EditableStateCell>
       )
     },
