@@ -345,6 +345,10 @@ export default function useImportationViewModel() {
     return isValidArray(record.expandableImportationTableDataTypes)
   }
 
+  const isCheckImported = (record: ImportationTableDataType): boolean | undefined => {
+    return isValidArray(record.expandableImportationTableDataTypes)
+  }
+
   return {
     state: {
       productColors,
@@ -369,6 +373,7 @@ export default function useImportationViewModel() {
     },
     action: {
       isChecked,
+      isCheckImported,
       loadData,
       handleAddNew,
       handleUpdate,

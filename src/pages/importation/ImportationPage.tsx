@@ -24,18 +24,13 @@ const ImportationPage = () => {
     productCode: (record: ImportationTableDataType) => {
       return (
         <SkyTableTypography strong status={record.status}>
-          {textValidatorDisplay(record.productCode)}
+          {textValidatorDisplay(record.productCode)}{' '}
+          {viewModel.action.isCheckImported(record) && (
+            <SkyTableTypography type='success' code>
+              Imported
+            </SkyTableTypography>
+          )}
         </SkyTableTypography>
-        // <Space direction='horizontal'>
-        //   <SkyTableTypography strong status={record.status}>
-        //     {textValidatorDisplay(record.productCode)}
-        //   </SkyTableTypography>
-        //   {viewModel.action.isChecked(record) && (
-        //     <SkyTableTypography code>
-        //       <Image src={ImportExportIcon} width={20} height={20} preview={false} />
-        //     </SkyTableTypography>
-        //   )}
-        // </Space>
       )
     },
     quantityPO: (record: ImportationTableDataType) => {
@@ -75,13 +70,6 @@ const ImportationPage = () => {
         />
       )
     }
-    // printablePlace: (record: ImportationTableDataType) => {
-    //   return (
-    //     <SkyTableTypography status={record.printablePlace?.print?.status}>
-    //       {textValidatorDisplay(record.printablePlace?.print?.name)}
-    //     </SkyTableTypography>
-    //   )
-    // }
   }
 
   const tableColumns: ColumnType<ImportationTableDataType>[] = [
