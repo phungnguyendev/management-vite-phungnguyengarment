@@ -200,8 +200,6 @@ export default function useGarmentAccessoryViewModel() {
 
   const handleUpdate = async (record: GarmentAccessoryTableDataType) => {
     try {
-      let newDataSourceItem: GarmentAccessoryTableDataType = record
-
       // Kiểm tra nếu record có tồn tại và nếu một trong các thuộc tính thay đổi thì Update
       if (
         isValidObject(record.expandableGarmentAccessory) &&
@@ -220,14 +218,12 @@ export default function useGarmentAccessoryViewModel() {
         // Checking error and throw error
         if (!result.success) throw new Error(define('update_failed'))
         const updatedItem = result.data as GarmentAccessory
-        newDataSourceItem = {
-          ...newDataSourceItem,
-          expandableGarmentAccessory: {
-            ...updatedItem,
-            accessoryNotes: newDataSourceItem.expandableGarmentAccessory?.accessoryNotes
-          }
-        }
-        // table.handleUpdate(record.key, { ...record, expandableGarmentAccessory: updatedItem })
+        delete updatedItem.product
+        const updatedGarmentAccessoryNotes = await handleUpdateGarmentAccessoryNotes(updatedItem.id!)
+        table.handleUpdate(record.key, {
+          ...record,
+          expandableGarmentAccessory: { ...updatedItem, accessoryNotes: updatedGarmentAccessoryNotes }
+        })
       }
 
       if (!isValidObject(record.expandableGarmentAccessory)) {
@@ -238,41 +234,15 @@ export default function useGarmentAccessoryViewModel() {
         // Checking error and throw error
         if (!result.success) throw new Error(define('update_failed'))
         const createdItem = result.data as GarmentAccessory
-        newDataSourceItem = {
-          ...newDataSourceItem,
-          expandableGarmentAccessory: createdItem
-        }
-        // table.handleUpdate(record.key, { ...record, expandableGarmentAccessory: createdItem })
+        delete createdItem.product
+        const updatedGarmentAccessoryNotes = await handleUpdateGarmentAccessoryNotes(createdItem.id!)
+
+        table.handleUpdate(record.key, {
+          ...record,
+          expandableGarmentAccessory: { ...createdItem, accessoryNotes: updatedGarmentAccessoryNotes }
+        })
       }
 
-      // Kiểm tra accessoryNotes (Ghi chú phụ liệu)
-      if (isValidObject(record.expandableGarmentAccessory) && isValidArray(newRecord.accessoryNoteIDs)) {
-        const result = await garmentAccessoryNoteService.updateItemsBy(
-          {
-            field: 'garmentAccessoryID',
-            id: record.expandableGarmentAccessory.id!
-          },
-          newRecord.accessoryNoteIDs.map((accessoryNoteID) => {
-            return {
-              accessoryNoteID: accessoryNoteID,
-              garmentAccessoryID: record.expandableGarmentAccessory?.id
-            } as GarmentAccessoryNote
-          })
-        )
-        if (!result.success) throw new Error(define('update_failed'))
-        const updatedItems = result.data as GarmentAccessoryNote[]
-        newDataSourceItem = {
-          ...newDataSourceItem,
-          expandableGarmentAccessory: {
-            ...newDataSourceItem.expandableGarmentAccessory,
-            accessoryNotes: updatedItems.map((item) => {
-              return item.accessoryNote!
-            })
-          }
-        }
-      }
-
-      table.handleUpdate(record.key, newDataSourceItem)
       message.success(define('updated_success'))
     } catch (error: any) {
       message.error(`${error.message}`)
@@ -280,6 +250,34 @@ export default function useGarmentAccessoryViewModel() {
       setNewRecord({})
       table.handleCancelEditing()
       table.setLoading(false)
+    }
+  }
+
+  const handleUpdateGarmentAccessoryNotes = async (garmentAccessoryID: number): Promise<AccessoryNote[]> => {
+    try {
+      // Kiểm tra accessoryNotes (Ghi chú phụ liệu)
+      const result = await garmentAccessoryNoteService.updateItemsBy(
+        {
+          field: 'garmentAccessoryID',
+          id: garmentAccessoryID
+        },
+        isValidArray(newRecord.accessoryNoteIDs)
+          ? newRecord.accessoryNoteIDs.map((accessoryNoteID) => {
+              return {
+                accessoryNoteID: accessoryNoteID,
+                garmentAccessoryID: garmentAccessoryID
+              } as GarmentAccessoryNote
+            })
+          : []
+      )
+      if (!result.success) throw new Error(define('update_failed'))
+      const updatedItems = result.data as GarmentAccessoryNote[]
+      return updatedItems.map((item) => {
+        delete item.garmentAccessory
+        return item.accessoryNote!
+      })
+    } catch (error) {
+      throw error
     }
   }
 

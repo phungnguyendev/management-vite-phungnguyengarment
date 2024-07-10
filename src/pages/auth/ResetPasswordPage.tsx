@@ -63,7 +63,7 @@ const ResetPasswordPage = () => {
   }
 
   const handleResetPassword = async (user: { password: string; passwordConfirm: string }) => {
-    if (user.password.trim() !== user.passwordConfirm.trim()) {
+    if (user.password !== user.passwordConfirm) {
       message.error(define('password_not_match'))
     } else {
       try {

@@ -35,7 +35,7 @@ const SewingLinePage: React.FC<Props> = () => {
             value={viewModel.state.newRecord.name}
             onValueChange={(val: string) =>
               viewModel.state.setNewRecord((prev) => {
-                return { ...prev, name: textValidatorChange(val.trim()) }
+                return { ...prev, name: textValidatorChange(val) }
               })
             }
           >

@@ -135,18 +135,16 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
           ...item,
           ...itemToUpdate
         })
-        setDataSource(newData)
-        setEditingKey('')
         // After updated local data
         // We need to update on database
       } else {
         newData.push(itemToUpdate)
-        setDataSource(newData)
-        setEditingKey('')
       }
+      setDataSource(newData)
     } catch (errInfo) {
       throw errInfo
     } finally {
+      setEditingKey('')
       setLoading(false)
     }
   }

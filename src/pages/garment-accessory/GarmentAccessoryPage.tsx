@@ -17,6 +17,7 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isValidArray,
   isValidObject,
   numberValidatorCalc,
   numberValidatorChange,
@@ -174,7 +175,7 @@ const GarmentAccessoryPage = () => {
             title='Ghi chú'
             inputType='multipleselect'
             required
-            disabled={isDisable}
+            // disabled={isDisable}
             defaultValue={record.expandableGarmentAccessory?.accessoryNotes?.map((item) => {
               return item.id
             })}
@@ -193,23 +194,26 @@ const GarmentAccessoryPage = () => {
               })
             }}
           >
-            <Space size='small' wrap>
-              {record.expandableGarmentAccessory?.accessoryNotes?.map((item, index) => {
-                return (
-                  <SkyTableRowHighLightItem
-                    key={index}
-                    disabled={
-                      isDisable &&
-                      isValidObject(record.expandableGarmentAccessory) &&
-                      record.expandableGarmentAccessory.syncStatus
-                    }
-                    status={item.status}
-                    title={item.title}
-                    background
-                  />
-                )
-              })}
-            </Space>
+            {isValidObject(record.expandableGarmentAccessory) &&
+              isValidArray(record.expandableGarmentAccessory.accessoryNotes) && (
+                <Space size='small' wrap>
+                  {record.expandableGarmentAccessory.accessoryNotes.map((item, index) => {
+                    return (
+                      <SkyTableRowHighLightItem
+                        key={index}
+                        disabled={
+                          isDisable &&
+                          isValidObject(record.expandableGarmentAccessory) &&
+                          record.expandableGarmentAccessory.syncStatus
+                        }
+                        status={item.status}
+                        title={item.title}
+                        background
+                      />
+                    )
+                  })}
+                </Space>
+              )}
           </EditableStateCell>
         </>
       )

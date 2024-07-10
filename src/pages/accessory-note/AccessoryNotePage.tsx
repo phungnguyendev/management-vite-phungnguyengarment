@@ -35,7 +35,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
             value={viewModel.state.newRecord.title}
             onValueChange={(val: string) =>
               viewModel.state.setNewRecord((prev) => {
-                return { ...prev, title: textValidatorChange(val.trim()) }
+                return { ...prev, title: textValidatorChange(val) }
               })
             }
           >
@@ -60,7 +60,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
             value={viewModel.state.newRecord.summary}
             onValueChange={(val: string) =>
               viewModel.state.setNewRecord((prev) => {
-                return { ...prev, summary: textValidatorChange(val.trim()) }
+                return { ...prev, summary: textValidatorChange(val) }
               })
             }
           >

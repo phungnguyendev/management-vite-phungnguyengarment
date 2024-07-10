@@ -70,7 +70,7 @@ export const dateTimeValidatorChange = (date?: string | dayjs.Dayjs | Date): str
 }
 
 export const textValidatorChange = (text?: string | null): string => {
-  return text ? text.trim() : ''
+  return text ? text : ''
 }
 
 export const numberValidatorChange = (number?: number | null): number => {
@@ -141,7 +141,7 @@ export const isValidArray = <T>(arr?: T[] | null | undefined): arr is T[] => {
 }
 
 export function isValidString(value?: string | null | undefined): value is string {
-  return value ? typeof value === 'string' && value.trim().length > 0 : false
+  return value ? typeof value === 'string' && value.length > 0 : false
 }
 
 // Hàm kiểm tra số hợp lệ
