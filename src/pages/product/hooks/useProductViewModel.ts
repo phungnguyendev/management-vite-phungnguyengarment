@@ -153,6 +153,8 @@ export default function useProductViewModel() {
    */
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
+      table.setLoading(true)
+      // Update product
       let updatedProduct: ProductTableDataType = record
       if (
         textComparator(newRecord.productCode, record.productCode) ||
@@ -179,7 +181,9 @@ export default function useProductViewModel() {
           }
         )
       }
-      if (numberComparator(newRecord.colorID, record.productColor?.colorID)) {
+
+      // Update color
+      if (isValidObject(record.productColor) && numberComparator(newRecord.colorID, record.productColor.colorID)) {
         await productColorService.updateItemBySync(
           { field: 'productID', id: record.id! },
           { colorID: newRecord.colorID },
@@ -194,22 +198,57 @@ export default function useProductViewModel() {
           }
         )
       }
-      if (numberComparator(newRecord.groupID, record.productGroup?.groupID)) {
+
+      // Create product color
+      if (!isValidObject(record.productColor) && isValidNumber(newRecord.colorID)) {
+        await productColorService.createItemSync(
+          { productID: record.id, colorID: newRecord.colorID },
+          table.setLoading,
+          (meta) => {
+            if (!meta.success) throw new Error(define('update_failed'))
+            const newItem = meta.data as ProductColor
+            updatedProduct = {
+              ...updatedProduct,
+              productColor: newItem
+            }
+          }
+        )
+      }
+
+      // Update group
+      if (isValidObject(record.productGroup) && numberComparator(newRecord.groupID, record.productGroup.groupID)) {
         await productGroupService.updateItemBySync(
           { field: 'productID', id: record.id! },
           { groupID: newRecord.groupID },
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
-            const newProductGroup = meta.data as ProductGroup
+            const newItem = meta.data as ProductGroup
             updatedProduct = {
               ...updatedProduct,
-              productGroup: newProductGroup
+              productGroup: newItem
             }
           }
         )
       }
 
+      // Create product group
+      if (!isValidObject(record.productGroup) && isValidNumber(newRecord.groupID)) {
+        await productGroupService.createItemSync(
+          { productID: record.id, groupID: newRecord.groupID },
+          table.setLoading,
+          (meta) => {
+            if (!meta.success) throw new Error(define('update_failed'))
+            const newItem = meta.data as ProductGroup
+            updatedProduct = {
+              ...updatedProduct,
+              productGroup: newItem
+            }
+          }
+        )
+      }
+
+      // Update printablePlace
       if (isValidObject(record.printablePlace) && numberComparator(record.printablePlace.id, newRecord.printID)) {
         await printablePlaceService.updateItemBySync(
           { field: 'productID', id: record.id! },
@@ -217,15 +256,16 @@ export default function useProductViewModel() {
           table.setLoading,
           (meta) => {
             if (!meta.success) throw new Error(define('update_failed'))
-            const newPrintablePlace = meta.data as PrintablePlace
+            const newItem = meta.data as PrintablePlace
             updatedProduct = {
               ...updatedProduct,
-              printablePlace: newPrintablePlace
+              printablePlace: newItem
             }
           }
         )
       }
 
+      // Create new printablePlace
       if (!isValidObject(record.printablePlace) && isValidNumber(newRecord.printID)) {
         await printablePlaceService.createItemSync(
           { productID: record.id!, printID: newRecord.printID },

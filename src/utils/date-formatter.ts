@@ -4,6 +4,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import 'dayjs/locale/vi'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc' // dependent on utc plugin
+import { isValidDate } from './helpers'
 
 dayjs.extend(localizedFormat)
 dayjs.locale('vi') // use locale globally
@@ -16,9 +17,10 @@ dayjs.tz.setDefault(dayjs.tz.guess())
 export type DateFormatType = 'dateOnly' | 'dateTime' | 'timeOnly' | 'iso8601'
 
 export const dateFormatter = (
-  date?: string | number | Date | dayjs.Dayjs | undefined,
+  date?: string | number | Date | dayjs.Dayjs | null | undefined,
   formatType?: DateFormatType
 ): string => {
+  if (!isValidDate(date)) return ''
   switch (formatType) {
     case 'timeOnly':
       return dayjs(date).format('HH:mm:ss')

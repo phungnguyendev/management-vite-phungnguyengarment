@@ -14,11 +14,16 @@ module.exports = {
         ring: 'var(--ring)',
         normal: 'var(--normal)',
         warn: 'var(--warn)',
+        'bg-warn': 'var(--bg-warn)',
         lightGrey: 'var(--light-grey)',
         error: 'var(--error)',
+        'bg-error': 'var(--bg-error)',
         success: 'var(--success)',
+        'bg-success': 'var(--bg-success)',
         blue: 'var(--blue)',
+        'bg-blue': 'var(--bg-blue)',
         incomingSuccess: 'var(--incoming-success)',
+        'bg-incoming-success': 'var(--bg-incoming-success)',
         primary: {
           DEFAULT: 'var(--primary)',
           foreground: 'var(--primary-foreground)'

@@ -51,21 +51,21 @@ export const textValidatorDisplay = (text?: string): string => {
   return text ? text : '-'
 }
 
-export const dateValidatorDisplay = (date?: string | Date | dayjs.Dayjs): string => {
+export const dateValidatorDisplay = (date?: string | number | Date | dayjs.Dayjs | null | undefined): string => {
   return isValidDate(date) ? dateFormatter(date, 'dateOnly') : '--/--/----'
 }
 
 export const dateTimeValidatorDisplay = (date?: string | Date | dayjs.Dayjs): string => {
-  return date ? dateFormatter(date, 'dateTime') : ' --/--/----'
+  return isValidDate(date) ? dateFormatter(date, 'dateTime') : ' --/--/----'
 }
 
 // Validator value change
 
-export const dateValidatorChange = (date?: string | dayjs.Dayjs | Date): string => {
+export const dateValidatorChange = (date?: string | number | Date | dayjs.Dayjs | null | undefined): string => {
   return date ? dateFormatter(date, 'iso8601') : dateFormatter(Date.now(), 'iso8601')
 }
 
-export const dateTimeValidatorChange = (date?: string | dayjs.Dayjs | Date): string => {
+export const dateTimeValidatorChange = (date?: string | number | Date | dayjs.Dayjs | null | undefined): string => {
   return date ? dateFormatter(date, 'dateTime') : dateFormatter(Date.now(), 'dateTime')
 }
 
@@ -154,7 +154,7 @@ export function isValidBoolean(value?: boolean | null | undefined): value is boo
   return typeof value === 'boolean'
 }
 
-export function isValidDate(value?: string | undefined | null | Date | dayjs.Dayjs): boolean {
+export function isValidDate(value?: string | number | Date | dayjs.Dayjs | null | undefined): boolean {
   return value ? dayjs(value).isValid() : false
 }
 

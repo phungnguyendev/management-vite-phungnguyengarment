@@ -46,11 +46,16 @@
     --ring: #ff6b00;
 
     --normal: #808080;
-    --warn: #faad14;
-    --error: #f5222d;
+    --warn: #ff9f43;
+    --bg-warn: #fff0e1;
+    --error: #ff4c51;
+    --bg-error: #ffe2e3;
     --success: #52c41a;
+    --bg-success: #28c76f;
     --incoming-success: #128c86;
+    --bg-incoming-success: #cefaf8;
     --blue: #1677ff;
+    --bg-blue: #c1d8fa;
     --light-grey: #f2f2f2;
 
     /* Border radius for card, input and buttons */

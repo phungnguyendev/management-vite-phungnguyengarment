@@ -10,7 +10,7 @@ import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Print } from '~/typing'
-import DayJS, { dateFormatter } from '~/utils/date-formatter'
+import { dateFormatter } from '~/utils/date-formatter'
 import { ProductAddNewProps } from '../type'
 
 interface Props extends SkyModalProps {
@@ -94,7 +94,6 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Mã màu:'
-                required
                 dataIndex='colorID'
                 inputType='colorselector'
                 placeholder='Ví dụ: Black'
@@ -113,7 +112,6 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Nhóm:'
-                required
                 dataIndex='groupID'
                 inputType='select'
                 placeholder='Ví dụ: G1-4'
@@ -152,9 +150,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 title='Ngày nhập NPL:'
                 dataIndex='dateInputNPL'
                 inputType='datepicker'
-                required
                 placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
-                defaultValue={DayJS(Date.now())}
               />
             </SkyModalRowItem>
             <SkyModalRowItem>
@@ -163,9 +159,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 title='Ngày xuất FCR:'
                 dataIndex='dateOutputFCR'
                 inputType='datepicker'
-                required
                 placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
-                defaultValue={DayJS(Date.now())}
               />
             </SkyModalRowItem>
           </SkyModalRow>
