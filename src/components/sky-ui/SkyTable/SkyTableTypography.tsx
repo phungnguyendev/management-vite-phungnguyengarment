@@ -9,9 +9,14 @@ export interface SkyTableTypographyProps extends BlockProps {
   required?: boolean
 }
 
-const SkyTableTypography: React.FC<SkyTableTypographyProps> = ({ status, required, ...props }) => {
+const SkyTableTypography: React.FC<SkyTableTypographyProps> = ({ status, type, required, ...props }) => {
   return (
-    <Typography.Text {...props} delete={status === 'deleted'} className={cn('w-full flex-shrink-0', props.className)}>
+    <Typography.Text
+      {...props}
+      delete={status === 'deleted'}
+      type={type ?? (status === 'deleted' ? 'danger' : undefined)}
+      className={cn('w-full flex-shrink-0', props.className)}
+    >
       {props.children} {required && <DotRequired />}
     </Typography.Text>
   )

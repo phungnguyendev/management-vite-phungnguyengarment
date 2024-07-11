@@ -46,12 +46,12 @@
     --ring: #ff6b00;
 
     --normal: #808080;
-    --warn: rgb(246, 192, 0);
-    --bg-warn: rgb(255, 248, 221);
-    --error: rgb(248, 40, 90);
-    --bg-error: rgb(255, 238, 243);
-    --success: rgb(23, 198, 83);
-    --bg-success: rgb(223, 255, 234);
+    --warn: #f6c000;
+    --bg-warn: #fff8dd;
+    --error: #f8285a;
+    --bg-error: #ffeef3;
+    --success: #17c653;
+    --bg-success: #dfffea;
     --incoming-success: #128c86;
     --bg-incoming-success: #cefaf8;
     --blue: #1b84ff;

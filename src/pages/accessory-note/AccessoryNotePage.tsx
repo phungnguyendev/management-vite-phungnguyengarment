@@ -64,7 +64,7 @@ const AccessoryNotePage: React.FC<Props> = () => {
               })
             }
           >
-            <SkyTableTypography status={record.status}>{textValidatorDisplay(record.summary)}</SkyTableTypography>
+            <SkyTableTypography>{textValidatorDisplay(record.summary)}</SkyTableTypography>
           </EditableStateCell>
         )
       }

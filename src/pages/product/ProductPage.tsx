@@ -143,7 +143,7 @@ const ProductPage = () => {
             required
             // disabled={isDisable}
             defaultValue={record.printablePlaces?.map((item) => {
-              return item.print?.id
+              return item.printID
             })}
             selectProps={{
               options: viewModel.state.prints.map((item) => {
