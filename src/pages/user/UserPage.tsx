@@ -198,12 +198,9 @@ const UserPage = () => {
           <Space size='small' wrap>
             {record.roles?.map((role, index) => {
               return (
-                <SkyTableRowHighLightItem
-                  key={index}
-                  title={role.desc}
-                  type={role.role === 'admin' ? 'success' : undefined}
-                  background
-                />
+                <SkyTableRowHighLightItem key={index} type={role.role === 'admin' ? 'success' : undefined}>
+                  {role.desc}
+                </SkyTableRowHighLightItem>
               )
             })}
           </Space>
