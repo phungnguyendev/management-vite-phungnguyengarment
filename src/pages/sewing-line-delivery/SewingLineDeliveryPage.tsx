@@ -104,7 +104,8 @@ const SewingLineDeliveryPage = () => {
                   return (
                     <SkyTableRowHighLightTextItem
                       key={index}
-                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : 'secondary'}
+                      status={item.sewingLine?.status}
+                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : undefined}
                     >
                       {isExpiredDate(record.dateOutputFCR, item.expiredDate)
                         ? `${item.sewingLine?.name} (Bể)`

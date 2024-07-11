@@ -162,7 +162,7 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                         <SkyTableRowHighLightTextItem
                           key={index}
                           className='w-fit'
-                          type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : 'secondary'}
+                          type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : undefined}
                         >
                           {isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
                             ? `${record.sewingLine?.name} (Bể)`

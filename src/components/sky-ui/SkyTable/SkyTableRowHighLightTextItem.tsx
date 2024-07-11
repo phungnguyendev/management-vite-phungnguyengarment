@@ -5,10 +5,7 @@ import { SkyTableTypographyProps } from './SkyTableTypography'
 
 interface SkyTableRowHighLightTextItemProps extends SkyTableTypographyProps {}
 
-const SkyTableRowHighLightTextItem: React.FC<SkyTableRowHighLightTextItemProps> = ({
-  type = 'secondary',
-  ...props
-}) => {
+const SkyTableRowHighLightTextItem: React.FC<SkyTableRowHighLightTextItemProps> = ({ type, status, ...props }) => {
   return (
     <Typography.Text
       {...props}
@@ -22,6 +19,8 @@ const SkyTableRowHighLightTextItem: React.FC<SkyTableRowHighLightTextItemProps> 
         },
         props.className
       )}
+      delete={status === 'deleted'}
+      type={type ?? (status === 'deleted' ? 'danger' : undefined)}
     >
       {props.children}
     </Typography.Text>
