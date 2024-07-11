@@ -29,8 +29,8 @@ const BaseLayout: React.FC<Props> = ({
       <Flex vertical gap={40} className='w-full'>
         {props.title && <Typography.Title level={2}>{props.title}</Typography.Title>}
         <Flex vertical gap={20} className='w-full rounded-md bg-white p-5'>
-          <Flex gap={20} align='center' className='w-full'>
-            {searchProps && <SearchBar {...searchProps} className='w-[500px]' />}
+          <Flex gap={20} align='center' className='w-full flex-col md:flex-row'>
+            {searchProps && <SearchBar {...searchProps} className='w-full md:w-[500px]' />}
             <Flex justify='space-between' className='w-full'>
               <Flex gap={10} className='w-full'>
                 {sortProps && (
