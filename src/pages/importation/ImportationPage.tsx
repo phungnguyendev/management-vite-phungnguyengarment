@@ -207,7 +207,7 @@ const ImportationPage = () => {
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewImportation
-          title={`Thêm lô nhập mã hàng: ${viewModel.table.addingKey.key}`}
+          title={`Thêm lô nhập mã hàng: #${viewModel.table.addingKey.key}`}
           okButtonProps={{ loading: viewModel.table.loading }}
           open={viewModel.state.openModal}
           setOpenModal={viewModel.state.setOpenModal}

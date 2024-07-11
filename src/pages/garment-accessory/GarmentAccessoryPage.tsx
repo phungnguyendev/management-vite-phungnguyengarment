@@ -390,7 +390,7 @@ const GarmentAccessoryPage = () => {
   return (
     <>
       <BaseLayout
-        title='Phụ liệu'
+        title='Nguyên phụ liệu'
         loading={viewModel.table.loading}
         searchProps={{
           onSearch: viewModel.action.handleSearch,
