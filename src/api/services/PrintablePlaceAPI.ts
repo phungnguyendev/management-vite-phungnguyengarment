@@ -99,6 +99,24 @@ export default {
         throwErrorFormatter(error)
       })
   },
+  updateItemsBy: async (
+    query: { field: string; id: number },
+    itemsToUpdate: PrintablePlace[],
+    accessToken: string
+  ): Promise<ResponseDataType> => {
+    return client
+      .put(`${NAMESPACE}/${query.field}/${query.id}`, itemsToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
   deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {

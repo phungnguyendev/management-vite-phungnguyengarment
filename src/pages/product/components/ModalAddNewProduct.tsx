@@ -130,8 +130,8 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
               <EditableFormCell
                 isEditing={true}
                 title='Nơi in:'
-                dataIndex='printID'
-                inputType='select'
+                dataIndex='printIDs'
+                inputType='multipleselect'
                 placeholder='Ví dụ: T THINH, TIẾN THẮNG..'
                 selectProps={{
                   options: prints.map((item) => {

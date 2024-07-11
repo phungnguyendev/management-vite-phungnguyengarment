@@ -12,7 +12,14 @@ import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { ProductAddNewProps, ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
-import { dateComparator, isValidNumber, isValidObject, numberComparator, textComparator } from '~/utils/helpers'
+import {
+  dateComparator,
+  isValidArray,
+  isValidNumber,
+  isValidObject,
+  numberComparator,
+  textComparator
+} from '~/utils/helpers'
 
 export default function useProductViewModel() {
   const { message } = AntApp.useApp()
@@ -62,7 +69,7 @@ export default function useProductViewModel() {
         key: `${product.id}`,
         productColor: productColors.find((item) => item.productID === product.id),
         productGroup: productGroups.find((item) => item.productID === product.id),
-        printablePlace: printablePlaces.find((item) => item.productID === product.id)
+        printablePlaces: printablePlaces.filter((item) => item.productID === product.id)
       } as ProductTableDataType
     })
     table.setDataSource(newDataSource)
@@ -152,6 +159,7 @@ export default function useProductViewModel() {
    * Function update record
    */
   const handleUpdate = async (record: ProductTableDataType) => {
+    console.log({ newRecord, record })
     try {
       table.setLoading(true)
       // Update product
@@ -249,33 +257,35 @@ export default function useProductViewModel() {
       }
 
       // Update printablePlace
-      if (isValidObject(record.printablePlace) && numberComparator(record.printablePlace.id, newRecord.printID)) {
-        await printablePlaceService.updateItemBySync(
-          { field: 'productID', id: record.id! },
-          { printID: newRecord.printID },
-          table.setLoading,
-          (meta) => {
-            if (!meta.success) throw new Error(define('update_failed'))
-            const newItem = meta.data as PrintablePlace
-            updatedProduct = {
-              ...updatedProduct,
-              printablePlace: newItem
-            }
-          }
-        )
-      }
+      // if (isValidObject(record.printablePlace) && numberComparator(record.printablePlace.id, newRecord.printID)) {
+      //   await printablePlaceService.updateItemBySync(
+      //     { field: 'productID', id: record.id! },
+      //     { printID: newRecord.printID },
+      //     table.setLoading,
+      //     (meta) => {
+      //       if (!meta.success) throw new Error(define('update_failed'))
+      //       const newItem = meta.data as PrintablePlace
+      //       updatedProduct = {
+      //         ...updatedProduct,
+      //         printablePlace: newItem
+      //       }
+      //     }
+      //   )
+      // }
 
-      // Create new printablePlace
-      if (!isValidObject(record.printablePlace) && isValidNumber(newRecord.printID)) {
-        await printablePlaceService.createItemSync(
-          { productID: record.id!, printID: newRecord.printID },
+      if (newRecord.printIDs) {
+        await printablePlaceService.updateItemsSync(
+          { field: 'productID', id: record.id! },
+          newRecord.printIDs.map((item) => {
+            return { productID: record.id!, printID: item } as PrintablePlace
+          }),
           table.setLoading,
           (meta) => {
-            if (!meta.success) throw new Error(define('update_failed'))
-            const newPrintablePlace = meta.data as PrintablePlace
+            if (!meta?.success) throw new Error(define('create_failed'))
+            const newItems = meta.data as PrintablePlace[]
             updatedProduct = {
               ...updatedProduct,
-              printablePlace: newPrintablePlace
+              printablePlaces: newItems
             }
           }
         )
@@ -311,7 +321,7 @@ export default function useProductViewModel() {
           const newProduct = meta.data as Product
           let newProductColor: ProductColor | undefined = undefined
           let newProductGroup: ProductGroup | undefined = undefined
-          let newPrintablePlace: PrintablePlace | undefined = undefined
+          let newPrintablePlaces: PrintablePlace[] | undefined = undefined
 
           if (isValidNumber(formAddNew.colorID)) {
             await productColorService.createItemSync(
@@ -335,13 +345,16 @@ export default function useProductViewModel() {
             )
           }
 
-          if (isValidNumber(formAddNew.printID)) {
-            await printablePlaceService.createItemSync(
-              { productID: newProduct.id!, printID: formAddNew.printID },
+          if (isValidArray(formAddNew.printIDs)) {
+            await printablePlaceService.updateItemsSync(
+              { field: 'productID', id: newProduct.id! },
+              formAddNew.printIDs.map((item) => {
+                return { productID: newProduct.id!, printID: item } as PrintablePlace
+              }),
               table.setLoading,
               (meta) => {
                 if (!meta?.success) throw new Error(define('create_failed'))
-                newPrintablePlace = meta.data as PrintablePlace
+                newPrintablePlaces = meta.data as PrintablePlace[]
               }
             )
           }
@@ -351,7 +364,7 @@ export default function useProductViewModel() {
             key: `${newProduct.id}`,
             productColor: newProductColor,
             productGroup: newProductGroup,
-            printablePlace: newPrintablePlace
+            printablePlaces: newPrintablePlaces
           })
         }
       )

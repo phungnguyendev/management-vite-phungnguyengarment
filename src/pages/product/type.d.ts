@@ -4,7 +4,7 @@ export interface ProductTableDataType extends Product {
   key: string
   productColor?: ProductColor
   productGroup?: ProductGroup
-  printablePlace?: PrintablePlace
+  printablePlaces?: PrintablePlace[]
 }
 
 export interface ProductAddNewProps {
@@ -12,7 +12,7 @@ export interface ProductAddNewProps {
   quantityPO?: number
   colorID?: number
   groupID?: number
-  printID?: number
+  printIDs?: number[]
   dateInputNPL?: string
   dateOutputFCR?: string
 }

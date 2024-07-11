@@ -1,4 +1,4 @@
-import { Flex } from 'antd'
+import { Flex, Space } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import useDevice from '~/components/hooks/useDevice'
@@ -10,12 +10,14 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isValidArray,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
@@ -130,29 +132,47 @@ const ProductPage = () => {
         </EditableStateCell>
       )
     },
-    printablePlace: (record: ProductTableDataType) => {
+    printablePlaces: (record: ProductTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key)}
-          dataIndex='printID'
-          title='Nơi in'
-          inputType='select'
-          onValueChange={(val: number) =>
-            viewModel.state.setNewRecord((prev) => {
-              return { ...prev, printID: numberValidatorChange(val) }
-            })
-          }
-          defaultValue={numberValidatorInit(record.printablePlace?.printID)}
-          selectProps={{
-            options: viewModel.state.prints.map((i) => {
-              return { label: i.name, value: i.id }
-            })
-          }}
-        >
-          <SkyTableTypography status={record.printablePlace?.print?.status}>
-            {textValidatorDisplay(record.printablePlace?.print?.name)}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <>
+          <EditableStateCell
+            isEditing={viewModel.table.isEditing(record.key)}
+            dataIndex='printIDs'
+            title='Nơi in'
+            inputType='multipleselect'
+            required
+            // disabled={isDisable}
+            defaultValue={record.printablePlaces?.map((item) => {
+              return item.print?.id
+            })}
+            selectProps={{
+              options: viewModel.state.prints.map((item) => {
+                return {
+                  value: item.id,
+                  label: item.name
+                }
+              })
+            }}
+            onValueChange={(values: number[]) => {
+              viewModel.state.setNewRecord({
+                ...viewModel.state.newRecord,
+                printIDs: values
+              })
+            }}
+          >
+            {isValidArray(record.printablePlaces) && (
+              <Space size='small' wrap>
+                {record.printablePlaces.map((item, index) => {
+                  return (
+                    <SkyTableRowHighLightItem key={index} status={item.print?.status}>
+                      {item.print?.name}
+                    </SkyTableRowHighLightItem>
+                  )
+                })}
+              </Space>
+            )}
+          </EditableStateCell>
+        </>
       )
     },
     dateInputNPL: (record: ProductTableDataType) => {
@@ -206,7 +226,9 @@ const ProductPage = () => {
                 quantityPO: record.quantityPO,
                 colorID: record.productColor?.colorID,
                 groupID: record.productGroup?.groupID,
-                printID: record.printablePlace?.printID,
+                printIDs: record.printablePlaces?.map((item) => {
+                  return item.printID!
+                }),
                 dateInputNPL: record.dateInputNPL,
                 dateOutputFCR: record.dateOutputFCR
               })
@@ -294,7 +316,7 @@ const ProductPage = () => {
       width: '10%',
       responsive: ['xxl'],
       render: (_value: any, record: ProductTableDataType) => {
-        return columns.printablePlace(record)
+        return columns.printablePlaces(record)
       }
     },
     {
@@ -377,7 +399,7 @@ const ProductPage = () => {
                   )}
                   {!(width >= breakpoint.xxl) && (
                     <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.printablePlace(record)}
+                      {columns.printablePlaces(record)}
                     </SkyTableExpandableItemRow>
                   )}
                   {!(width >= breakpoint.md) && (
