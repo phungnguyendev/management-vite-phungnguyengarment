@@ -91,7 +91,7 @@ const Main: React.FC<HTMLAttributes<HTMLElement>> = () => {
   }
 
   const items: MenuProps['items'] = routes
-    .filter((item) => (currentUser.role?.includes('admin') ? true : currentUser.role?.includes(item.role)))
+    .filter((item) => item.roles.some((self) => currentUser.roles.includes(self)))
     .map((route) => {
       if (route.isGroup) {
         return getItem(SideItem(route), route.key, null, 'group')

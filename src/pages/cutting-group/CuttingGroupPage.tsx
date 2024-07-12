@@ -1,6 +1,7 @@
 import { Checkbox, Flex, Space } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -12,6 +13,8 @@ import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpa
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 import {
   booleanValidatorInit,
   breakpoint,
@@ -20,6 +23,7 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isAcceptRole,
   isValidObject,
   numberValidatorCalc,
   numberValidatorChange,
@@ -31,9 +35,12 @@ import CuttingGroupExpandableItemRow from './components/CuttingGroupExpandableIt
 import useCuttingGroupViewModel from './hooks/useCuttingGroupViewModel'
 import { CuttingGroupTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'cutting_group_manager']
+
 const SampleSewingPage = () => {
   useTitle('Cutting Group - Phung Nguyen')
   const viewModel = useCuttingGroupViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -666,7 +673,7 @@ const SampleSewingPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{

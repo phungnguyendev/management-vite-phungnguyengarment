@@ -1,6 +1,7 @@
 import { Flex, Space } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -12,11 +13,14 @@ import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpa
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isAcceptRole,
   isValidArray,
   numberValidatorChange,
   numberValidatorDisplay,
@@ -29,9 +33,12 @@ import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'product_manager']
+
 const ProductPage = () => {
   useTitle('Products | Phung Nguyen')
   const { width } = useDevice()
+  const currentUser = useSelector((state: RootState) => state.user)
   const viewModel = useProductViewModel()
 
   const columns = {
@@ -365,16 +372,21 @@ const ProductPage = () => {
           // Show delete list Switch Button
           onChange: viewModel.action.handleSwitchDeleteChange
         }}
-        addNewProps={{
-          // Add new Button
-          onClick: () => viewModel.state.setOpenModal(true)
-        }}
+        addNewProps={
+          isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            ? {
+                // Add new Button
+                onClick: () => viewModel.state.setOpenModal(true)
+              }
+            : undefined
+        }
       >
         <SkyTable
           loading={viewModel.table.loading}
           tableColumns={{
             columns: tableColumns,
-            actionColumn: actionCol
+            actionColumn: actionCol,
+            showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{

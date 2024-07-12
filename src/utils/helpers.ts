@@ -2,6 +2,7 @@ import { Color } from 'antd/es/color-picker'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
+import { UserRoleType } from '~/typing'
 import { dateFormatter } from './date-formatter'
 
 export function cn(...inputs: ClassValue[]) {
@@ -33,6 +34,10 @@ export const breakpoint = {
    * >=
    */
   xxl: 1600
+}
+
+export const isAcceptRole = (initRoles: UserRoleType[], userRoles: UserRoleType[]): boolean => {
+  return initRoles.some((role) => userRoles.includes(role)) // If true === accept
 }
 
 export const numberValidatorDisplay = (number?: number): string => {

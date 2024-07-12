@@ -2,6 +2,7 @@ import { Flex, Space } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { Check } from 'lucide-react'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -12,11 +13,14 @@ import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicke
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isAcceptRole,
   isValidNumber,
   isValidObject,
   numberValidatorCalc,
@@ -29,9 +33,12 @@ import CompletionProgressItem from './components/CompletionProgressItem'
 import useCompletionViewModel from './hooks/useCompletionViewModel'
 import { CompletionTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'completion_manager']
+
 const FinishPage = () => {
   useTitle('Hoàn thành - Phung Nguyen')
   const viewModel = useCompletionViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -456,7 +463,7 @@ const FinishPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{

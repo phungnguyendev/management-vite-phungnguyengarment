@@ -4,12 +4,12 @@ import { setUser, setUserRole } from '../actions-creator'
 
 interface UserState {
   user: User
-  role: UserRoleType[]
+  roles: UserRoleType[]
 }
 
 const initialState: UserState = {
   user: {},
-  role: ['staff']
+  roles: []
 }
 
 const userReducer = createReducer(initialState, (builder) => {
@@ -17,7 +17,7 @@ const userReducer = createReducer(initialState, (builder) => {
     state.user = action.payload
   })
   builder.addCase(setUserRole, (state, action) => {
-    state.role = action.payload
+    state.roles = action.payload
   })
 })
 

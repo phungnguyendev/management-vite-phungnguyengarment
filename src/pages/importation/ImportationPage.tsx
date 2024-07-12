@@ -1,5 +1,6 @@
 import { Flex, Space } from 'antd'
 import { ColumnType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -10,15 +11,20 @@ import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpa
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { breakpoint, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
+import { breakpoint, isAcceptRole, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
 import ImportationTable from './components/ImportationTable'
 import ModalAddNewImportation from './components/ModalAddNewImportation'
 import useImportationViewModel from './hooks/useImportationViewModel'
 import { ImportationTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'importation_manager']
+
 const ImportationPage = () => {
   useTitle('Importations | Phung Nguyen')
   const viewModel = useImportationViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -150,7 +156,7 @@ const ImportationPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{
@@ -185,6 +191,7 @@ const ImportationPage = () => {
                     )}
 
                     <ImportationTable
+                      permissionAcceptRole={isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)}
                       productRecord={record}
                       viewModelProps={{
                         tableProps: viewModel.table,

@@ -1,6 +1,7 @@
 import { Checkbox, Flex, Space } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -13,11 +14,14 @@ import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpan
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isAcceptRole,
   isValidArray,
   isValidObject,
   numberValidatorCalc,
@@ -29,9 +33,12 @@ import {
 import useGarmentAccessoryViewModel from './hooks/useGarmentAccessoryViewModel'
 import { GarmentAccessoryTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'accessory_manager']
+
 const GarmentAccessoryPage = () => {
   useTitle('Garment Accessory | Phung Nguyen')
   const viewModel = useGarmentAccessoryViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -408,7 +415,7 @@ const GarmentAccessoryPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{

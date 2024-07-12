@@ -52,9 +52,10 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('userTemp')
-      navigate('/login')
     } catch (error: any) {
       message.error(`${error.message}`)
+    } finally {
+      navigate('/login')
     }
   }
 

@@ -1,6 +1,7 @@
 import { Flex } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,12 +12,15 @@ import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicke
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { RootState } from '~/store/store'
+import { UserRoleType } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  isAcceptRole,
   isValidObject,
   numberValidatorDisplay,
   textValidatorDisplay
@@ -24,9 +28,12 @@ import {
 import useSampleSewingViewModel from './hooks/useSampleSewingViewModel'
 import { SampleSewingTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'sample_sewing_manager']
+
 const SampleSewingPage = () => {
   useTitle('Sample Sewing | Phung Nguyen')
   const viewModel = useSampleSewingViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -365,7 +372,7 @@ const SampleSewingPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           dataSource={viewModel.table.dataSource}
           pagination={{

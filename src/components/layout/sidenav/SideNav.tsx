@@ -1,11 +1,9 @@
 import type { MenuProps } from 'antd'
 import { Flex, Menu } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import routes from '~/config/route.config'
-import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
@@ -29,7 +27,7 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
 const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
-  const currentUser = useSelector((state: RootState) => state.user)
+  // const currentUser = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
     const keyFound = routes.find((route) => route.path === lastPath(pathname))
@@ -45,7 +43,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
   }
 
   const items: MenuProps['items'] = routes
-    .filter((item) => (currentUser.role?.includes('admin') ? true : currentUser.role?.includes(item.role)))
+    // .filter((item) => !currentUser.roles.includes('admin') || currentUser.roles.includes('staff'))
     .map((route) => {
       if (route.isGroup) {
         return getItem(SideItem(route), route.key, null, 'group')

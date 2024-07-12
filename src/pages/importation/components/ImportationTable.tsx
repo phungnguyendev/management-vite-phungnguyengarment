@@ -17,6 +17,7 @@ import {
 import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
 interface Props {
+  permissionAcceptRole: boolean
   productRecord: ImportationTableDataType
   viewModelProps: {
     tableProps: UseTableProps<ImportationTableDataType>
@@ -31,7 +32,7 @@ interface Props {
   }
 }
 
-const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) => {
+const ImportationTable: React.FC<Props> = ({ permissionAcceptRole, productRecord, viewModelProps }) => {
   const {
     tableProps,
     showDeleted,
@@ -162,7 +163,7 @@ const ImportationTable: React.FC<Props> = ({ productRecord, viewModelProps }) =>
         tableColumns={{
           columns: tableColumns,
           actionColumn: actionCol,
-          showAction: !showDeleted
+          showAction: !showDeleted && permissionAcceptRole
         }}
         dataSource={productRecord.expandableImportationTableDataTypes}
         pagination={{ pageSize: 5, onChange: handlePageChange }}

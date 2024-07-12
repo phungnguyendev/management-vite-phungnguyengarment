@@ -1,5 +1,6 @@
 import { Flex, Space } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
+import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -11,10 +12,12 @@ import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpa
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { SewingLineDelivery } from '~/typing'
+import { RootState } from '~/store/store'
+import { SewingLineDelivery, UserRoleType } from '~/typing'
 import {
   breakpoint,
   dateValidatorDisplay,
+  isAcceptRole,
   isExpiredDate,
   isValidArray,
   numberValidatorChange,
@@ -25,9 +28,12 @@ import SewingLineDeliveryExpandableList from './components/SewingLineDeliveryExp
 import useSewingLineDeliveryViewModel from './hooks/useSewingLineDeliveryViewModel'
 import { SewingLineDeliveryTableDataType } from './type'
 
+const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'sewing_line_manager']
+
 const SewingLineDeliveryPage = () => {
   useTitle('Chuyền may | Phung Nguyen')
   const viewModel = useSewingLineDeliveryViewModel()
+  const currentUser = useSelector((state: RootState) => state.user)
   const { width } = useDevice()
 
   const columns = {
@@ -253,7 +259,7 @@ const SewingLineDeliveryPage = () => {
           tableColumns={{
             columns: tableColumns,
             actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted
+            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
           }}
           columns={tableColumns}
           dataSource={viewModel.table.dataSource}

@@ -35,7 +35,7 @@ export type SideType = {
   key: string
   name: string
   path: string
-  role: UserRoleType
+  roles: UserRoleType[]
   component: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
   isGroup?: boolean
   icon: string
@@ -48,7 +48,17 @@ const routes: SideType[] = [
     path: '/',
     component: DashboardPage,
     isGroup: false,
-    role: 'staff',
+    roles: [
+      'admin',
+      'staff',
+      'product_manager',
+      'importation_manager',
+      'sample_sewing_manager',
+      'accessory_manager',
+      'completion_manager',
+      'cutting_group_manager',
+      'sewing_line_manager'
+    ],
     icon: DashboardIcon
   },
   {
@@ -57,7 +67,7 @@ const routes: SideType[] = [
     path: '/products',
     component: ProductPage,
     isGroup: false,
-    role: 'product_manager',
+    roles: ['admin', 'product_manager', 'staff'],
     icon: PackageSearchIcon
   },
   {
@@ -66,7 +76,7 @@ const routes: SideType[] = [
     path: '/importations',
     component: ImportationPage,
     isGroup: false,
-    role: 'importation_manager',
+    roles: ['admin', 'importation_manager', 'staff'],
     icon: ImportExportIcon
   },
   {
@@ -75,7 +85,7 @@ const routes: SideType[] = [
     path: '/sample-sewing',
     component: SampleSewingPage,
     isGroup: false,
-    role: 'sample_sewing_manager',
+    roles: ['admin', 'sample_sewing_manager', 'staff'],
     icon: SewingMachineIcon
   },
   {
@@ -84,7 +94,7 @@ const routes: SideType[] = [
     path: '/garment-accessories',
     component: GarmentAccessoryPage,
     isGroup: false,
-    role: 'accessory_manager',
+    roles: ['admin', 'accessory_manager', 'staff'],
     icon: WarehouseIcon
   },
   {
@@ -92,7 +102,7 @@ const routes: SideType[] = [
     name: 'Tổ cắt',
     path: '/cutting-groups',
     isGroup: false,
-    role: 'cutting_group_manager',
+    roles: ['admin', 'cutting_group_manager', 'staff'],
     component: CuttingGroupPage,
     icon: CutIcon
   },
@@ -100,7 +110,7 @@ const routes: SideType[] = [
     key: '5',
     name: 'Chuyền may',
     path: '/sewing-line-deliveries',
-    role: 'sample_sewing_manager',
+    roles: ['admin', 'sample_sewing_manager', 'staff'],
     component: SewingLineDeliveryPage,
     icon: DeliveryIcon
   },
@@ -110,7 +120,7 @@ const routes: SideType[] = [
     path: '/completions',
     component: FinishPage,
     isGroup: false,
-    role: 'completion_manager',
+    roles: ['admin', 'completion_manager', 'staff'],
     icon: PackageSuccessIcon
   },
   {
@@ -119,14 +129,14 @@ const routes: SideType[] = [
     path: 'structure',
     component: Outlet,
     isGroup: true,
-    role: 'admin',
+    roles: ['admin'],
     icon: PackageSuccessIcon
   },
   {
     key: '10',
     name: 'Màu',
     path: '/colors',
-    role: 'admin',
+    roles: ['admin'],
     component: ColorPage,
     icon: ColorIcon
   },
@@ -134,7 +144,7 @@ const routes: SideType[] = [
     key: '11',
     name: 'Nhóm',
     path: '/groups',
-    role: 'admin',
+    roles: ['admin'],
     component: GroupPage,
     icon: AgeGroupIcon
   },
@@ -142,7 +152,7 @@ const routes: SideType[] = [
     key: '12',
     name: 'Chuyền may',
     path: '/sewing-lines',
-    role: 'admin',
+    roles: ['admin'],
     component: SewingLinePage,
     icon: DeliveryIcon
   },
@@ -150,7 +160,7 @@ const routes: SideType[] = [
     key: '13',
     name: 'Nơi in - Thêu',
     path: '/prints',
-    role: 'admin',
+    roles: ['admin'],
     component: PrintPage,
     icon: PrintIcon
   },
@@ -158,7 +168,7 @@ const routes: SideType[] = [
     key: '14',
     name: 'Ghi chú phụ liệu',
     path: '/accessory-notes',
-    role: 'admin',
+    roles: ['admin'],
     component: NotePage,
     icon: NoteIcon
   },
@@ -168,14 +178,14 @@ const routes: SideType[] = [
     path: 'structure',
     component: Outlet,
     isGroup: true,
-    role: 'admin',
+    roles: ['admin'],
     icon: PackageSuccessIcon
   },
   {
     key: '8',
     name: 'Người dùng',
     path: '/users',
-    role: 'admin',
+    roles: ['admin'],
     component: UserPage,
     icon: UserIcon
   }
@@ -183,7 +193,7 @@ const routes: SideType[] = [
   //   key: '15',
   //   name: 'Vai trò',
   //   path: 'roles',
-  //   role: 'admin',
+  //   roles: ['admin'],
   //   component: RolePage,
   //   icon: UserRoleIcon
   // }
