@@ -267,7 +267,7 @@ export default function useProductViewModel() {
 
       // Update PrintablePlaces
       if (
-        newRecord.printIDs &&
+        isValidArray(newRecord.printIDs) &&
         arrayComparator(
           newRecord.printIDs,
           record.printablePlaces?.map((item) => {

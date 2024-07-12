@@ -137,7 +137,7 @@ export const arrayComparator = <T>(array1?: T[], array2?: T[]): boolean => {
 }
 
 export const isValidArray = <T>(arr?: T[] | null | undefined): arr is T[] => {
-  return arr ? Array.isArray(arr) && arr.length > 0 : false
+  return arr ? Array.isArray(arr) : false
 }
 
 export function isValidString(value?: string | null | undefined): value is string {
