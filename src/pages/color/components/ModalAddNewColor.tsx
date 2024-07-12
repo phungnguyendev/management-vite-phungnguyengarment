@@ -47,7 +47,7 @@ const ModalAddNewColor: React.FC<Props> = ({ onAddNew, ...props }) => {
               title='Chọn mã màu:'
               placeholder='Ví dụ: #000000'
               dataIndex='hexColor'
-              inputType='colorpicker'
+              inputType='colorPicker'
               required
             />
           </SkyModalRowItem>

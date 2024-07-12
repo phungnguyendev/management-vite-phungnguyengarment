@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
-import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -159,7 +159,7 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                   renderItem={(record, index) => (
                     <List.Item key={index}>
                       <Flex vertical gap={20} align='center' className='w-full'>
-                        <SkyTableRowHighLightTextItem
+                        <SkyTableRowHighLightItem
                           key={index}
                           className='w-fit'
                           type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : undefined}
@@ -167,7 +167,7 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                           {isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
                             ? `${record.sewingLine?.name} (Bể)`
                             : record.sewingLine?.name}
-                        </SkyTableRowHighLightTextItem>
+                        </SkyTableRowHighLightItem>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'
                           title='SL vào chuyền:'

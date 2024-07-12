@@ -76,7 +76,7 @@ function EditableStateCell({
 
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
-      case 'colorpicker':
+      case 'colorPicker':
         return (
           <ColorPicker
             {...colorPickerProps}
@@ -150,7 +150,7 @@ function EditableStateCell({
             className={cn('w-full', restProps.className)}
           />
         )
-      case 'multipleselect':
+      case 'multipleSelect':
         return (
           <Select
             {...selectProps}
@@ -165,7 +165,7 @@ function EditableStateCell({
             className='w-full'
           />
         )
-      case 'colorselector':
+      case 'colorSelector':
         return (
           <Select
             {...selectProps}

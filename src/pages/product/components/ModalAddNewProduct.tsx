@@ -95,7 +95,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 isEditing={true}
                 title='Mã màu:'
                 dataIndex='colorID'
-                inputType='colorselector'
+                inputType='colorSelector'
                 placeholder='Ví dụ: Black'
                 selectProps={{
                   options: colors.map((item) => {
@@ -131,7 +131,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                 isEditing={true}
                 title='Nơi in:'
                 dataIndex='printIDs'
-                inputType='multipleselect'
+                inputType='multipleSelect'
                 placeholder='Ví dụ: T THINH, TIẾN THẮNG..'
                 selectProps={{
                   options: prints.map((item) => {

@@ -10,7 +10,7 @@ const SkyTableRowHighLightTextItem: React.FC<SkyTableRowHighLightTextItemProps> 
     <Typography.Text
       {...props}
       className={cn(
-        'w-full flex-shrink-0 rounded-sm bg-lightGrey px-2 py-1 font-medium',
+        'w-full flex-shrink-0 rounded-sm px-2 py-1',
         {
           'text-foreground': type === 'secondary',
           'text-success': type === 'success',
@@ -20,7 +20,6 @@ const SkyTableRowHighLightTextItem: React.FC<SkyTableRowHighLightTextItemProps> 
         props.className
       )}
       delete={status === 'deleted'}
-      type={type ?? (status === 'deleted' ? 'danger' : undefined)}
     >
       {props.children}
     </Typography.Text>

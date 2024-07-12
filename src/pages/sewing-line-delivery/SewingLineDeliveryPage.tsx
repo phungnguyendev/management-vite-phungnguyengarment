@@ -9,7 +9,7 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
-import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
+import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { SewingLineDelivery } from '~/typing'
 import {
@@ -17,6 +17,7 @@ import {
   dateValidatorDisplay,
   isExpiredDate,
   isValidArray,
+  numberValidatorChange,
   numberValidatorDisplay,
   textValidatorDisplay
 } from '~/utils/helpers'
@@ -68,11 +69,11 @@ const SewingLineDeliveryPage = () => {
           isEditing={viewModel.table.isEditing(record.key!)}
           dataIndex='sewingLineDeliveries'
           title='Chuyền may'
-          inputType='multipleselect'
+          inputType='multipleSelect'
           required
           selectProps={{
             options: viewModel.state.sewingLines
-              .sort((a, b) => a.id! - b.id!)
+              .sort((a, b) => numberValidatorChange(a.id) - numberValidatorChange(b.id))
               .map((item) => {
                 return {
                   value: item.id,
@@ -83,7 +84,7 @@ const SewingLineDeliveryPage = () => {
               ? record.sewingLineDeliveries.map((item) => {
                   return {
                     value: item.sewingLine?.id,
-                    label: item.sewingLine?.name
+                    label: <SkyTableRowHighLightItem>{item.sewingLine?.name}</SkyTableRowHighLightItem>
                   }
                 })
               : undefined
@@ -102,15 +103,15 @@ const SewingLineDeliveryPage = () => {
                 .sort((a, b) => a.sewingLineID! - b.sewingLineID!)
                 .map((item, index) => {
                   return (
-                    <SkyTableRowHighLightTextItem
+                    <SkyTableRowHighLightItem
                       key={index}
                       status={item.sewingLine?.status}
-                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : undefined}
+                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : 'secondary'}
                     >
                       {isExpiredDate(record.dateOutputFCR, item.expiredDate)
                         ? `${item.sewingLine?.name} (Bể)`
                         : item.sewingLine?.name}
-                    </SkyTableRowHighLightTextItem>
+                    </SkyTableRowHighLightItem>
                   )
                 })}
             </Space>

@@ -84,7 +84,7 @@ const ProductPage = () => {
           dataIndex='colorID'
           title='Màu'
           required
-          inputType='colorselector'
+          inputType='colorSelector'
           onValueChange={(val: number) =>
             viewModel.state.setNewRecord((prev) => {
               return { ...prev, colorID: numberValidatorChange(val) }
@@ -139,7 +139,7 @@ const ProductPage = () => {
             isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='printIDs'
             title='Nơi in'
-            inputType='multipleselect'
+            inputType='multipleSelect'
             required
             // disabled={isDisable}
             defaultValue={record.printablePlaces?.map((item) => {

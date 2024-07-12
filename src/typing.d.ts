@@ -20,14 +20,14 @@ export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'delet
 export type InputType =
   | 'number'
   | 'text'
-  | 'colorpicker'
+  | 'colorPicker'
   | 'select'
   | 'datepicker'
   | 'dateTimePicker'
-  | 'colorselector'
+  | 'colorSelector'
   | 'textarea'
   | 'checkbox'
-  | 'multipleselect'
+  | 'multipleSelect'
   | 'password'
   | 'email'
 

@@ -56,7 +56,7 @@ const ColorPage: React.FC<Props> = () => {
             isEditing={viewModel.table.isEditing(record.key!)}
             dataIndex='hexColor'
             title='Mã màu'
-            inputType='colorpicker'
+            inputType='colorPicker'
             required={true}
             className='w-fit'
             defaultValue={record.hexColor}

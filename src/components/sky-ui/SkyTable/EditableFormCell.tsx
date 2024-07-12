@@ -34,7 +34,7 @@ function EditableFormCell({
 }: EditableFormCellProps) {
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
-      case 'colorpicker':
+      case 'colorPicker':
         return (
           <ColorPicker
             {...colorPickerProps}
@@ -45,7 +45,7 @@ function EditableFormCell({
             className={cn('w-full', restProps.className)}
           />
         )
-      case 'colorselector':
+      case 'colorSelector':
         return (
           <Select
             {...selectProps}
@@ -139,7 +139,7 @@ function EditableFormCell({
             className={cn('w-full', restProps.className)}
           />
         )
-      case 'multipleselect':
+      case 'multipleSelect':
         return (
           <Select
             {...selectProps}

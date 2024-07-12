@@ -37,7 +37,7 @@ const GarmentAccessoryPage = () => {
   const columns = {
     productCode: (record: GarmentAccessoryTableDataType) => {
       return (
-        <Space direction='horizontal'>
+        <Space direction='horizontal' wrap>
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
@@ -170,7 +170,7 @@ const GarmentAccessoryPage = () => {
             isEditing={viewModel.table.isEditing(record.key)}
             dataIndex='accessoryNotes'
             title='Ghi chú'
-            inputType='multipleselect'
+            inputType='multipleSelect'
             required
             // disabled={isDisable}
             defaultValue={record.expandableGarmentAccessory?.accessoryNotes?.map((item) => {

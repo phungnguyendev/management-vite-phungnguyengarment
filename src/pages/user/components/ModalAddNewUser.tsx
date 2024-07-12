@@ -84,7 +84,7 @@ const ModalAddNewUser: React.FC<Props> = ({ onAddNew, ...props }) => {
               title='Role'
               required
               dataIndex='roleIDs'
-              inputType='multipleselect'
+              inputType='multipleSelect'
               placeholder='Select role'
               selectProps={{
                 options: roles.map((role) => {

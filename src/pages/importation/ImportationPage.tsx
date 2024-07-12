@@ -24,7 +24,7 @@ const ImportationPage = () => {
   const columns = {
     productCode: (record: ImportationTableDataType) => {
       return (
-        <Space direction='horizontal'>
+        <Space direction='horizontal' wrap>
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>

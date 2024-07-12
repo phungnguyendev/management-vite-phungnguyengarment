@@ -39,7 +39,7 @@ const SampleSewingPage = () => {
   const columns = {
     productCode: (record: CuttingGroupTableDataType) => {
       return (
-        <Space direction='horizontal'>
+        <Space direction='horizontal' wrap>
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
@@ -545,7 +545,7 @@ const SampleSewingPage = () => {
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
-      width: '12%',
+      width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.productCode(record)
       }
@@ -589,7 +589,7 @@ const SampleSewingPage = () => {
     {
       title: 'SL còn lại (Cắt)',
       dataIndex: 'remainingAmount',
-      width: '10%',
+      width: '7%',
       responsive: ['lg'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.remainingAmount(record)
@@ -611,7 +611,7 @@ const SampleSewingPage = () => {
         {
           title: 'Ngày gửi in thêu',
           dataIndex: 'dateSendEmbroidered',
-          width: '20%',
+          width: '15%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return columns.embroidered.dateSendEmbroidered(record)
           }
@@ -619,7 +619,7 @@ const SampleSewingPage = () => {
         {
           title: 'SL in thêu còn lại',
           dataIndex: 'amountQuantityEmbroidered',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return columns.embroidered.amountQuantityEmbroidered(record)
           }
@@ -627,7 +627,7 @@ const SampleSewingPage = () => {
         {
           title: 'In thêu?',
           dataIndex: 'syncStatus',
-          width: '15%',
+          width: '10%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return columns.embroidered.syncStatus(record)
           }

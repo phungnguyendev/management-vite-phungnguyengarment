@@ -65,7 +65,7 @@ const FinishPage = () => {
     },
     productColor: (record: CompletionTableDataType) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorselector' required={false}>
+        <EditableStateCell isEditing={false} dataIndex='colorID' title='Màu' inputType='colorSelector' required={false}>
           <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
             <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
               {textValidatorDisplay(record.productColor?.color?.name)}

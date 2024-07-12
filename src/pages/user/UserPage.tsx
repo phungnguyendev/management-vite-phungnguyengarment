@@ -11,6 +11,7 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
+import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import TextHint from '~/components/sky-ui/TextHint'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -36,7 +37,7 @@ const UserPage = () => {
     email: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='email'
           title='Email'
           inputType='text'
@@ -56,7 +57,7 @@ const UserPage = () => {
     fullName: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='fullName'
           title='Full name'
           inputType='text'
@@ -76,7 +77,7 @@ const UserPage = () => {
     password: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='password'
           title='Password'
           inputType='password'
@@ -96,7 +97,7 @@ const UserPage = () => {
     phone: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='phone'
           title='Phone'
           inputType='text'
@@ -118,7 +119,7 @@ const UserPage = () => {
     workDescription: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='workDescription'
           title='Work description'
           inputType='textarea'
@@ -139,7 +140,7 @@ const UserPage = () => {
     birthday: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='birthday'
           title='Birthday'
           inputType='datepicker'
@@ -158,21 +159,19 @@ const UserPage = () => {
     role: (record: UserTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={viewModel.table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key)}
           dataIndex='roles'
           title='Vai trò'
-          inputType='multipleselect'
+          inputType='multipleSelect'
           required
           selectProps={{
             options: viewModel.state.roles.map((role) => {
               return {
                 value: role.id,
                 label: (
-                  <SkyTableRowHighLightItem
-                    title={role.desc}
-                    role={role.role}
-                    type={role.role === 'admin' ? 'success' : undefined}
-                  />
+                  <SkyTableRowHighLightTextItem type={role.role === 'admin' ? 'success' : 'secondary'}>
+                    {role.desc}
+                  </SkyTableRowHighLightTextItem>
                 )
               }
             }),
@@ -180,11 +179,9 @@ const UserPage = () => {
               return {
                 value: role.id,
                 label: (
-                  <SkyTableRowHighLightItem
-                    title={role.desc}
-                    role={role.role}
-                    type={role.role === 'admin' ? 'success' : undefined}
-                  />
+                  <SkyTableRowHighLightTextItem type={role.role === 'admin' ? 'success' : 'secondary'}>
+                    {role.desc}
+                  </SkyTableRowHighLightTextItem>
                 )
               }
             })
@@ -195,15 +192,21 @@ const UserPage = () => {
             })
           }}
         >
-          <Space size='small' wrap>
-            {record.roles?.map((role, index) => {
-              return (
-                <SkyTableRowHighLightItem key={index} type={role.role === 'admin' ? 'success' : undefined}>
-                  {role.desc}
-                </SkyTableRowHighLightItem>
-              )
-            })}
-          </Space>
+          {isValidArray(record.roles) && (
+            <Space size='small' wrap>
+              {record.roles.map((role, index) => {
+                return (
+                  <SkyTableRowHighLightItem
+                    key={index}
+                    type={role.role === 'admin' ? 'success' : 'secondary'}
+                    status={role.status}
+                  >
+                    {role.desc}
+                  </SkyTableRowHighLightItem>
+                )
+              })}
+            </Space>
+          )}
         </EditableStateCell>
       )
     }
