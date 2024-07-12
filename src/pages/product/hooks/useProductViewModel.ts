@@ -13,6 +13,7 @@ import useAPIService from '~/hooks/useAPIService'
 import { ProductAddNewProps, ProductTableDataType } from '~/pages/product/type'
 import { Color, Group, Print, PrintablePlace, Product, ProductColor, ProductGroup } from '~/typing'
 import {
+  arrayComparator,
   dateComparator,
   isValidArray,
   isValidNumber,
@@ -159,7 +160,6 @@ export default function useProductViewModel() {
    * Function update record
    */
   const handleUpdate = async (record: ProductTableDataType) => {
-    console.log({ newRecord, record })
     try {
       table.setLoading(true)
       // Update product
@@ -256,28 +256,19 @@ export default function useProductViewModel() {
         )
       }
 
-      // Update printablePlace
-      // if (isValidObject(record.printablePlace) && numberComparator(record.printablePlace.id, newRecord.printID)) {
-      //   await printablePlaceService.updateItemBySync(
-      //     { field: 'productID', id: record.id! },
-      //     { printID: newRecord.printID },
-      //     table.setLoading,
-      //     (meta) => {
-      //       if (!meta.success) throw new Error(define('update_failed'))
-      //       const newItem = meta.data as PrintablePlace
-      //       updatedProduct = {
-      //         ...updatedProduct,
-      //         printablePlace: newItem
-      //       }
-      //     }
-      //   )
-      // }
-
-      if (newRecord.printIDs) {
+      // Update PrintablePlaces
+      if (
+        arrayComparator(
+          newRecord.printIDs,
+          record.printablePlaces?.map((item) => {
+            return item.printID
+          })
+        )
+      ) {
         await printablePlaceService.updateItemsSync(
           { field: 'productID', id: record.id! },
-          newRecord.printIDs.map((item) => {
-            return { productID: record.id!, printID: item } as PrintablePlace
+          newRecord.printIDs!.map((printID) => {
+            return { productID: record.id!, printID: printID! } as PrintablePlace
           }),
           table.setLoading,
           (meta) => {
