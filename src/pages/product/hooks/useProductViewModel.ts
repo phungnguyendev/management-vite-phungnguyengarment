@@ -169,6 +169,7 @@ export default function useProductViewModel() {
    */
   const handleUpdate = async (record: ProductTableDataType) => {
     try {
+      console.log({ newRecord, record })
       table.setLoading(true)
       // Update product
       let updatedProduct: ProductTableDataType = record
