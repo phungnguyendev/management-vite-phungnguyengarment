@@ -277,7 +277,7 @@ export default function useProductViewModel() {
       ) {
         await printablePlaceService.updateItemsSync(
           { field: 'productID', id: record.id! },
-          newRecord.printIDs!.map((printID) => {
+          newRecord.printIDs.map((printID) => {
             return { productID: record.id!, printID: printID! } as PrintablePlace
           }),
           table.setLoading,
