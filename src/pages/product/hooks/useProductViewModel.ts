@@ -432,7 +432,11 @@ export default function useProductViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = async () => {}
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
+  }
+
+  // const handlePageChange = () => {}
 
   /**
    * Function handle switch delete button

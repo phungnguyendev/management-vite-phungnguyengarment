@@ -323,7 +323,9 @@ export default function useGarmentAccessoryViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = () => {}
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
+  }
 
   /**
    * Function handle switch delete button

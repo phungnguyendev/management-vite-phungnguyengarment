@@ -305,8 +305,8 @@ export default function useImportationViewModel() {
   /**
    * Function query paginator (page and pageSize)
    */
-  const handlePageChange = () => {
-    // loadData({ paginator: { page, pageSize }, isDeleted: showDeleted, searchTerm: searchText })
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
   }
 
   /**

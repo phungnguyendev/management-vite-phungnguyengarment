@@ -228,6 +228,11 @@ const DashboardPage = () => {
                   : [...tableColumns, ...progressVerticalCol]
             }}
             dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
             onPageChange={viewModel.action.handlePageChange}
             expandable={{
               expandedRowRender: (record: DashboardTableDataType) => {

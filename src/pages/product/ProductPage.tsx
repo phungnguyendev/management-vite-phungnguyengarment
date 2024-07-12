@@ -377,7 +377,11 @@ const ProductPage = () => {
             actionColumn: actionCol
           }}
           dataSource={viewModel.table.dataSource}
-          onPageChange={viewModel.action.handlePageChange}
+          pagination={{
+            pageSize: viewModel.table.paginator.pageSize,
+            current: viewModel.table.paginator.page,
+            onChange: viewModel.action.handlePageChange
+          }}
           expandable={{
             expandedRowRender: (record: ProductTableDataType) => {
               return (

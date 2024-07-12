@@ -1,6 +1,7 @@
 import { DragEndEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
+import { Paginator } from '~/api/client'
 
 type RequiredDataType = {
   key: string
@@ -17,6 +18,8 @@ export interface UseTableProps<T extends RequiredDataType> {
   expandingKeys: string[]
   editingKey: string
   deletingKey: string
+  paginator: Paginator
+  setPaginator: React.Dispatch<React.SetStateAction<Paginator>>
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
   setScrollIndex: React.Dispatch<React.SetStateAction<number>>
   setEditingKey: React.Dispatch<React.SetStateAction<string>>
@@ -50,6 +53,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
   const [addingKey, setAddingKey] = useState<{ key: string; payload?: T }>({ key: '' })
   const [editingKey, setEditingKey] = useState<string>('')
   const [deletingKey, setDeletingKey] = useState<string>('')
+  const [paginator, setPaginator] = useState<Paginator>({ page: 1, pageSize: 10 })
 
   const isAdding = (key: string) => key === addingKey.key
   const isEditing = (key: string) => key === editingKey
@@ -174,6 +178,8 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     isAdding,
     isEditing,
     isDelete,
+    paginator,
+    setPaginator,
     expandingKeys,
     addingKey,
     editingKey,

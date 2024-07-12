@@ -229,7 +229,9 @@ export default function useUserViewModel() {
     }
   }
 
-  const handlePageChange = async () => {}
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
+  }
 
   /**
    * Function handle switch delete button
