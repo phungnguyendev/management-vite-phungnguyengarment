@@ -37,7 +37,15 @@ export default function useProductViewModel() {
   const [searchText, setSearchText] = useState<string>('')
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
   const [openModal, setOpenModal] = useState<boolean>(false)
-  const [newRecord, setNewRecord] = useState<ProductAddNewProps>({})
+  const [newRecord, setNewRecord] = useState<ProductAddNewProps>({
+    productCode: undefined,
+    quantityPO: undefined,
+    colorID: undefined,
+    groupID: undefined,
+    printIDs: undefined,
+    dateInputNPL: undefined,
+    dateOutputFCR: undefined
+  })
 
   // Data
   const [productColors, setProductColors] = useState<ProductColor[]>([])
@@ -258,6 +266,7 @@ export default function useProductViewModel() {
 
       // Update PrintablePlaces
       if (
+        newRecord.printIDs &&
         arrayComparator(
           newRecord.printIDs,
           record.printablePlaces?.map((item) => {
