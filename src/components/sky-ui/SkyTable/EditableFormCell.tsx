@@ -1,7 +1,7 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
 import { memo } from 'react'
-import { cn } from '~/utils/helpers'
+import { cn, extractHexCode } from '~/utils/helpers'
 import { EditableStateCellProps } from './EditableStateCell'
 
 export type EditableCellRequiredType = { key: string; name?: string; id?: number }
@@ -61,7 +61,7 @@ function EditableFormCell({
                     <div
                       className='h-6 w-6 rounded-sm'
                       style={{
-                        backgroundColor: `${ori.key}`
+                        backgroundColor: `${extractHexCode(`${ori.key}`)}`
                       }}
                     />
                   </Flex>

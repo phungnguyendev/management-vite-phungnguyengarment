@@ -12,15 +12,19 @@ import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import {
   breakpoint,
   dateValidatorDisplay,
+  handleFilterText,
+  handleObjectFilterText,
   isValidArray,
   isValidObject,
   numberValidatorChange,
   numberValidatorDisplay,
   sumCounts,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
 import useDashboardViewModel from './hooks/useDashboardViewModel'
 import { DashboardTableDataType } from './type'
+import { dateFormatter } from '~/utils/date-formatter'
 
 const DashboardPage = () => {
   useTitle('Dashboard | Phung Nguyen')
@@ -153,7 +157,19 @@ const DashboardPage = () => {
       width: '10%',
       render: (_value: any, record: DashboardTableDataType) => {
         return columns.title(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -162,7 +178,15 @@ const DashboardPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: DashboardTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -180,7 +204,15 @@ const DashboardPage = () => {
       responsive: ['xl'],
       render: (_value: any, record: DashboardTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
       title: 'Ngày xuất FCR',
@@ -189,7 +221,19 @@ const DashboardPage = () => {
       responsive: ['md'],
       render: (_value: any, record: DashboardTableDataType) => {
         return columns.dateOutputFCR(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.dateOutputFCR, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.dateOutputFCR, 'dateOnly'))
     }
   ]
 

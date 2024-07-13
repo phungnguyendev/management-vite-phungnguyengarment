@@ -102,7 +102,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, ...props }) => {
                     return {
                       label: item.name,
                       value: item.id,
-                      key: item.hexColor
+                      key: `${item.hexColor}-${item.id}`
                     }
                   })
                 }}

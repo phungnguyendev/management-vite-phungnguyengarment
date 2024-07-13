@@ -20,7 +20,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
 import dayjs, { dateFormatter } from '~/utils/date-formatter'
-import { cn } from '~/utils/helpers'
+import { cn, extractHexCode } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
@@ -185,7 +185,7 @@ function EditableStateCell({
                     <div
                       className='h-6 w-6 rounded-sm'
                       style={{
-                        backgroundColor: `${ori.key}`
+                        backgroundColor: `${extractHexCode(`${ori.key}`)}`
                       }}
                     />
                   </Flex>

@@ -1,6 +1,8 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
+import ColorAPI from '~/api/services/ColorAPI'
 import CompletionAPI from '~/api/services/CompletionAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
@@ -8,7 +10,7 @@ import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Completion, Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
+import { Color, Completion, Group, Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
 import { DashboardTableDataType } from '../type'
 
 export default function useDashboardViewModel() {
@@ -20,6 +22,8 @@ export default function useDashboardViewModel() {
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const completionService = useAPIService<Completion>(CompletionAPI)
   const sewingLineDeliveryService = useAPIService<SewingLineDelivery>(SewingLineDeliveryAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
 
   const [searchText, setSearchText] = useState<string>('')
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -30,6 +34,8 @@ export default function useDashboardViewModel() {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [completions, setCompletions] = useState<Completion[]>([])
   const [sewingLineDeliveries, setSewingLineDeliveries] = useState<SewingLineDelivery[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -93,6 +99,15 @@ export default function useDashboardViewModel() {
       )
       const newSewingLineDeliveries = sewingLineDeliveriesResult.data as SewingLineDelivery[]
       setSewingLineDeliveries(newSewingLineDeliveries)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newSewingLineDeliveries, newCompletions)
     } catch (error: any) {
@@ -163,6 +178,8 @@ export default function useDashboardViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       showDeleted,
       openModal,
       setOpenModal

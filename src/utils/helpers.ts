@@ -196,6 +196,16 @@ export const extractEmailName = (email: string): string => {
   return username
 }
 
+export const extractHexCode = (hexCodeWithID: string): string => {
+  const parts = hexCodeWithID.split('-')
+
+  // Lấy phần username từ phần đầu tiên của mảng parts
+  const username = parts[0]
+
+  // Trả về phần username
+  return username
+}
+
 export const isExpiredDate = (date1?: string | undefined | null, date2?: string | undefined | null): boolean => {
   if (!isValidDate(date1) || !isValidDate(date2)) return false
   // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không

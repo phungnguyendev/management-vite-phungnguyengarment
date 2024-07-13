@@ -104,7 +104,7 @@ const ProductPage = () => {
           defaultValue={numberValidatorInit(record.productColor?.colorID)}
           selectProps={{
             options: viewModel.state.colors.map((color) => {
-              return { label: color.name, value: color.id, key: color.id }
+              return { label: color.name, value: color.id, key: `${color.hexColor}-${color.id}` }
             })
           }}
         >
