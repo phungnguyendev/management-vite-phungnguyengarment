@@ -3,25 +3,27 @@ import { SearchProps } from 'antd/es/input'
 import { SwitchProps } from 'antd/lib'
 import { Plus } from 'lucide-react'
 import React from 'react'
+import ExportToExcel, { ExportToExcelProps } from '../sky-ui/ExportToExcel'
 import SearchBar from '../sky-ui/SearchBar'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
+interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
   loading?: boolean
   onLoading?: (enable: boolean) => void
   searchProps: SearchProps
   sortProps?: SwitchProps
   deleteProps?: SwitchProps
   addNewProps?: ButtonProps
+  exportAsExcelProps?: ExportToExcelProps
 }
 
-const BaseLayout: React.FC<Props> = ({
+const BaseLayout: React.FC<BaseLayoutProps> = ({
   searchProps,
   sortProps,
   deleteProps,
   addNewProps,
   children,
   loading,
-  // onLoading,
+  exportAsExcelProps,
   ...props
 }) => {
   return (
@@ -36,13 +38,14 @@ const BaseLayout: React.FC<Props> = ({
           <Flex gap={20} align='center' className='w-full flex-col md:flex-row'>
             {searchProps && <SearchBar {...searchProps} className='w-full md:w-[500px]' />}
             <Flex justify='space-between' align='center' className='w-full'>
-              <Flex gap={10} className='w-full'>
+              <Flex gap={10} align='center' className='w-full'>
                 {sortProps && (
                   <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sort' defaultChecked={false} />
                 )}
                 {deleteProps && (
                   <Switch {...deleteProps} checkedChildren='Deleted list' unCheckedChildren='Deleted list' />
                 )}
+                {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
               </Flex>
               {addNewProps && (
                 <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
