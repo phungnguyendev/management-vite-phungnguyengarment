@@ -14,16 +14,21 @@ import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHi
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { SewingLineDelivery, UserRoleType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorDisplay,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isExpiredDate,
   isValidArray,
   numberValidatorChange,
   numberValidatorDisplay,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
+import { ProductTableDataType } from '../product/type'
 import SewingLineDeliveryExpandableList from './components/SewingLineDeliveryExpandableList'
 import useSewingLineDeliveryViewModel from './hooks/useSewingLineDeliveryViewModel'
 import { SewingLineDeliveryTableDataType } from './type'
@@ -191,7 +196,19 @@ const SewingLineDeliveryPage = () => {
       width: '15%',
       render: (_value: any, record: SewingLineDeliveryTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -200,7 +217,15 @@ const SewingLineDeliveryPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: SewingLineDeliveryTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -212,13 +237,42 @@ const SewingLineDeliveryPage = () => {
       }
     },
     {
+      title: 'Nhóm',
+      dataIndex: 'groupID',
+      width: '7%',
+      responsive: ['xl'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.productGroup(record)
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
+    },
+    {
       title: 'Ngày xuất FCR',
       dataIndex: 'dateOutputFCR',
       width: '15%',
       responsive: ['lg'],
       render: (_value: any, record: SewingLineDeliveryTableDataType) => {
         return columns.dateOutputFCR(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.dateOutputFCR, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.dateOutputFCR, 'dateOnly'))
     },
     {
       title: 'Chuyền may',

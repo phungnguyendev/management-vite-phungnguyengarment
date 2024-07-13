@@ -13,7 +13,15 @@ import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
-import { breakpoint, isAcceptRole, numberValidatorDisplay, textValidatorDisplay } from '~/utils/helpers'
+import {
+  breakpoint,
+  handleFilterText,
+  handleObjectFilterText,
+  isAcceptRole,
+  numberValidatorDisplay,
+  textValidatorDisplay,
+  uniqueArray
+} from '~/utils/helpers'
 import ImportationTable from './components/ImportationTable'
 import ModalAddNewImportation from './components/ModalAddNewImportation'
 import useImportationViewModel from './hooks/useImportationViewModel'
@@ -84,7 +92,19 @@ const ImportationPage = () => {
       width: '7%',
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -93,7 +113,15 @@ const ImportationPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -111,17 +139,16 @@ const ImportationPage = () => {
       responsive: ['xl'],
       render: (_value: any, record: ImportationTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     }
-    // {
-    //   title: 'Nơi in',
-    //   dataIndex: 'printID',
-    //   width: '10%',
-    //   responsive: ['xl'],
-    //   render: (_value: any, record: ImportationTableDataType) => {
-    //     return columns.printablePlace(record)
-    //   }
-    // }
   ]
 
   const actionCol: ColumnType<ImportationTableDataType> = {

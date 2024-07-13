@@ -15,6 +15,7 @@ import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   booleanValidatorInit,
   breakpoint,
@@ -23,13 +24,16 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isValidObject,
   numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
 import CuttingGroupExpandableItemRow from './components/CuttingGroupExpandableItemRow'
 import useCuttingGroupViewModel from './hooks/useCuttingGroupViewModel'
@@ -555,7 +559,19 @@ const SampleSewingPage = () => {
       width: '10%',
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -564,7 +580,15 @@ const SampleSewingPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -582,7 +606,15 @@ const SampleSewingPage = () => {
       responsive: ['xl'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
       title: 'SL thực cắt',
@@ -609,7 +641,20 @@ const SampleSewingPage = () => {
       responsive: ['xl'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.dateTimeCut(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.cuttingGroup?.dateTimeCut, 'dateTime')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) =>
+        handleObjectFilterText(value, record.cuttingGroup, dateFormatter(record.cuttingGroup?.dateTimeCut, 'dateTime'))
     },
     {
       title: 'In thêu',
@@ -621,7 +666,24 @@ const SampleSewingPage = () => {
           width: '15%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return columns.embroidered.dateSendEmbroidered(record)
-          }
+          },
+          filters: uniqueArray(
+            viewModel.table.dataSource.map((item) => {
+              return dateFormatter(item.cuttingGroup?.dateSendEmbroidered, 'dateOnly')
+            })
+          ).map((item) => {
+            return {
+              text: item,
+              value: item
+            }
+          }),
+          filterSearch: true,
+          onFilter: (value, record) =>
+            handleObjectFilterText(
+              value,
+              record.cuttingGroup,
+              dateFormatter(record.cuttingGroup?.dateSendEmbroidered, 'dateOnly')
+            )
         },
         {
           title: 'SL in thêu còn lại',

@@ -1,14 +1,16 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { ResponseDataType } from '~/api/client'
+import ColorAPI from '~/api/services/ColorAPI'
 import CuttingGroupAPI from '~/api/services/CuttingGroupAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, CuttingGroup, Group, Product, ProductColor, ProductGroup } from '~/typing'
 import { booleanComparator, dateComparator, isValidBoolean, isValidObject, numberComparator } from '~/utils/helpers'
 import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
 
@@ -21,6 +23,8 @@ export default function useCuttingGroupViewModel() {
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const cuttingGroupService = useAPIService<CuttingGroup>(CuttingGroupAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -32,6 +36,8 @@ export default function useCuttingGroupViewModel() {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [cuttingGroups, setCuttingGroups] = useState<CuttingGroup[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -86,6 +92,15 @@ export default function useCuttingGroupViewModel() {
       )
       const newCuttingGroups = cuttingGroupResult.data as CuttingGroup[]
       setCuttingGroups(newCuttingGroups)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newCuttingGroups)
     } catch (error: any) {
@@ -244,6 +259,8 @@ export default function useCuttingGroupViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       showDeleted,
       openModal,
       newRecord,

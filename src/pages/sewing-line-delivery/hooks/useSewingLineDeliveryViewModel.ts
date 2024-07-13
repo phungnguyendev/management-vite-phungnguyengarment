@@ -1,5 +1,7 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
+import ColorAPI from '~/api/services/ColorAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
@@ -8,7 +10,7 @@ import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductColor, ProductGroup, SewingLine, SewingLineDelivery } from '~/typing'
+import { Color, Group, Product, ProductColor, ProductGroup, SewingLine, SewingLineDelivery } from '~/typing'
 import { isValidArray } from '~/utils/helpers'
 import { SewingLineDeliveryTableDataType } from '../type'
 
@@ -23,6 +25,8 @@ export default function useSewingLineDeliveryViewModel() {
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
   const sewingLineDeliveryService = useAPIService<SewingLineDelivery>(SewingLineDeliveryAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -35,6 +39,8 @@ export default function useSewingLineDeliveryViewModel() {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [sewingLineDeliveries, setSewingLineDeliveries] = useState<SewingLineDelivery[]>([])
   const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -106,6 +112,15 @@ export default function useSewingLineDeliveryViewModel() {
       if (!sewingLineResult.success) throw new Error(define('dataLoad_failed'))
       const newSewingLines = sewingLineResult.data as SewingLine[]
       setSewingLines(newSewingLines)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newSewingLineDeliveries)
     } catch (error: any) {
@@ -244,6 +259,8 @@ export default function useSewingLineDeliveryViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       sewingLines,
       sewingLineDeliveries,
       showDeleted,

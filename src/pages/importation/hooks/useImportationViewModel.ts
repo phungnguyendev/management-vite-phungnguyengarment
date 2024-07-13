@@ -1,5 +1,7 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
+import ColorAPI from '~/api/services/ColorAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ImportationAPI from '~/api/services/ImportationAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -7,7 +9,7 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Importation, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Group, Importation, Product, ProductColor, ProductGroup } from '~/typing'
 import { dateComparator, isValidArray, numberComparator } from '~/utils/helpers'
 import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
@@ -21,6 +23,8 @@ export default function useImportationViewModel() {
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   // const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const importationService = useAPIService<Importation>(ImportationAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -31,7 +35,8 @@ export default function useImportationViewModel() {
   // List
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
-  // const [printablePlaces, setPrintablePlaces] = useState<PrintablePlace[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
   const [importations, setImportations] = useState<Importation[]>([])
 
   useEffect(() => {
@@ -87,19 +92,21 @@ export default function useImportationViewModel() {
       const newProductGroups = productGroupsResult.data as ProductGroup[]
       setProductGroups(newProductGroups)
 
-      // const printablePlacesResult = await printablePlaceService.getItems(
-      //   { paginator: { page: 1, pageSize: -1 } },
-      //   table.setLoading
-      // )
-      // const newPrintablePlaces = printablePlacesResult.data as PrintablePlace[]
-      // setPrintablePlaces(newPrintablePlaces)
-
       const importationsResult = await importationService.getItems(
         { paginator: { page: 1, pageSize: -1 } },
         table.setLoading
       )
       const newImportations = importationsResult.data as Importation[]
       setImportations(newImportations)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newImportations)
     } catch (error: any) {
@@ -352,7 +359,8 @@ export default function useImportationViewModel() {
   return {
     state: {
       productColors,
-      // printablePlaces,
+      colors,
+      groups,
       productGroups,
       importations,
       showDeleted,

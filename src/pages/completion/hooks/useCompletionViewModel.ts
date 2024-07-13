@@ -1,13 +1,15 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
+import ColorAPI from '~/api/services/ColorAPI'
 import CompletionAPI from '~/api/services/CompletionAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Completion, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Completion, Group, Product, ProductColor, ProductGroup } from '~/typing'
 import { dateComparator, isValidObject, numberComparator } from '~/utils/helpers'
 import { CompletionNewRecordProps, CompletionTableDataType } from '../type'
 
@@ -20,6 +22,8 @@ export default function useCompletionViewModel() {
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const completionService = useAPIService<Completion>(CompletionAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
   // UI
 
   // State changes
@@ -32,6 +36,8 @@ export default function useCompletionViewModel() {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [completions, setCompletions] = useState<Completion[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -94,6 +100,15 @@ export default function useCompletionViewModel() {
       if (!completionResult.success) throw new Error(define('dataLoad_failed'))
       const newCompletions = completionResult.data as Completion[]
       setCompletions(newCompletions)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newCompletions)
     } catch (error: any) {
@@ -239,6 +254,8 @@ export default function useCompletionViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       productColors,
       completions,
       showDeleted,

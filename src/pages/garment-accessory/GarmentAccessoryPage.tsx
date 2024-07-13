@@ -16,11 +16,14 @@ import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isValidArray,
   isValidObject,
@@ -28,7 +31,8 @@ import {
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
 import useGarmentAccessoryViewModel from './hooks/useGarmentAccessoryViewModel'
 import { GarmentAccessoryTableDataType } from './type'
@@ -292,7 +296,19 @@ const GarmentAccessoryPage = () => {
       width: '10%',
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -301,7 +317,15 @@ const GarmentAccessoryPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -319,7 +343,15 @@ const GarmentAccessoryPage = () => {
       responsive: ['lg'],
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
       title: 'Đồng bộ PL',
@@ -355,7 +387,24 @@ const GarmentAccessoryPage = () => {
       responsive: ['xxl'],
       render: (_value: any, record: GarmentAccessoryTableDataType) => {
         return columns.passingDeliveryDate(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.expandableGarmentAccessory?.passingDeliveryDate, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) =>
+        handleObjectFilterText(
+          value,
+          record.expandableGarmentAccessory,
+          dateFormatter(record.expandableGarmentAccessory?.passingDeliveryDate, 'dateOnly')
+        )
     },
     {
       title: 'Phụ liệu còn thiếu',

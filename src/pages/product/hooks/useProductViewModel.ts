@@ -32,7 +32,7 @@ export default function useProductViewModel() {
   const printablePlaceService = useAPIService<PrintablePlace>(PrintablePlaceAPI)
   const colorService = useAPIService<Color>(ColorAPI)
   const groupService = useAPIService<Group>(GroupAPI)
-  const printService = useAPIService<Group>(PrintAPI)
+  const printService = useAPIService<Print>(PrintAPI)
 
   const [searchText, setSearchText] = useState<string>('')
   const [showDeleted, setShowDeleted] = useState<boolean>(false)

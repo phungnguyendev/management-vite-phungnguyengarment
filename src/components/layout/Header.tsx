@@ -81,9 +81,6 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
           <Flex vertical>
             <Dropdown menu={{ items }}>
               <Flex align='center' justify='center' gap={8} className='h-full'>
-                {/* <Flex className='h-full'>
-                  <Avatar size={32} src={currentUser.user.avatar} />
-                </Flex> */}
                 <Flex className='h-full'>
                   <Button type='link' className='' onClick={(e) => e.preventDefault()}>
                     <Flex gap={4} justify='center' className='h-full text-foreground'>

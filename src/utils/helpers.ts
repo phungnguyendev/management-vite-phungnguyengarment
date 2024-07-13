@@ -1,6 +1,7 @@
 import { Color } from 'antd/es/color-picker'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
+import React from 'react'
 import { twMerge } from 'tailwind-merge'
 import { UserRoleType } from '~/typing'
 import { dateFormatter } from './date-formatter'
@@ -36,8 +37,24 @@ export const breakpoint = {
   xxl: 1600
 }
 
+export const handleFilterText = (value: React.Key | boolean, text?: string | null): boolean => {
+  return textValidatorChange(text).startsWith(value as string)
+}
+
+export const handleObjectFilterText = (
+  value: React.Key | boolean,
+  object?: { id?: number },
+  valueCompare?: string | number
+): boolean => {
+  return isValidObject(object) ? `${valueCompare}`.startsWith(value as string) : false
+}
+
 export const isAcceptRole = (initRoles: UserRoleType[], userRoles: UserRoleType[]): boolean => {
   return initRoles.some((role) => userRoles.includes(role)) // If true === accept
+}
+
+export const uniqueArray = <T>(duplicateArray: T[]): T[] => {
+  return [...new Set(duplicateArray)]
 }
 
 export const numberValidatorDisplay = (number?: number): string => {

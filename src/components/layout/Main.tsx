@@ -135,7 +135,7 @@ const Main: React.FC<HTMLAttributes<HTMLElement>> = () => {
       </Drawer>
       <Layout>
         <Header onMenuClick={() => setOpenDrawer(!openDrawer)} />
-        <Content className='min-h-screen bg-background p-5'>{!loading && <Outlet />}</Content>
+        <Content className='min-h-screen bg-background md:p-5'>{!loading && <Outlet />}</Content>
         <Footer className=''>Ant Design ©2023 Created by Ant UED</Footer>
       </Layout>
     </Layout>

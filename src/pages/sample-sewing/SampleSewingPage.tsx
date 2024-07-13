@@ -20,10 +20,13 @@ import {
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isValidObject,
   numberValidatorDisplay,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
 import useSampleSewingViewModel from './hooks/useSampleSewingViewModel'
 import { SampleSewingTableDataType } from './type'
@@ -133,7 +136,19 @@ const SampleSewingPage = () => {
       width: '15%',
       render: (_value: any, record: SampleSewingTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -142,7 +157,15 @@ const SampleSewingPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: SampleSewingTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -160,7 +183,15 @@ const SampleSewingPage = () => {
       responsive: ['lg'],
       render: (_value: any, record: SampleSewingTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     }
   ]
 

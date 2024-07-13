@@ -1,5 +1,7 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
+import ColorAPI from '~/api/services/ColorAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
@@ -7,7 +9,7 @@ import SampleSewingAPI from '~/api/services/SampleSewingAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
+import { Color, Group, Product, ProductColor, ProductGroup, SampleSewing } from '~/typing'
 import { dateComparator } from '~/utils/helpers'
 import { SampleSewingAddNewProps, SampleSewingTableDataType } from '../type'
 
@@ -20,6 +22,8 @@ export default function useSampleSewingViewModel() {
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const sampleSewingService = useAPIService<SampleSewing>(SampleSewingAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -32,6 +36,8 @@ export default function useSampleSewingViewModel() {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [sampleSewings, setSampleSewings] = useState<SampleSewing[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -90,6 +96,15 @@ export default function useSampleSewingViewModel() {
       )
       const newSampleSewing = sampleSewingResult.data as SampleSewing[]
       setSampleSewings(newSampleSewing)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newSampleSewing)
     } catch (error: any) {
@@ -255,6 +270,8 @@ export default function useSampleSewingViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       sampleSewings,
       showDeleted,
       setShowDeleted,

@@ -1,15 +1,26 @@
 import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import AccessoryNoteAPI from '~/api/services/AccessoryNoteAPI'
+import ColorAPI from '~/api/services/ColorAPI'
 import GarmentAccessoryAPI from '~/api/services/GarmentAccessoryAPI'
 import GarmentAccessoryNoteAPI from '~/api/services/GarmentAccessoryNoteAPI'
+import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { AccessoryNote, GarmentAccessory, GarmentAccessoryNote, Product, ProductColor, ProductGroup } from '~/typing'
+import {
+  AccessoryNote,
+  Color,
+  GarmentAccessory,
+  GarmentAccessoryNote,
+  Group,
+  Product,
+  ProductColor,
+  ProductGroup
+} from '~/typing'
 import {
   booleanComparator,
   dateComparator,
@@ -36,6 +47,8 @@ export default function useGarmentAccessoryViewModel() {
   const garmentAccessoryService = useAPIService<GarmentAccessory>(GarmentAccessoryAPI)
   const garmentAccessoryNoteService = useAPIService<GarmentAccessoryNote>(GarmentAccessoryNoteAPI)
   const accessoryNoteService = useAPIService<AccessoryNote>(AccessoryNoteAPI)
+  const colorService = useAPIService<Color>(ColorAPI)
+  const groupService = useAPIService<Group>(GroupAPI)
 
   // State changes
   const [showDeleted, setShowDeleted] = useState<boolean>(false)
@@ -57,6 +70,8 @@ export default function useGarmentAccessoryViewModel() {
   const [garmentAccessories, setGarmentAccessories] = useState<GarmentAccessory[]>([])
   const [garmentAccessoryNotes, setGarmentAccessoryNotes] = useState<GarmentAccessoryNote[]>([])
   const [accessoryNotes, setAccessoryNotes] = useState<AccessoryNote[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
 
   useEffect(() => {
     initialize()
@@ -159,6 +174,15 @@ export default function useGarmentAccessoryViewModel() {
       )
       const newAccessoryNotes = accessoryNoteResult.data as AccessoryNote[]
       setAccessoryNotes(newAccessoryNotes)
+
+      await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setColors(result.data as Color[])
+      })
+      await groupService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
+        if (!result.success) throw new Error(define('dataLoad_failed'))
+        setGroups(result.data as Group[])
+      })
 
       dataMapped(newProducts, newProductColors, newProductGroups, newGarmentAccessories, newGarmentAccessoryNotes)
     } catch (error: any) {
@@ -365,6 +389,8 @@ export default function useGarmentAccessoryViewModel() {
 
   return {
     state: {
+      colors,
+      groups,
       accessoryNotes,
       showDeleted,
       setShowDeleted,

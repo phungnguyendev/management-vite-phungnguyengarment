@@ -15,11 +15,14 @@ import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpan
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isValidNumber,
   isValidObject,
@@ -27,7 +30,8 @@ import {
   numberValidatorChange,
   numberValidatorDisplay,
   numberValidatorInit,
-  textValidatorDisplay
+  textValidatorDisplay,
+  uniqueArray
 } from '~/utils/helpers'
 import CompletionProgressItem from './components/CompletionProgressItem'
 import useCompletionViewModel from './hooks/useCompletionViewModel'
@@ -318,7 +322,36 @@ const FinishPage = () => {
       width: '10%',
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.productCode(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
+    },
+    {
+      title: 'Màu',
+      dataIndex: 'colorID',
+      width: '10%',
+      responsive: ['sm'],
+      render: (_value: any, record: CompletionTableDataType) => {
+        return columns.productColor(record)
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -330,22 +363,21 @@ const FinishPage = () => {
       }
     },
     {
-      title: 'Màu',
-      dataIndex: 'colorID',
-      width: '10%',
-      responsive: ['sm'],
-      render: (_value: any, record: CompletionTableDataType) => {
-        return columns.productColor(record)
-      }
-    },
-    {
       title: 'Nhóm',
       dataIndex: 'groupID',
       width: '7%',
       responsive: ['xl'],
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
       title: 'Ủi',
@@ -420,7 +452,19 @@ const FinishPage = () => {
       width: '10%',
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.exportedDate(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.completion?.exportedDate, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.completion?.exportedDate, 'dateOnly'))
     },
     {
       title: 'Pass FI',
@@ -429,7 +473,19 @@ const FinishPage = () => {
       width: '10%',
       render: (_value: any, record: CompletionTableDataType) => {
         return columns.passFIDate(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.completion?.passFIDate, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.completion?.passFIDate, 'dateOnly'))
     }
   ]
 

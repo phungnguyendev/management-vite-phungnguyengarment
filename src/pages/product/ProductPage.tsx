@@ -1,5 +1,5 @@
 import { Flex, Space } from 'antd'
-import type { ColumnType } from 'antd/es/table'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
 import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
@@ -15,11 +15,14 @@ import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHi
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
+  handleFilterText,
+  handleObjectFilterText,
   isAcceptRole,
   isValidArray,
   numberValidatorChange,
@@ -27,7 +30,8 @@ import {
   numberValidatorInit,
   textValidatorChange,
   textValidatorDisplay,
-  textValidatorInit
+  textValidatorInit,
+  uniqueArray
 } from '~/utils/helpers'
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProductViewModel from './hooks/useProductViewModel'
@@ -281,14 +285,26 @@ const ProductPage = () => {
     }
   }
 
-  const tableColumns: ColumnType<ProductTableDataType>[] = [
+  const tableColumns: ColumnsType<ProductTableDataType> = [
     {
       title: 'Mã hàng',
       dataIndex: 'productCode',
       width: '10%',
       render: (_value: any, record: ProductTableDataType) => {
         return columns.title(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return `${item.productCode}`
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, record.productCode)
     },
     {
       title: 'Màu',
@@ -297,7 +313,15 @@ const ProductPage = () => {
       responsive: ['sm'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productColor(record)
-      }
+      },
+      filters: viewModel.state.colors.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productColor, record.productColor?.colorID)
     },
     {
       title: 'Số lượng PO',
@@ -315,7 +339,15 @@ const ProductPage = () => {
       responsive: ['xl'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.productGroup(record)
-      }
+      },
+      filters: viewModel.state.groups.map((item) => {
+        return {
+          text: `${item.name}`,
+          value: `${item.id}`
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
       title: 'Nơi in',
@@ -333,7 +365,19 @@ const ProductPage = () => {
       responsive: ['md'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.dateInputNPL(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.dateInputNPL, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.dateInputNPL, 'dateOnly'))
     },
     {
       title: 'Ngày xuất FCR',
@@ -342,7 +386,19 @@ const ProductPage = () => {
       responsive: ['lg'],
       render: (_value: any, record: ProductTableDataType) => {
         return columns.dateOutputFCR(record)
-      }
+      },
+      filters: uniqueArray(
+        viewModel.table.dataSource.map((item) => {
+          return dateFormatter(item.dateOutputFCR, 'dateOnly')
+        })
+      ).map((item) => {
+        return {
+          text: item,
+          value: item
+        }
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => handleFilterText(value, dateFormatter(record.dateOutputFCR, 'dateOnly'))
     }
   ]
 
