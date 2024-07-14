@@ -252,7 +252,7 @@ export default function useCuttingGroupViewModel() {
 
   const isChecked = (record: CuttingGroupTableDataType): boolean => {
     if (isValidObject(record.cuttingGroup)) {
-      if (isValidBoolean(record.cuttingGroup.syncStatus)) {
+      if (isValidBoolean(record.cuttingGroup.syncStatus) && record.cuttingGroup.syncStatus) {
         // Kiểm tra sl in thêu về
         const {
           quantityArrived1Th,
@@ -280,7 +280,7 @@ export default function useCuttingGroupViewModel() {
         // Kiểm tra số sượng thực cắt
         const sumQuantityRealCutAmount = record.cuttingGroup.quantityRealCut
         return (
-          sumQuantityArrivedAmount >= numberValidatorCalc(record.quantityPO) &&
+          numberValidatorCalc(sumQuantityArrivedAmount) >= numberValidatorCalc(record.quantityPO) &&
           numberValidatorCalc(sumQuantityRealCutAmount) >= numberValidatorCalc(record.quantityPO)
         )
       } else {
