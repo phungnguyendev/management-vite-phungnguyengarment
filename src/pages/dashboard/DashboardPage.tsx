@@ -1,5 +1,7 @@
 import { Flex } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { BarChartBig, CheckCheck, CircleAlert } from 'lucide-react'
+import { SewingIcon } from '~/assets/icons'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -9,6 +11,8 @@ import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicke
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorDisplay,
@@ -22,14 +26,17 @@ import {
   textValidatorDisplay,
   uniqueArray
 } from '~/utils/helpers'
+import StatisticCard from './components/StatisticCard'
+import StatisticWrapper from './components/StatisticWapper'
 import useDashboardViewModel from './hooks/useDashboardViewModel'
+import useStatisticViewModel from './hooks/useStatisticViewModel'
 import { DashboardTableDataType } from './type'
-import { dateFormatter } from '~/utils/date-formatter'
 
 const DashboardPage = () => {
   useTitle('Dashboard | Phung Nguyen')
   const { width } = useDevice()
   const viewModel = useDashboardViewModel()
+  const statisticViewModel = useStatisticViewModel()
 
   const columns = {
     title: (record: DashboardTableDataType) => {
@@ -239,15 +246,34 @@ const DashboardPage = () => {
 
   return (
     <>
-      <Flex vertical gap={40}>
-        {/* <StatisticWrapper>
-          <StatisticCard title='Tổng mã hàng' value={100} subTitle='100%' type='default' />
-          <StatisticCard title='Mã đang may' value={50} subTitle='Chiếm 50% (50/100)' type='success' />
-          <StatisticCard title='Mã đang sửa' value={30} subTitle='Chiếm 30% (30/100)' type='warning' />
-          <StatisticCard title='Mã bị bể' value={20} subTitle='Chiếm 20% (20/100)' type='danger' />
-        </StatisticWrapper> */}
-        <BaseLayout
-          title='Dashboard'
+      <BaseLayout title='Dashboard'>
+        <StatisticWrapper>
+          <StatisticCard
+            title='Tổng mã sản phẩm'
+            value={statisticViewModel.sumProductAll()}
+            type='base'
+            icon={<BarChartBig size={32} />}
+          />
+          <StatisticCard
+            title='Mã đã hoàn thành'
+            value={statisticViewModel.sumProductCompleted()}
+            type='success'
+            icon={<CheckCheck size={32} />}
+          />
+          <StatisticCard
+            title='Mã đang may'
+            value={statisticViewModel.sumProductProgressing()}
+            type='warning'
+            icon={<img src={SewingIcon} className='h-[32px] w-[32px] object-contain' />}
+          />
+          <StatisticCard
+            title='Mã bị bể'
+            value={statisticViewModel.sumProductError()}
+            type='danger'
+            icon={<CircleAlert size={32} />}
+          />
+        </StatisticWrapper>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
           searchProps={{
             // Search Input
@@ -315,8 +341,8 @@ const DashboardPage = () => {
               showExpandColumn: !(width >= breakpoint.xl)
             }}
           />
-        </BaseLayout>
-      </Flex>
+        </SkyTableWrapperLayout>
+      </BaseLayout>
     </>
   )
 }

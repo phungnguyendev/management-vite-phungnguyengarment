@@ -12,6 +12,7 @@ import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicke
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -381,118 +382,112 @@ const SampleSewingPage = () => {
 
   return (
     <>
-      <BaseLayout
-        title='May mẫu'
-        loading={viewModel.table.loading}
-        searchProps={{
-          // Search Input
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Mã hàng..'
-        }}
-        sortProps={{
-          // Sort Switch Button
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          // Show delete list Switch Button
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='May mẫu'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+          searchProps={{
+            // Search Input
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Mã hàng..'
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            // Sort Switch Button
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-          expandable={{
-            expandedRowRender: (record) => {
-              return (
-                <>
-                  <SkyTableExpandableLayout>
-                    {!(width >= breakpoint.md) && (
-                      <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={false}>
-                        {columns.quantityPO(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.sm) && (
-                      <SkyTableExpandableItemRow title='Màu:' isEditing={false}>
-                        {columns.productColor(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.lg) && (
-                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={false}>
-                        {columns.productGroup(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    <SkyTableExpandableItemRow title='NPL may mẫu:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {expandableColumns.dateSubmissionNPL(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày duyệt mẫu PP:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateApprovalPP(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow title='Ngày duyệt SO:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {expandableColumns.dateApprovalSO(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày gửi mẫu lần 1:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateSubmissionFirstTime(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày gửi mẫu lần 2:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateSubmissionSecondTime(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày gửi mẫu lần 3:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateSubmissionThirdTime(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày gửi mẫu lần 4:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateSubmissionForthTime(record)}
-                    </SkyTableExpandableItemRow>
-
-                    <SkyTableExpandableItemRow
-                      title='Ngày gửi mẫu lần 5:'
-                      isEditing={viewModel.table.isEditing(record.key)}
-                    >
-                      {expandableColumns.dateSubmissionFifthTime(record)}
-                    </SkyTableExpandableItemRow>
-                  </SkyTableExpandableLayout>
-                </>
-              )
-            },
-            columnWidth: '0.001%',
-            onExpand: (expanded, record: SampleSewingTableDataType) =>
-              viewModel.table.handleStartExpanding(expanded, record.key),
-            expandedRowKeys: viewModel.table.expandingKeys
+          deleteProps={{
+            // Show delete list Switch Button
+            onChange: viewModel.action.handleSwitchDeleteChange
           }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol,
+              showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            expandable={{
+              expandedRowRender: (record) => {
+                return (
+                  <>
+                    <SkyTableExpandableLayout>
+                      {!(width >= breakpoint.md) && (
+                        <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={false}>
+                          {columns.quantityPO(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.sm) && (
+                        <SkyTableExpandableItemRow title='Màu:' isEditing={false}>
+                          {columns.productColor(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.lg) && (
+                        <SkyTableExpandableItemRow title='Nhóm:' isEditing={false}>
+                          {columns.productGroup(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      <SkyTableExpandableItemRow title='NPL may mẫu:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {expandableColumns.dateSubmissionNPL(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày duyệt mẫu PP:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateApprovalPP(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày duyệt SO:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateApprovalSO(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày gửi mẫu lần 1:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateSubmissionFirstTime(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày gửi mẫu lần 2:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateSubmissionSecondTime(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày gửi mẫu lần 3:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateSubmissionThirdTime(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày gửi mẫu lần 4:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateSubmissionForthTime(record)}
+                      </SkyTableExpandableItemRow>
+                      <SkyTableExpandableItemRow
+                        title='Ngày gửi mẫu lần 5:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {expandableColumns.dateSubmissionFifthTime(record)}
+                      </SkyTableExpandableItemRow>
+                    </SkyTableExpandableLayout>
+                  </>
+                )
+              },
+              columnWidth: '0.001%',
+              onExpand: (expanded, record: SampleSewingTableDataType) =>
+                viewModel.table.handleStartExpanding(expanded, record.key),
+              expandedRowKeys: viewModel.table.expandingKeys
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
     </>
   )

@@ -5,12 +5,12 @@
 @layer base {
   :root {
     /* Default background color of <body />...etc */
-    --background: #fafafa;
+    --background: rgb(244, 247, 254);
     --foreground: #262626;
 
     /* Background color for <Card /> */
     --card: #ffffff;
-    --card-foreground: #262626;
+    --card-foreground: rgb(0, 0, 0, 0.5);
 
     /* Muted backgrounds such as <TabsList />, <Skeleton /> and <Switch /> */
     --muted: #bfbfbf;

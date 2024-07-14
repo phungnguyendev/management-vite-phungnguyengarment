@@ -11,6 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Completion, Group, Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
+import { isValidNumber, isValidObject } from '~/utils/helpers'
 import { DashboardTableDataType } from '../type'
 
 export default function useDashboardViewModel() {
@@ -30,6 +31,7 @@ export default function useDashboardViewModel() {
   const [openModal, setOpenModal] = useState<boolean>(false)
 
   // Data
+  const [products, setProducts] = useState<Product[]>([])
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [completions, setCompletions] = useState<Completion[]>([])
@@ -51,16 +53,18 @@ export default function useDashboardViewModel() {
     sewingLineDeliveries: SewingLineDelivery[],
     completions: Completion[]
   ) => {
-    const newDataSource = products.map((product) => {
-      return {
-        ...product,
-        key: `${product.id}`,
-        productColor: productColors.find((item) => item.productID === product.id),
-        productGroup: productGroups.find((item) => item.productID === product.id),
-        completion: completions.find((item) => item.productID === product.id),
-        sewingLineDeliveries: sewingLineDeliveries.filter((item) => item.productID === product.id)
-      } as DashboardTableDataType
-    })
+    const newDataSource = products
+      .filter((item) => item.status === 'active')
+      .map((product) => {
+        return {
+          ...product,
+          key: `${product.id}`,
+          productColor: productColors.find((item) => item.productID === product.id),
+          productGroup: productGroups.find((item) => item.productID === product.id),
+          completion: completions.find((item) => item.productID === product.id),
+          sewingLineDeliveries: sewingLineDeliveries.filter((item) => item.productID === product.id)
+        } as DashboardTableDataType
+      })
     table.setDataSource(newDataSource)
   }
 
@@ -69,8 +73,12 @@ export default function useDashboardViewModel() {
    */
   const initialize = useCallback(async () => {
     try {
-      const productsResult = await productService.getItems({ paginator: { page: 1, pageSize: -1 } }, table.setLoading)
+      const productsResult = await productService.getItems(
+        { paginator: { page: 1, pageSize: -1 }, filter: { status: ['active', 'deleted'], field: 'id', items: [-1] } },
+        table.setLoading
+      )
       const newProducts = productsResult.data as Product[]
+      setProducts(newProducts)
 
       const productColorsResult = await productColorService.getItems(
         { paginator: { page: 1, pageSize: -1 } },
@@ -125,7 +133,7 @@ export default function useDashboardViewModel() {
       await productService.getItemsSync(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading,
@@ -176,8 +184,38 @@ export default function useDashboardViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
+  const sumProductAll = (): number => {
+    return products.length
+  }
+
+  const sumProductCompleted = (): number => {
+    const listCompletion = completions.filter((item) => {
+      const quantityPO =
+        isValidObject(item.product) && isValidNumber(item.product.quantityPO) ? item.product.quantityPO : 0
+      return (
+        item.quantityIroned === quantityPO &&
+        item.quantityCheckPassed === quantityPO &&
+        item.quantityPackaged === quantityPO
+      )
+    })
+    return listCompletion.length
+  }
+
+  const sumProductProgressing = (): number => {
+    return products.length
+  }
+
+  const sumProductError = (): number => {
+    return products.length
+  }
+
   return {
     state: {
+      sumProductAll,
+      sumProductCompleted,
+      sumProductProgressing,
+      sumProductError,
+      products,
       colors,
       groups,
       showDeleted,

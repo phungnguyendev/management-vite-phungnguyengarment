@@ -57,6 +57,10 @@ export const uniqueArray = <T>(duplicateArray: T[]): T[] => {
   return [...new Set(duplicateArray)]
 }
 
+export const sumArray = (numbers: number[]): number => {
+  return numbers.reduce((sum, num) => sum + num, 0)
+}
+
 export const numberValidatorDisplay = (number?: number): string => {
   if (typeof number !== 'number' || isNaN(number)) {
     return '-'
@@ -117,7 +121,7 @@ export const textValidatorInit = (text?: string): string | undefined => {
   return text ? text : undefined
 }
 
-export const numberValidatorInit = (number?: number): number | undefined => {
+export const numberValidatorInit = (number?: number | null): number | undefined => {
   return number ? number : undefined
 }
 

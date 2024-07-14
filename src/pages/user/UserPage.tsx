@@ -13,6 +13,7 @@ import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpan
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableRowHighLightTextItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightTextItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import TextHint from '~/components/sky-ui/TextHint'
 import { dateFormatter } from '~/utils/date-formatter'
 import {
@@ -355,80 +356,81 @@ const UserPage = () => {
 
   return (
     <ProtectedLayout>
-      <BaseLayout
-        title='Danh sách người dùng'
-        loading={viewModel.table.loading}
-        searchProps={{
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Ví dụ: abc@gmail.com'
-        }}
-        sortProps={{
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-        addNewProps={{
-          onClick: () => viewModel.state.setOpenModal(true)
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='Danh sách người dùng'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          columns={tableColumns}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol
+          searchProps={{
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Ví dụ: abc@gmail.com'
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-          expandable={{
-            expandedRowRender: (record) => {
-              return (
-                <SkyTableExpandableLayout>
-                  {!(width >= breakpoint.lg) && (
-                    <SkyTableExpandableItemRow title='Email:' isEditing={viewModel.table.isEditing(record.id!)}>
-                      {columns.email(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Roles:' isEditing={viewModel.table.isEditing(record.id!)}>
-                      {columns.role(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow title='Password:' isEditing={viewModel.table.isEditing(record.id!)}>
-                      {columns.password(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow title='Phone:' isEditing={viewModel.table.isEditing(record.id!)}>
-                      {columns.phone(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow
-                      title='Work description:'
-                      isEditing={viewModel.table.isEditing(record.id!)}
-                    >
-                      {columns.workDescription(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow title='Birthday:' isEditing={viewModel.table.isEditing(record.id!)}>
-                      {columns.birthday(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                </SkyTableExpandableLayout>
-              )
-            },
-            columnWidth: '0.001%',
-            showExpandColumn: !(width >= breakpoint.xxl)
+          deleteProps={{
+            onChange: viewModel.action.handleSwitchDeleteChange
           }}
-        />
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModal(true)
+          }}
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            columns={tableColumns}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            expandable={{
+              expandedRowRender: (record) => {
+                return (
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow title='Email:' isEditing={viewModel.table.isEditing(record.id!)}>
+                        {columns.email(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Roles:' isEditing={viewModel.table.isEditing(record.id!)}>
+                        {columns.role(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow title='Password:' isEditing={viewModel.table.isEditing(record.id!)}>
+                        {columns.password(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <SkyTableExpandableItemRow title='Phone:' isEditing={viewModel.table.isEditing(record.id!)}>
+                        {columns.phone(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <SkyTableExpandableItemRow
+                        title='Work description:'
+                        isEditing={viewModel.table.isEditing(record.id!)}
+                      >
+                        {columns.workDescription(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <SkyTableExpandableItemRow title='Birthday:' isEditing={viewModel.table.isEditing(record.id!)}>
+                        {columns.birthday(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                  </SkyTableExpandableLayout>
+                )
+              },
+              columnWidth: '0.001%',
+              showExpandColumn: !(width >= breakpoint.xxl)
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewUser

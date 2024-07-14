@@ -13,6 +13,7 @@ import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpa
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -412,87 +413,94 @@ const ProductPage = () => {
 
   return (
     <>
-      <BaseLayout
-        title='Danh sách sản phẩm'
-        loading={viewModel.table.loading}
-        searchProps={{
-          // Search Input
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Mã hàng..'
-        }}
-        sortProps={{
-          // Sort Switch Button
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          // Show delete list Switch Button
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-        addNewProps={
-          isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
-            ? {
-                // Add new Button
-                onClick: () => viewModel.state.setOpenModal(true)
-              }
-            : undefined
-        }
-      >
-        <SkyTable
+      <BaseLayout title='Danh sách sản phẩm'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol,
-            showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+          searchProps={{
+            // Search Input
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Mã hàng..'
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            // Sort Switch Button
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-          expandable={{
-            expandedRowRender: (record: ProductTableDataType) => {
-              return (
-                <SkyTableExpandableLayout>
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.quantityPO(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.sm) && (
-                    <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.productColor(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xl) && (
-                    <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.productGroup(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.xxl) && (
-                    <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.printablePlaces(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.md) && (
-                    <SkyTableExpandableItemRow title='Ngày nhập NPL:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.dateInputNPL(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                  {!(width >= breakpoint.lg) && (
-                    <SkyTableExpandableItemRow title='Ngày xuất FCR:' isEditing={viewModel.table.isEditing(record.key)}>
-                      {columns.dateInputNPL(record)}
-                    </SkyTableExpandableItemRow>
-                  )}
-                </SkyTableExpandableLayout>
-              )
-            },
-            columnWidth: '0.001%',
-            onExpand: (expanded, record: ProductTableDataType) =>
-              viewModel.table.handleStartExpanding(expanded, record.key),
-            expandedRowKeys: viewModel.table.expandingKeys
+          deleteProps={{
+            // Show delete list Switch Button
+            onChange: viewModel.action.handleSwitchDeleteChange
           }}
-        />
+          addNewProps={
+            isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+              ? {
+                  // Add new Button
+                  onClick: () => viewModel.state.setOpenModal(true)
+                }
+              : undefined
+          }
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol,
+              showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            expandable={{
+              expandedRowRender: (record: ProductTableDataType) => {
+                return (
+                  <SkyTableExpandableLayout>
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Số lượng PO:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.quantityPO(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.sm) && (
+                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.productColor(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xl) && (
+                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.productGroup(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.xxl) && (
+                      <SkyTableExpandableItemRow title='Nơi in:' isEditing={viewModel.table.isEditing(record.key)}>
+                        {columns.printablePlaces(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.md) && (
+                      <SkyTableExpandableItemRow
+                        title='Ngày nhập NPL:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {columns.dateInputNPL(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                    {!(width >= breakpoint.lg) && (
+                      <SkyTableExpandableItemRow
+                        title='Ngày xuất FCR:'
+                        isEditing={viewModel.table.isEditing(record.key)}
+                      >
+                        {columns.dateInputNPL(record)}
+                      </SkyTableExpandableItemRow>
+                    )}
+                  </SkyTableExpandableLayout>
+                )
+              },
+              columnWidth: '0.001%',
+              onExpand: (expanded, record: ProductTableDataType) =>
+                viewModel.table.handleStartExpanding(expanded, record.key),
+              expandedRowKeys: viewModel.table.expandingKeys
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewProduct

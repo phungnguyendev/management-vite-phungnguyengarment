@@ -6,6 +6,11 @@ module.exports = {
       center: true
     },
     extend: {
+      fontFamily: {
+        'roboto-condensed': ['Roboto Condensed', 'sans-serif'],
+        'roboto-flex': ['Roboto Flex', 'sans-serif'],
+        'roboto-mono': ['Roboto Mono', 'sans-serif']
+      },
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
@@ -14,16 +19,16 @@ module.exports = {
         ring: 'var(--ring)',
         normal: 'var(--normal)',
         warn: 'var(--warn)',
-        'bgWarn': 'var(--bg-warn)',
+        bgWarn: 'var(--bg-warn)',
         lightGrey: 'var(--light-grey)',
         error: 'var(--error)',
-        'bgError': 'var(--bg-error)',
+        bgError: 'var(--bg-error)',
         success: 'var(--success)',
-        'bgSuccess': 'var(--bg-success)',
+        bgSuccess: 'var(--bg-success)',
         blue: 'var(--blue)',
-        'bgBlue': 'var(--bg-blue)',
+        bgBlue: 'var(--bg-blue)',
         incomingSuccess: 'var(--incoming-success)',
-        'bgIncomingSuccess': 'var(--bg-incoming-success)',
+        bgIncomingSuccess: 'var(--bg-incoming-success)',
         primary: {
           DEFAULT: 'var(--primary)',
           foreground: 'var(--primary-foreground)'
@@ -70,7 +75,8 @@ module.exports = {
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out'
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        'spin-slow': 'spin 3s linear infinite'
       }
     }
   },

@@ -11,7 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Product, ProductColor, ProductGroup, SewingLine, SewingLineDelivery } from '~/typing'
-import { isValidArray } from '~/utils/helpers'
+import { isValidArray, sumArray } from '~/utils/helpers'
 import { SewingLineDeliveryTableDataType } from '../type'
 
 export default function useSewingLineDeliveryViewModel() {
@@ -138,7 +138,7 @@ export default function useSewingLineDeliveryViewModel() {
       const productsResult = await productService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading
@@ -257,6 +257,16 @@ export default function useSewingLineDeliveryViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
+  const isCheckImported = (record: SewingLineDeliveryTableDataType): boolean => {
+    return isValidArray(record.sewingLineDeliveries)
+      ? sumArray(
+          record.sewingLineDeliveries.map((item) => {
+            return item.quantitySewed ?? 0
+          })
+        ) === record.quantityPO
+      : false
+  }
+
   return {
     state: {
       colors,
@@ -285,7 +295,8 @@ export default function useSewingLineDeliveryViewModel() {
       handlePageChange,
       handleDelete,
       handleDeleteForever,
-      handleRestore
+      handleRestore,
+      isCheckImported
     },
     table
   }

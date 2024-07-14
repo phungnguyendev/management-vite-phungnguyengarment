@@ -7,11 +7,13 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
 import { SewingLineDelivery, UserRoleType } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
@@ -44,9 +46,12 @@ const SewingLineDeliveryPage = () => {
   const columns = {
     productCode: (record: SewingLineDeliveryTableDataType) => {
       return (
-        <SkyTableTypography strong status={record.status}>
-          {textValidatorDisplay(record.productCode)}
-        </SkyTableTypography>
+        <Space direction='horizontal' wrap>
+          <SkyTableTypography strong status={record.status}>
+            {textValidatorDisplay(record.productCode)}{' '}
+          </SkyTableTypography>
+          {viewModel.action.isCheckImported(record) && <SkyTableCheckedIcon />}
+        </Space>
       )
     },
     productColor: (record: SewingLineDeliveryTableDataType) => {
@@ -294,73 +299,71 @@ const SewingLineDeliveryPage = () => {
 
   return (
     <>
-      <BaseLayout
-        title='Chuyền may'
-        loading={viewModel.table.loading}
-        searchProps={{
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Mã hàng..'
-        }}
-        sortProps={{
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='Chuyền may'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+          searchProps={{
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Mã hàng..'
           }}
-          columns={tableColumns}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-          expandable={{
-            expandedRowRender: (record: SewingLineDeliveryTableDataType) => {
-              return (
-                <>
-                  <SkyTableExpandableLayout>
-                    {!(width >= breakpoint.md) && (
-                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
-                        {columns.productColor(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.lg) && (
-                      <SkyTableExpandableItemRow
-                        title='Số lượng PO:'
-                        isEditing={viewModel.table.isEditing(`${record.id}`)}
-                      >
-                        {columns.quantityPO(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.xl) && (
-                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
-                        {columns.productGroup(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    <SewingLineDeliveryExpandableList
-                      parentRecord={record}
-                      isEditing={viewModel.table.isEditing(record.key)}
-                      newRecord={viewModel.state.newRecord}
-                      setNewRecord={viewModel.state.setNewRecord}
-                    />
-                  </SkyTableExpandableLayout>
-                </>
-              )
-            },
-            columnWidth: '0.001%'
+          deleteProps={{
+            onChange: viewModel.action.handleSwitchDeleteChange
           }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol,
+              showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            columns={tableColumns}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            expandable={{
+              expandedRowRender: (record: SewingLineDeliveryTableDataType) => {
+                return (
+                  <>
+                    <SkyTableExpandableLayout>
+                      {!(width >= breakpoint.md) && (
+                        <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                          {columns.productColor(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.lg) && (
+                        <SkyTableExpandableItemRow
+                          title='Số lượng PO:'
+                          isEditing={viewModel.table.isEditing(`${record.id}`)}
+                        >
+                          {columns.quantityPO(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.xl) && (
+                        <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                          {columns.productGroup(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      <SewingLineDeliveryExpandableList
+                        parentRecord={record}
+                        isEditing={viewModel.table.isEditing(record.key)}
+                        newRecord={viewModel.state.newRecord}
+                        setNewRecord={viewModel.state.setNewRecord}
+                      />
+                    </SkyTableExpandableLayout>
+                  </>
+                )
+              },
+              columnWidth: '0.001%'
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
     </>
   )
