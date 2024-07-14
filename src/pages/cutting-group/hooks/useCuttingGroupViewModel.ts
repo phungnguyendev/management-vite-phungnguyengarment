@@ -11,7 +11,14 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, CuttingGroup, Group, Product, ProductColor, ProductGroup } from '~/typing'
-import { booleanComparator, dateComparator, isValidBoolean, isValidObject, numberComparator } from '~/utils/helpers'
+import {
+  booleanComparator,
+  dateComparator,
+  isValidBoolean,
+  isValidObject,
+  numberComparator,
+  numberValidatorCalc
+} from '~/utils/helpers'
 import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
 
 export default function useCuttingGroupViewModel() {
@@ -115,7 +122,7 @@ export default function useCuttingGroupViewModel() {
       const productResult = await productService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading
@@ -143,7 +150,7 @@ export default function useCuttingGroupViewModel() {
         (numberComparator(newRecord.quantityRealCut, record.cuttingGroup.quantityRealCut) ||
           dateComparator(newRecord.dateTimeCut, record.cuttingGroup.dateTimeCut) ||
           dateComparator(newRecord.dateSendEmbroidered, record.cuttingGroup.dateSendEmbroidered) ||
-          numberComparator(newRecord.quantityDeliveredBTP, record.cuttingGroup.quantityDeliveredBTP) ||
+          numberComparator(newRecord.quantitySendDeliveredBTP, record.cuttingGroup.quantitySendDeliveredBTP) ||
           booleanComparator(newRecord.syncStatus, record.cuttingGroup.syncStatus) ||
           dateComparator(newRecord.dateArrived1Th, record.cuttingGroup.dateArrived1Th) ||
           dateComparator(newRecord.dateArrived2Th, record.cuttingGroup.dateArrived2Th) ||
@@ -244,7 +251,45 @@ export default function useCuttingGroupViewModel() {
   }
 
   const isChecked = (record: CuttingGroupTableDataType): boolean => {
-    return isValidBoolean(record.cuttingGroup?.syncStatus) ? record.cuttingGroup.syncStatus : false
+    if (isValidObject(record.cuttingGroup)) {
+      if (isValidBoolean(record.cuttingGroup.syncStatus)) {
+        // Kiểm tra sl in thêu về
+        const {
+          quantityArrived1Th,
+          quantityArrived2Th,
+          quantityArrived3Th,
+          quantityArrived4Th,
+          quantityArrived5Th,
+          quantityArrived6Th,
+          quantityArrived7Th,
+          quantityArrived8Th,
+          quantityArrived9Th,
+          quantityArrived10Th
+        } = record.cuttingGroup
+        const sumQuantityArrivedAmount =
+          numberValidatorCalc(quantityArrived1Th) +
+          numberValidatorCalc(quantityArrived2Th) +
+          numberValidatorCalc(quantityArrived3Th) +
+          numberValidatorCalc(quantityArrived4Th) +
+          numberValidatorCalc(quantityArrived5Th) +
+          numberValidatorCalc(quantityArrived6Th) +
+          numberValidatorCalc(quantityArrived7Th) +
+          numberValidatorCalc(quantityArrived8Th) +
+          numberValidatorCalc(quantityArrived9Th) +
+          numberValidatorCalc(quantityArrived10Th)
+        // Kiểm tra số sượng thực cắt
+        const sumQuantityRealCutAmount = record.cuttingGroup.quantityRealCut
+        return (
+          sumQuantityArrivedAmount >= numberValidatorCalc(record.quantityPO) &&
+          numberValidatorCalc(sumQuantityRealCutAmount) >= numberValidatorCalc(record.quantityPO)
+        )
+      } else {
+        // Kiểm tra số sượng thực cắt
+        const sumQuantityRealCutAmount = record.cuttingGroup.quantityRealCut ?? 0
+        return sumQuantityRealCutAmount >= (record.quantityPO ?? 0)
+      }
+    }
+    return false
   }
 
   const isDisableRecord = (record: CuttingGroupTableDataType): boolean => {
