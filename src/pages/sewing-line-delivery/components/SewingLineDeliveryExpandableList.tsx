@@ -163,6 +163,7 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                           key={index}
                           className='w-fit'
                           type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : undefined}
+                          status={record.sewingLine?.status}
                         >
                           {isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
                             ? `${record.sewingLine?.name} (Bể)`
