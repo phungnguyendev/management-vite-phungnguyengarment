@@ -1,4 +1,5 @@
 import AgeGroupIcon from './age-group.svg'
+import BieChatIcon from './bie-chart.svg'
 import ColorIcon from './color.svg'
 import CutIcon from './cut.svg'
 import DashboardIcon from './dashboard.svg'
@@ -10,6 +11,7 @@ import PackageSearchIcon from './package-search.svg'
 import PackageSuccessIcon from './package-success.svg'
 import PrintIcon from './print.svg'
 import SewingMachineIcon from './sewing-machine.svg'
+import SewingIcon from './sewing.svg'
 import UnitIcon from './unit.svg'
 import UserRoleIcon from './user-role.svg'
 import UserIcon from './user.svg'
@@ -17,6 +19,7 @@ import WarehouseIcon from './warehouse.svg'
 
 export {
   AgeGroupIcon,
+  BieChatIcon,
   ColorIcon,
   CutIcon,
   DashboardIcon,
@@ -27,6 +30,7 @@ export {
   PackageSearchIcon,
   PackageSuccessIcon,
   PrintIcon,
+  SewingIcon,
   SewingMachineIcon,
   UnitIcon,
   UserIcon,

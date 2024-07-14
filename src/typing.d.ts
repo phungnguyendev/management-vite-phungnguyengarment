@@ -222,31 +222,24 @@ export interface CuttingGroup {
   quantityRealCut?: number
   dateTimeCut?: string
   dateSendEmbroidered?: string
-  quantityDeliveredBTP?: number
+  dateSendDeliveredBTP?: string
+  quantitySendDeliveredBTP?: number
   status?: ItemStatusType
   syncStatus?: boolean
-  dateArrived1Th?: string
-  quantityArrived1Th?: number
-  dateArrived2Th?: string
-  quantityArrived2Th?: number
-  dateArrived3Th?: string
-  quantityArrived3Th?: number
-  dateArrived4Th?: string
-  quantityArrived4Th?: number
-  dateArrived5Th?: string
-  quantityArrived5Th?: number
-  dateArrived6Th?: string
-  quantityArrived6Th?: number
-  dateArrived7Th?: string
-  quantityArrived7Th?: number
-  dateArrived8Th?: string
-  quantityArrived8Th?: number
-  dateArrived9Th?: string
-  quantityArrived9Th?: number
-  dateArrived10Th?: string
-  quantityArrived10Th?: number
   createdAt?: string
   updatedAt?: string
+  product?: Product
+}
+
+export interface CutGroupEmbroidering {
+  id?: number
+  cuttingGroupID?: number
+  status?: ItemStatusType
+  dateArrived?: string
+  quantityArrived?: number
+  createdAt?: string
+  updatedAt?: string
+  cuttingGroup?: CuttingGroup
 }
 
 export interface SewingLineDelivery {

@@ -7,6 +7,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewSewingLine from './components/ModalAddNewSewingLine'
 import useSewingLineViewModel from './hooks/useSewingLineViewModel'
@@ -102,37 +103,38 @@ const SewingLinePage: React.FC<Props> = () => {
 
   return (
     <ProtectedLayout>
-      <BaseLayout
-        title='Danh sách chuyền may'
-        loading={viewModel.table.loading}
-        searchProps={{
-          placeholder: 'Ví dụ: Chuyền 1',
-          onSearch: viewModel.action.handleSearch
-        }}
-        sortProps={{
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-        addNewProps={{
-          onClick: () => viewModel.state.setOpenModal(true)
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='Danh sách chuyền may'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          columns={tableColumns}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol
+          searchProps={{
+            placeholder: 'Ví dụ: Chuyền 1',
+            onSearch: viewModel.action.handleSearch
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-        />
+          deleteProps={{
+            onChange: viewModel.action.handleSwitchDeleteChange
+          }}
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModal(true)
+          }}
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            columns={tableColumns}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewSewingLine

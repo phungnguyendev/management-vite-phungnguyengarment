@@ -19,7 +19,7 @@ export type ResponseDataType = {
   total?: number
 }
 
-export type Filter = { status?: ItemStatusType; field?: string; items: number[] }
+export type Filter = { status?: ItemStatusType[]; field?: string; items: number[] }
 export type Paginator = { page?: number; pageSize?: number }
 export type Search = {
   field?: string

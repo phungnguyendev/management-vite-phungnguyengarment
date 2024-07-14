@@ -50,7 +50,6 @@ export default function useImportationViewModel() {
     products: Product[],
     productColors: ProductColor[],
     productGroups: ProductGroup[],
-    // printablePlaces: PrintablePlace[],
     importations: Importation[]
   ) => {
     const newDataSource = products.map((product) => {
@@ -59,7 +58,6 @@ export default function useImportationViewModel() {
         key: `${product.id}`,
         productColor: productColors.find((item) => item.productID === product.id),
         productGroup: productGroups.find((item) => item.productID === product.id),
-        // printablePlace: printablePlaces.find((item) => item.productID === product.id),
         expandableImportationTableDataTypes: importations
           .filter((item) => item.productID === product.id)
           .map((item) => {
@@ -124,7 +122,7 @@ export default function useImportationViewModel() {
       const productResult = await productService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading

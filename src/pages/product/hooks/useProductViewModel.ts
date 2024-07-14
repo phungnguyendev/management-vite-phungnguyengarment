@@ -142,7 +142,7 @@ export default function useProductViewModel() {
       await productService.getItemsSync(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading,

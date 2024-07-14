@@ -3,7 +3,7 @@ import useLocalStorage from './useLocalStorage'
 
 export const defaultRequestBody: RequestBodyType = {
   filter: {
-    status: 'active',
+    status: ['active'],
     items: [-1]
   },
   paginator: {

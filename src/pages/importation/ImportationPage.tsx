@@ -6,11 +6,12 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
+import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
-import SkyTableStatusItem from '~/components/sky-ui/SkyTable/SkyTableStatusItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
 import { UserRoleType } from '~/typing'
 import {
@@ -42,7 +43,7 @@ const ImportationPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>
-          {viewModel.action.isCheckImported(record) && <SkyTableStatusItem>Imported</SkyTableStatusItem>}
+          {viewModel.action.isCheckImported(record) && <SkyTableCheckedIcon />}
         </Space>
       )
     },
@@ -161,87 +162,85 @@ const ImportationPage = () => {
 
   return (
     <>
-      <BaseLayout
-        title='Xuất nhập khẩu'
-        loading={viewModel.table.loading}
-        searchProps={{
-          // Search Input
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Mã hàng..'
-        }}
-        sortProps={{
-          // Sort Switch Button
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          // Show delete list Switch Button
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='Xuất nhập khẩu'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol,
-            showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+          searchProps={{
+            // Search Input
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Mã hàng..'
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            // Sort Switch Button
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-          expandable={{
-            expandedRowRender: (record: ImportationTableDataType) => {
-              return (
-                <>
-                  <SkyTableExpandableLayout>
-                    {!(width >= breakpoint.lg) && (
-                      <SkyTableExpandableItemRow
-                        title='Số lượng PO:'
-                        isEditing={viewModel.table.isEditing(`${record.id}`)}
-                      >
-                        {columns.quantityPO(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.md) && (
-                      <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
-                        {columns.productColor(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    {!(width >= breakpoint.xl) && (
-                      <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
-                        {columns.productGroup(record)}
-                      </SkyTableExpandableItemRow>
-                    )}
-
-                    <ImportationTable
-                      permissionAcceptRole={isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)}
-                      productRecord={record}
-                      viewModelProps={{
-                        tableProps: viewModel.table,
-                        showDeleted: viewModel.state.showDeleted,
-                        newRecord: viewModel.state.newRecord,
-                        setNewRecord: viewModel.state.setNewRecord,
-                        handleUpdate: viewModel.action.handleUpdate,
-                        handleDelete: viewModel.action.handleDelete,
-                        handleDeleteForever: viewModel.action.handleDeleteForever,
-                        handleRestore: viewModel.action.handleRestore,
-                        handlePageChange: viewModel.action.handlePageExpandedChange
-                      }}
-                    />
-                  </SkyTableExpandableLayout>
-                </>
-              )
-            },
-            columnWidth: '0.001%',
-            onExpand: (expanded, record: ImportationTableDataType) =>
-              viewModel.table.handleStartExpanding(expanded, record.key),
-            expandedRowKeys: viewModel.table.expandingKeys
+          deleteProps={{
+            // Show delete list Switch Button
+            onChange: viewModel.action.handleSwitchDeleteChange
           }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol,
+              showAction: !viewModel.state.showDeleted && isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            expandable={{
+              expandedRowRender: (record: ImportationTableDataType) => {
+                return (
+                  <>
+                    <SkyTableExpandableLayout>
+                      {!(width >= breakpoint.lg) && (
+                        <SkyTableExpandableItemRow
+                          title='Số lượng PO:'
+                          isEditing={viewModel.table.isEditing(`${record.id}`)}
+                        >
+                          {columns.quantityPO(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.md) && (
+                        <SkyTableExpandableItemRow title='Màu:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                          {columns.productColor(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      {!(width >= breakpoint.xl) && (
+                        <SkyTableExpandableItemRow title='Nhóm:' isEditing={viewModel.table.isEditing(`${record.id}`)}>
+                          {columns.productGroup(record)}
+                        </SkyTableExpandableItemRow>
+                      )}
+                      <ImportationTable
+                        permissionAcceptRole={isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)}
+                        productRecord={record}
+                        viewModelProps={{
+                          tableProps: viewModel.table,
+                          showDeleted: viewModel.state.showDeleted,
+                          newRecord: viewModel.state.newRecord,
+                          setNewRecord: viewModel.state.setNewRecord,
+                          handleUpdate: viewModel.action.handleUpdate,
+                          handleDelete: viewModel.action.handleDelete,
+                          handleDeleteForever: viewModel.action.handleDeleteForever,
+                          handleRestore: viewModel.action.handleRestore,
+                          handlePageChange: viewModel.action.handlePageExpandedChange
+                        }}
+                      />
+                    </SkyTableExpandableLayout>
+                  </>
+                )
+              },
+              columnWidth: '0.001%',
+              onExpand: (expanded, record: ImportationTableDataType) =>
+                viewModel.table.handleStartExpanding(expanded, record.key),
+              expandedRowKeys: viewModel.table.expandingKeys
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewImportation

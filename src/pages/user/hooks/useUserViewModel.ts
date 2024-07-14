@@ -78,7 +78,7 @@ export default function useUserViewModel() {
       const result = await userService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'email', term: query.searchTerm }
         },
         table.setLoading

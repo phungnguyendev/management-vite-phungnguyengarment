@@ -1,58 +1,51 @@
-import { Col, Flex, Statistic, Typography } from 'antd'
+import { Col, Flex, Spin, Typography } from 'antd'
+import { LoaderCircle } from 'lucide-react'
 import React from 'react'
+import AnimatedNumber from '~/components/sky-ui/AnimationNumber'
 import { cn } from '~/utils/helpers'
 
 interface StatisticCardProps {
   loading?: boolean
   title: string
-  value: number | string
-  subTitle: string
-  type: 'danger' | 'warning' | 'success' | 'default'
+  value: number
+  icon: React.ReactNode
+  type: 'danger' | 'warning' | 'success' | 'default' | 'base'
 }
 
-const StatisticCard: React.FC<StatisticCardProps> = ({ loading, title, value, type = 'default', subTitle }) => {
+const StatisticCard: React.FC<StatisticCardProps> = ({ loading, icon, title, value, type = 'default' }) => {
   return (
     <>
-      <Col span={6} className={cn('relative overflow-hidden')}>
+      <Col xs={24} sm={12} lg={6}>
         <Flex
-          vertical
           gap={20}
+          vertical
           align='center'
           justify='center'
-          className={cn('flex items-center rounded-lg p-2 sm:p-3 md:p-4 lg:p-5', {
-            'bg-error': type === 'danger',
-            'bg-fixing': type === 'warning',
-            'bg-success': type === 'success',
-            'bg-blue': type === 'default'
+          className={cn('relative w-full overflow-hidden rounded-lg bg-gradient-to-r p-5', {
+            'from-[#f5242e] to-[#ff8187]': type === 'danger',
+            'from-[#f6c000] to-[#ffe480]': type === 'warning',
+            'from-[#17c654] to-[#37ff7d]': type === 'success',
+            'from-[#000000] to-[#00000080]': type === 'default',
+            'from-[#0000ff] to-[#8484ff]': type === 'base'
           })}
         >
-          <Statistic
-            loading={loading}
-            title={<Typography.Text className='text-2xl font-bold text-white'>{title}</Typography.Text>}
-            value={value}
-            valueStyle={{ color: '#ffffff', fontSize: '32px', fontFamily: 'monospace' }}
-            className='h-full w-full font-bold'
-          />
-          <Flex gap={5} className='h-full w-full' align='center'>
-            <div
-              className={cn('h-2 w-2 rounded-full bg-black', {
-                // 'bg-black': type === 'danger',
-                // 'bg-black': type === 'warning',
-                // 'bg-black': type === 'success',
-                // 'bg-black': type === 'default'
-              })}
-            />
-            <Typography.Text
-              code
-              className={cn('text-white', {
-                hidden: !subTitle
-              })}
-            >
-              {subTitle}
-            </Typography.Text>
+          <Flex justify='center' align='start' className='w-full' gap={20}>
+            <Flex justify='center' align='center' className='h-fit w-fit text-white'>
+              {icon}
+            </Flex>
+            <Flex vertical className='w-full' gap={10}>
+              <Typography.Text className='text-md font-bold text-white'>{title.toUpperCase()}</Typography.Text>
+              {loading ? (
+                <Flex className='w-full'>
+                  <Spin size='large' indicator={<LoaderCircle className='animate-spin text-white' strokeWidth={2} />} />
+                </Flex>
+              ) : (
+                <AnimatedNumber end={value} duration={2000} className='text-3xl font-bold text-white' />
+              )}
+            </Flex>
           </Flex>
-          <div className='absolute -right-12 -top-6 h-20 w-20 rounded-full bg-white bg-opacity-50 md:-top-12 md:h-40 md:w-40' />
-          <div className='absolute -bottom-14 -right-10 h-32 w-32 rounded-full bg-white bg-opacity-25 md:-bottom-28 md:h-48 md:w-48' />
+          <div className='absolute -right-16 -top-20 h-40 w-40 rounded-full bg-white bg-opacity-50' />
+          <div className='absolute -right-10 top-12 h-48 w-48 rounded-full bg-white bg-opacity-25' />
         </Flex>
       </Col>
     </>

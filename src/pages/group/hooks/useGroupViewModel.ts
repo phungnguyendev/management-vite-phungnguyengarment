@@ -60,7 +60,7 @@ export default function useGroupViewModel() {
       const result = await groupService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'name', term: query.searchTerm }
         },
         table.setLoading

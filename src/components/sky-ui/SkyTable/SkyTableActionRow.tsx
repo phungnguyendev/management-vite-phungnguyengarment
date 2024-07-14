@@ -54,7 +54,7 @@ const SkyTableActionRow = <T extends { key: string }>({ record, ...props }: SkyT
       <Flex className={props.className}>
         <Flex align='center' justify='space-between'>
           {isEditing && isShowButton(props.buttonSave) ? (
-            <Flex className={cn('flex-col lg:flex-row', props.className)} gap={5}>
+            <Flex className={cn('flex-col', props.className)} gap={5}>
               <Button
                 type={props.buttonSave?.type ?? 'primary'}
                 onClick={props.buttonSave?.onClick}
@@ -67,12 +67,12 @@ const SkyTableActionRow = <T extends { key: string }>({ record, ...props }: SkyT
               </PopConfirm>
             </Flex>
           ) : (
-            <Flex gap={10} className={cn('flex-col lg:flex-row', props.className)} justify='center'>
+            <Flex gap={10} className={cn('flex-col', props.className)} justify='center'>
               {isShowButton(props.buttonAdd) && (
                 <Button
                   type={props.buttonAdd.type ?? 'primary'}
-                  disabled={props.buttonAdd.disabled ?? isDisableButton(props.buttonAdd)}
                   onClick={props.buttonAdd.onClick}
+                  disabled={props.buttonAdd.disabled ?? isDisableButton(props.buttonAdd)}
                 >
                   {props.buttonAdd.title ?? 'Add'}
                 </Button>

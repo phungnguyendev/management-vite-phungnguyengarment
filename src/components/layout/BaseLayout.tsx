@@ -1,31 +1,9 @@
-import { Button, ButtonProps, Flex, Spin, Switch, Typography } from 'antd'
-import { SearchProps } from 'antd/es/input'
-import { SwitchProps } from 'antd/lib'
-import { Plus } from 'lucide-react'
+import { Flex, Typography } from 'antd'
 import React from 'react'
-import ExportToExcel, { ExportToExcelProps } from '../sky-ui/ExportToExcel'
-import SearchBar from '../sky-ui/SearchBar'
 
-interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
-  loading?: boolean
-  onLoading?: (enable: boolean) => void
-  searchProps: SearchProps
-  sortProps?: SwitchProps
-  deleteProps?: SwitchProps
-  addNewProps?: ButtonProps
-  exportAsExcelProps?: ExportToExcelProps
-}
+interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {}
 
-const BaseLayout: React.FC<BaseLayoutProps> = ({
-  searchProps,
-  sortProps,
-  deleteProps,
-  addNewProps,
-  children,
-  loading,
-  exportAsExcelProps,
-  ...props
-}) => {
+const BaseLayout: React.FC<BaseLayoutProps> = ({ children, ...props }) => {
   return (
     <div {...props} className='w-full'>
       <Flex vertical gap={40} className='w-full'>
@@ -34,27 +12,8 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
             {props.title}
           </Typography.Title>
         )}
-        <Flex vertical gap={20} className='w-full rounded-md bg-white p-5'>
-          <Flex gap={20} align='center' className='w-full flex-col md:flex-row'>
-            {searchProps && <SearchBar {...searchProps} className='w-full md:w-[500px]' />}
-            <Flex justify='space-between' align='center' className='w-full'>
-              <Flex gap={10} align='center' className='w-full'>
-                {sortProps && (
-                  <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sort' defaultChecked={false} />
-                )}
-                {deleteProps && (
-                  <Switch {...deleteProps} checkedChildren='Deleted list' unCheckedChildren='Deleted list' />
-                )}
-                {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
-              </Flex>
-              {addNewProps && (
-                <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
-                  Add
-                </Button>
-              )}
-            </Flex>
-          </Flex>
-          {loading ? <Spin /> : children}
+        <Flex vertical gap={20}>
+          {children}
         </Flex>
       </Flex>
     </div>

@@ -9,6 +9,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { colorValidatorChange, textValidatorChange, textValidatorDisplay } from '~/utils/helpers'
 import ModalAddNewColor from './components/ModalAddNewColor'
 import useColorViewModel from './hooks/useColorViewModel'
@@ -136,37 +137,38 @@ const ColorPage: React.FC<Props> = () => {
 
   return (
     <ProtectedLayout>
-      <BaseLayout
-        title='Danh sách màu'
-        loading={viewModel.table.loading}
-        searchProps={{
-          onSearch: viewModel.action.handleSearch,
-          placeholder: 'Ví dụ: Black, White,..'
-        }}
-        sortProps={{
-          onChange: viewModel.action.handleSwitchSortChange
-        }}
-        deleteProps={{
-          onChange: viewModel.action.handleSwitchDeleteChange
-        }}
-        addNewProps={{
-          onClick: () => viewModel.state.setOpenModal(true)
-        }}
-      >
-        <SkyTable
+      <BaseLayout title='Danh sách màu'>
+        <SkyTableWrapperLayout
           loading={viewModel.table.loading}
-          columns={tableColumns}
-          tableColumns={{
-            columns: tableColumns,
-            actionColumn: actionCol
+          searchProps={{
+            onSearch: viewModel.action.handleSearch,
+            placeholder: 'Ví dụ: Black, White,..'
           }}
-          dataSource={viewModel.table.dataSource}
-          pagination={{
-            pageSize: viewModel.table.paginator.pageSize,
-            current: viewModel.table.paginator.page,
-            onChange: viewModel.action.handlePageChange
+          sortProps={{
+            onChange: viewModel.action.handleSwitchSortChange
           }}
-        />
+          deleteProps={{
+            onChange: viewModel.action.handleSwitchDeleteChange
+          }}
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModal(true)
+          }}
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            columns={tableColumns}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+            }}
+            dataSource={viewModel.table.dataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
       {viewModel.state.openModal && (
         <ModalAddNewColor

@@ -4,7 +4,7 @@ import React from 'react'
 const StatisticWrapper: React.FC<RowProps> = ({ ...props }) => {
   return (
     <>
-      <Row {...props} gutter={16}>
+      <Row {...props} gutter={[20, 20]}>
         {props.children}
       </Row>
     </>
