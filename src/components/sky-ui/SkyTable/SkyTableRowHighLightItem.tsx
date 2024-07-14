@@ -19,12 +19,11 @@ const SkyTableRowHighLightItem: React.FC<SkyTableRowHighLightItemProps> = ({
           'bg-lightGrey text-foreground': type === 'secondary',
           'bg-bgSuccess text-success': type === 'success',
           'bg-bgWarn text-warn': type === 'warning',
-          'bg-bgError text-error': type === 'danger'
+          'bg-bgError text-error': type === 'danger' || status === 'deleted'
         },
         props.className
       )}
       delete={status === 'deleted'}
-      // type={'warning'}
     >
       {props.children}
     </Typography.Text>
