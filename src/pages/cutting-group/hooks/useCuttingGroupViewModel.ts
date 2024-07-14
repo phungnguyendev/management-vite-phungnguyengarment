@@ -2,6 +2,7 @@ import { App as AntApp } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 import { ResponseDataType } from '~/api/client'
 import ColorAPI from '~/api/services/ColorAPI'
+import CutGroupEmbroideringAPI from '~/api/services/CutGroupEmbroideringAPI'
 import CuttingGroupAPI from '~/api/services/CuttingGroupAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
@@ -10,19 +11,22 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, CuttingGroup, Group, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, CutGroupEmbroidering, CuttingGroup, Group, Product, ProductColor, ProductGroup } from '~/typing'
 import { booleanComparator, dateComparator, isValidBoolean, isValidObject, numberComparator } from '~/utils/helpers'
 import { CuttingGroupNewRecordProps, CuttingGroupTableDataType } from '../type'
+import useCutGroupExpandableViewModel from './useCutGroupViewModel'
 
 export default function useCuttingGroupViewModel() {
   const { message } = AntApp.useApp()
   const table = useTable<CuttingGroupTableDataType>([])
+  const expandableViewModel = useCutGroupExpandableViewModel()
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const cuttingGroupService = useAPIService<CuttingGroup>(CuttingGroupAPI)
+  const cutGroupEmbroideringService = useAPIService<CutGroupEmbroidering>(CutGroupEmbroideringAPI)
   const colorService = useAPIService<Color>(ColorAPI)
   const groupService = useAPIService<Group>(GroupAPI)
 
@@ -36,6 +40,7 @@ export default function useCuttingGroupViewModel() {
   const [productColors, setProductColors] = useState<ProductColor[]>([])
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [cuttingGroups, setCuttingGroups] = useState<CuttingGroup[]>([])
+  const [cutGroupEmbroideries, setCutGroupEmbroideries] = useState<CutGroupEmbroidering[]>([])
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
 
@@ -50,15 +55,19 @@ export default function useCuttingGroupViewModel() {
     products: Product[],
     productColors: ProductColor[],
     productGroups: ProductGroup[],
-    cuttingGroups: CuttingGroup[]
+    cuttingGroups: CuttingGroup[],
+    cutGroupEmbroideries: CutGroupEmbroidering[]
   ) => {
     const newDataSource = products.map((product) => {
+      const cuttingGroup = cuttingGroups.find((item) => item.productID === product.id)
+
       return {
         ...product,
         key: `${product.id}`,
         productColor: productColors.find((item) => item.productID === product.id),
         productGroup: productGroups.find((item) => item.productID === product.id),
-        cuttingGroup: cuttingGroups.find((item) => item.productID === product.id)
+        cuttingGroup: cuttingGroups.find((item) => item.productID === product.id),
+        expandable: cutGroupEmbroideries.filter((item) => item.cuttingGroupID === cuttingGroup?.id)
       } as CuttingGroupTableDataType
     })
     table.setDataSource(newDataSource)
@@ -93,6 +102,13 @@ export default function useCuttingGroupViewModel() {
       const newCuttingGroups = cuttingGroupResult.data as CuttingGroup[]
       setCuttingGroups(newCuttingGroups)
 
+      const cutGroupEmbroideringResult = await cutGroupEmbroideringService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newCutGroupEmbroideries = cutGroupEmbroideringResult.data as CutGroupEmbroidering[]
+      setCutGroupEmbroideries(newCutGroupEmbroideries)
+
       await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
         if (!result.success) throw new Error(define('dataLoad_failed'))
         setColors(result.data as Color[])
@@ -102,7 +118,7 @@ export default function useCuttingGroupViewModel() {
         setGroups(result.data as Group[])
       })
 
-      dataMapped(newProducts, newProductColors, newProductGroups, newCuttingGroups)
+      dataMapped(newProducts, newProductColors, newProductGroups, newCuttingGroups, newCutGroupEmbroideries)
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
@@ -115,7 +131,7 @@ export default function useCuttingGroupViewModel() {
       const productResult = await productService.getItems(
         {
           paginator: { page: 1, pageSize: -1 },
-          filter: { field: 'id', items: [-1], status: query.isDeleted ? 'deleted' : 'active' },
+          filter: { field: 'id', items: [-1], status: query.isDeleted ? ['deleted'] : ['active'] },
           search: { field: 'productCode', term: query.searchTerm }
         },
         table.setLoading
@@ -124,7 +140,7 @@ export default function useCuttingGroupViewModel() {
       if (!productResult.success) throw new Error(define('dataLoad_failed'))
       const newProducts = productResult.data as Product[]
 
-      dataMapped(newProducts, productColors, productGroups, cuttingGroups)
+      dataMapped(newProducts, productColors, productGroups, cuttingGroups, cutGroupEmbroideries)
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -135,26 +151,17 @@ export default function useCuttingGroupViewModel() {
 
   const handleUpdate = async (record: CuttingGroupTableDataType) => {
     try {
+      console.log({ newRecord, record })
       table.setLoading(true)
       if (!newRecord) return
-
       if (
         isValidObject(record.cuttingGroup) &&
         (numberComparator(newRecord.quantityRealCut, record.cuttingGroup.quantityRealCut) ||
           dateComparator(newRecord.dateTimeCut, record.cuttingGroup.dateTimeCut) ||
           dateComparator(newRecord.dateSendEmbroidered, record.cuttingGroup.dateSendEmbroidered) ||
-          numberComparator(newRecord.quantityDeliveredBTP, record.cuttingGroup.quantityDeliveredBTP) ||
-          booleanComparator(newRecord.syncStatus, record.cuttingGroup.syncStatus) ||
-          dateComparator(newRecord.dateArrived1Th, record.cuttingGroup.dateArrived1Th) ||
-          dateComparator(newRecord.dateArrived2Th, record.cuttingGroup.dateArrived2Th) ||
-          dateComparator(newRecord.dateArrived3Th, record.cuttingGroup.dateArrived3Th) ||
-          dateComparator(newRecord.dateArrived4Th, record.cuttingGroup.dateArrived4Th) ||
-          dateComparator(newRecord.dateArrived5Th, record.cuttingGroup.dateArrived5Th) ||
-          numberComparator(newRecord.quantityArrived1Th, record.cuttingGroup.quantityArrived1Th) ||
-          numberComparator(newRecord.quantityArrived2Th, record.cuttingGroup.quantityArrived2Th) ||
-          numberComparator(newRecord.quantityArrived3Th, record.cuttingGroup.quantityArrived3Th) ||
-          numberComparator(newRecord.quantityArrived4Th, record.cuttingGroup.quantityArrived4Th) ||
-          numberComparator(newRecord.quantityArrived5Th, record.cuttingGroup.quantityArrived5Th))
+          dateComparator(newRecord.dateSendDeliveredBTP, record.cuttingGroup.dateSendDeliveredBTP) ||
+          numberComparator(newRecord.quantitySendDeliveredBTP, record.cuttingGroup.quantitySendDeliveredBTP) ||
+          booleanComparator(newRecord.syncStatus, record.cuttingGroup.syncStatus))
       ) {
         await cuttingGroupService.updateItemBySync(
           { field: 'productID', id: record.id! },
@@ -285,6 +292,7 @@ export default function useCuttingGroupViewModel() {
       isDisableRecord,
       handleRestore
     },
-    table
+    table,
+    expandableViewModel
   }
 }

@@ -1,13 +1,29 @@
-import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
+import { CutGroupEmbroidering, CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CuttingGroupTableDataType extends Product {
   key: string
   productColor?: ProductColor
   productGroup?: ProductGroup
   cuttingGroup?: CuttingGroup
+  expandable?: CutGroupEmbroideringTableDataType[]
 }
 
-export interface CuttingGroupNewRecordProps extends CuttingGroup {
-  productColorID?: number | null // Using for compare check box
-  cuttingGroupID?: number | null // Using for compare check box
+export interface CuttingGroupNewRecordProps {
+  productID?: number
+  quantityRealCut?: number
+  dateTimeCut?: string
+  dateSendEmbroidered?: string
+  dateSendDeliveredBTP?: string
+  quantitySendDeliveredBTP?: number
+  syncStatus?: boolean
+}
+
+export interface CutGroupEmbroideringTableDataType extends CutGroupEmbroidering {
+  key: string
+}
+
+export interface CutGroupEmbroideringNewRecordProps {
+  cuttingGroupID?: number
+  dateArrived?: string
+  quantityArrived?: number
 }
