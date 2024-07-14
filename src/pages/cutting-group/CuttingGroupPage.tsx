@@ -513,9 +513,7 @@ const SampleSewingPage = () => {
             onClick: () => {
               if (isValidObject(record.cuttingGroup)) {
                 viewModel.state.setNewRecord({
-                  ...record.cuttingGroup,
-                  cuttingGroupID: isValidObject(record.cuttingGroup) ? record.cuttingGroup.id : null, // Using for compare check box
-                  productColorID: isValidObject(record.productColor) ? record.productColor.colorID : null // Using for compare check box
+                  ...record.cuttingGroup
                 })
               }
               viewModel.table.handleStartEditing(record.key)

@@ -251,17 +251,6 @@ export interface CuttingGroup {
   product?: Product
 }
 
-export interface CutGroupEmbroidering {
-  id?: number
-  cuttingGroupID?: number
-  status?: ItemStatusType
-  dateArrived?: string
-  quantityArrived?: number
-  createdAt?: string
-  updatedAt?: string
-  cuttingGroup?: CuttingGroup
-}
-
 export interface SewingLineDelivery {
   id?: number
   productID?: number

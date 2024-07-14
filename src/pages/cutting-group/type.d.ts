@@ -1,4 +1,4 @@
-import { CutGroupEmbroidering, CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
+import { CuttingGroup, Product, ProductColor, ProductGroup } from '~/typing'
 
 export interface CuttingGroupTableDataType extends Product {
   key: string
@@ -16,14 +16,24 @@ export interface CuttingGroupNewRecordProps {
   dateSendDeliveredBTP?: string
   quantitySendDeliveredBTP?: number
   syncStatus?: boolean
-}
-
-export interface CutGroupEmbroideringTableDataType extends CutGroupEmbroidering {
-  key: string
-}
-
-export interface CutGroupEmbroideringNewRecordProps {
-  cuttingGroupID?: number
-  dateArrived?: string
-  quantityArrived?: number
+  dateArrived1Th?: string
+  quantityArrived1Th?: number
+  dateArrived2Th?: string
+  quantityArrived2Th?: number
+  dateArrived3Th?: string
+  quantityArrived3Th?: number
+  dateArrived4Th?: string
+  quantityArrived4Th?: number
+  dateArrived5Th?: string
+  quantityArrived5Th?: number
+  dateArrived6Th?: string
+  quantityArrived6Th?: number
+  dateArrived7Th?: string
+  quantityArrived7Th?: number
+  dateArrived8Th?: string
+  quantityArrived8Th?: number
+  dateArrived9Th?: string
+  quantityArrived9Th?: number
+  dateArrived10Th?: string
+  quantityArrived10Th?: number
 }

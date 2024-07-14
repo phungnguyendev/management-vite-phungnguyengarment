@@ -285,8 +285,8 @@ export default function useCuttingGroupViewModel() {
         )
       } else {
         // Kiểm tra số sượng thực cắt
-        const sumQuantityRealCutAmount = record.cuttingGroup.quantityRealCut ?? 0
-        return sumQuantityRealCutAmount >= (record.quantityPO ?? 0)
+        const sumQuantityRealCutAmount = numberValidatorCalc(record.cuttingGroup.quantityRealCut)
+        return sumQuantityRealCutAmount >= numberValidatorCalc(record.quantityPO)
       }
     }
     return false
