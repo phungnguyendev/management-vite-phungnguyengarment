@@ -191,7 +191,7 @@ export default function useCuttingGroupViewModel() {
     } catch (error: any) {
       message.error(`${error.message}`)
     } finally {
-      setNewRecord({})
+      setNewRecord(null)
       table.handleCancelEditing()
       table.setLoading(false)
     }

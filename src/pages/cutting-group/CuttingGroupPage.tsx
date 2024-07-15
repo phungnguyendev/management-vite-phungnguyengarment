@@ -20,8 +20,6 @@ import { dateFormatter } from '~/utils/date-formatter'
 import {
   booleanValidatorInit,
   breakpoint,
-  dateTimeValidatorChange,
-  dateTimeValidatorDisplay,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
@@ -61,7 +59,7 @@ const SampleSewingPage = () => {
     },
     productColor: (record: CuttingGroupTableDataType) => {
       return (
-        <Flex className='' wrap='wrap' justify='space-between' align='center' gap={10}>
+        <Flex wrap='wrap' justify='space-between' align='center' gap={10}>
           <SkyTableTypography status={record.productColor?.color?.status} className='w-fit'>
             {textValidatorDisplay(record.productColor?.color?.name)}
           </SkyTableTypography>
@@ -70,7 +68,7 @@ const SampleSewingPage = () => {
       )
     },
     quantityPO: (record: CuttingGroupTableDataType) => {
-      return <SkyTableTypography status={'active'}>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
+      return <SkyTableTypography>{numberValidatorDisplay(record.quantityPO)}</SkyTableTypography>
     },
     productGroup: (record: CuttingGroupTableDataType) => {
       return (
@@ -111,11 +109,11 @@ const SampleSewingPage = () => {
           defaultValue={dateValidatorInit(record.cuttingGroup?.dateTimeCut)}
           onValueChange={(val: Dayjs) =>
             viewModel.state.setNewRecord((prev) => {
-              return { ...prev, dateTimeCut: dateTimeValidatorChange(val) }
+              return { ...prev, dateTimeCut: dateFormatter(val, 'dateTime') }
             })
           }
         >
-          <SkyTableTypography>{dateTimeValidatorDisplay(record.cuttingGroup?.dateTimeCut)}</SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.cuttingGroup?.dateTimeCut)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
