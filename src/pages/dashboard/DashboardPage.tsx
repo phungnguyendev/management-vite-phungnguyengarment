@@ -1,5 +1,7 @@
 import { Flex } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { BarChartBig, CheckCheck, CircleAlert } from 'lucide-react'
+import { SewingIcon } from '~/assets/icons'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -24,14 +26,17 @@ import {
   textValidatorDisplay,
   uniqueArray
 } from '~/utils/helpers'
+import StatisticCard from './components/StatisticCard'
+import StatisticWrapper from './components/StatisticWapper'
 import useDashboardViewModel from './hooks/useDashboardViewModel'
+import useStatisticViewModel from './hooks/useStatisticViewModel'
 import { DashboardTableDataType } from './type'
 
 const DashboardPage = () => {
   useTitle('Dashboard | Phung Nguyen')
   const { width } = useDevice()
   const viewModel = useDashboardViewModel()
-  // const statisticViewModel = useStatisticViewModel()
+  const statisticViewModel = useStatisticViewModel()
 
   const columns = {
     title: (record: DashboardTableDataType) => {
@@ -278,7 +283,7 @@ const DashboardPage = () => {
   return (
     <>
       <BaseLayout title='Dashboard'>
-        {/* <StatisticWrapper>
+        <StatisticWrapper>
           <StatisticCard
             title='Tổng mã sản phẩm'
             value={statisticViewModel.sumProductAll()}
@@ -303,7 +308,7 @@ const DashboardPage = () => {
             type='danger'
             icon={<CircleAlert size={32} />}
           />
-        </StatisticWrapper> */}
+        </StatisticWrapper>
         <SkyTableWrapperLayout
           loading={viewModel.table.loading}
           searchProps={{

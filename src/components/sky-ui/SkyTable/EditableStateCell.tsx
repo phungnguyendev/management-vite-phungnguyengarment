@@ -204,7 +204,6 @@ function EditableStateCell({
             required={required}
             onChange={(val) => val && onValueChange?.(val)}
             disabled={disabled}
-            value={value}
             defaultValue={defaultValue}
             format={datePickerProps?.format ?? 'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
@@ -220,8 +219,7 @@ function EditableStateCell({
             required={required}
             onChange={(val) => val && onValueChange?.(val)}
             disabled={disabled}
-            value={value}
-            showTime={{ defaultValue: dayjs('00:00:00', 'HH:mm', 'A') }}
+            showTime={{ defaultOpenValue: dayjs('00:00:00', 'HH:mm:ss') }}
             defaultValue={defaultValue}
             format={datePickerProps?.format ?? 'DD/MM/YYYY - HH:mm A'}
             className={cn('w-full', restProps.className)}

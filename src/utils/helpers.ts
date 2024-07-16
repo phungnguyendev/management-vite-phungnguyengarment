@@ -110,7 +110,7 @@ export const colorValidatorChange = (color?: Color | null): string => {
 // Validator initial value
 
 export const dateValidatorInit = (date?: string | Date | dayjs.Dayjs): dayjs.Dayjs | undefined => {
-  if (date && isValidDate(date)) return dayjs(date)
+  return isValidDate(date) ? dayjs(date) : undefined
 }
 
 export const booleanValidatorInit = (value?: boolean | null | undefined): boolean | undefined => {

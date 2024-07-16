@@ -1,10 +1,20 @@
 import { Button, ButtonProps, Flex, Spin, Switch } from 'antd'
 import { SearchProps } from 'antd/es/input'
 import { SwitchProps } from 'antd/lib'
-import { Plus } from 'lucide-react'
+import { ArrowDownWideNarrow, Plus } from 'lucide-react'
 import React from 'react'
+import DropDownFilterModal, { DropDownFilterModalProps } from '../DropDownFilterModal'
 import ExportToExcel, { ExportToExcelProps } from '../ExportToExcel'
 import SearchBar from '../SearchBar'
+
+interface ButtonFilterProps extends ButtonProps {
+  count?: number
+}
+
+interface FilterProps {
+  buttonProps?: ButtonFilterProps
+  dropDownProps?: DropDownFilterModalProps
+}
 
 interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
   loading?: boolean
@@ -13,6 +23,7 @@ interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
   sortProps?: SwitchProps
   deleteProps?: SwitchProps
   addNewProps?: ButtonProps
+  filterProps?: FilterProps
   exportAsExcelProps?: ExportToExcelProps
 }
 
@@ -21,6 +32,7 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
   sortProps,
   deleteProps,
   addNewProps,
+  filterProps,
   children,
   loading,
   exportAsExcelProps,
@@ -31,7 +43,7 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
       <Flex {...props} vertical gap={20} className='w-full rounded-md bg-white p-5'>
         <Flex gap={20} align='center' className='w-full flex-col md:flex-row'>
           {searchProps && <SearchBar {...searchProps} className='w-full md:w-[500px]' />}
-          <Flex justify='space-between' align='center' className='w-full'>
+          <Flex gap={20} justify='space-between' align='center' className='w-full'>
             <Flex gap={10} align='center' className='w-full'>
               {sortProps && (
                 <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sort' defaultChecked={false} />
@@ -41,6 +53,19 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
               )}
               {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
             </Flex>
+            {filterProps && (
+              <DropDownFilterModal>
+                <Button
+                  {...filterProps.buttonProps}
+                  className='flex items-center'
+                  type='dashed'
+                  icon={<ArrowDownWideNarrow size={16} />}
+                  iconPosition='start'
+                >
+                  <span>Filter {filterProps.buttonProps?.count && `(${filterProps.buttonProps.count})`}</span>
+                </Button>
+              </DropDownFilterModal>
+            )}
             {addNewProps && (
               <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>
                 Add

@@ -437,6 +437,11 @@ const ProductPage = () => {
                 }
               : undefined
           }
+          // filterProps={{
+          //   buttonProps: {
+          //     count: 3
+          //   }
+          // }}
         >
           <SkyTable
             loading={viewModel.table.loading}

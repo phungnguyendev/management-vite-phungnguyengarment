@@ -142,6 +142,7 @@ export default function useCuttingGroupViewModel() {
 
   const handleUpdate = async (record: CuttingGroupTableDataType) => {
     try {
+      console.log({ newRecord, record })
       table.setLoading(true)
       if (!newRecord) return
 
