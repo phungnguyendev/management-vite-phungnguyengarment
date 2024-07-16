@@ -473,6 +473,38 @@ const SampleSewingPage = () => {
           deleteProps={{
             onChange: viewModel.action.handleSwitchDeleteChange
           }}
+          filterProps={{
+            items: [
+              {
+                label: 'Colors',
+                dataIndex: 'colors',
+                inputType: 'multipleSelect',
+                dataSource: viewModel.state.colors.map((item, index) => {
+                  return {
+                    key: `${index}`,
+                    label: `${item.name}`,
+                    value: item.id
+                  }
+                })
+              },
+              {
+                label: 'Groups',
+                dataIndex: 'groups',
+                inputType: 'select',
+                dataSource: viewModel.state.groups.map((item, index) => {
+                  return {
+                    key: `${index}`,
+                    label: `${item.name}`,
+                    value: item.id
+                  }
+                })
+              }
+            ],
+            onApply: (data) => {
+              console.log(data)
+            },
+            onClose: () => {}
+          }}
         >
           <SkyTable
             bordered

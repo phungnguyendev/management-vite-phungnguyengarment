@@ -2,18 +2,14 @@ import { Button, ButtonProps, Flex, Spin, Switch } from 'antd'
 import { SearchProps } from 'antd/es/input'
 import { SwitchProps } from 'antd/lib'
 import { ArrowDownWideNarrow, Plus } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
+import { isValidNumber } from '~/utils/helpers'
 import DropDownFilterModal, { DropDownFilterModalProps } from '../DropDownFilterModal'
 import ExportToExcel, { ExportToExcelProps } from '../ExportToExcel'
 import SearchBar from '../SearchBar'
 
-interface ButtonFilterProps extends ButtonProps {
+interface FilterProps extends DropDownFilterModalProps {
   count?: number
-}
-
-interface FilterProps {
-  buttonProps?: ButtonFilterProps
-  dropDownProps?: DropDownFilterModalProps
 }
 
 interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
@@ -38,6 +34,13 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
   exportAsExcelProps,
   ...props
 }) => {
+  const [open, setOpen] = useState<boolean>(false)
+
+  const handleClose = () => {
+    filterProps?.onClose?.()
+    setOpen(false)
+  }
+
   return (
     <>
       <Flex {...props} vertical gap={20} className='w-full rounded-md bg-white p-5'>
@@ -54,15 +57,23 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
               {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
             </Flex>
             {filterProps && (
-              <DropDownFilterModal>
+              <DropDownFilterModal
+                open={open}
+                items={filterProps.items}
+                onClose={handleClose}
+                onApply={filterProps.onApply}
+              >
                 <Button
-                  {...filterProps.buttonProps}
                   className='flex items-center'
                   type='dashed'
                   icon={<ArrowDownWideNarrow size={16} />}
                   iconPosition='start'
+                  disabled={open}
+                  onClick={() => {
+                    if (!open) setOpen((prev) => !prev)
+                  }}
                 >
-                  <span>Filter {filterProps.buttonProps?.count && `(${filterProps.buttonProps.count})`}</span>
+                  <span>Filter {isValidNumber(filterProps.count) && `(${filterProps.count})`}</span>
                 </Button>
               </DropDownFilterModal>
             )}

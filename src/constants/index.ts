@@ -21,6 +21,7 @@ export type DefineType =
   | 'login_success'
   | 'login_failed'
   | 'user_role_not_blank'
+  | 'invalidate_form'
 
 const define = (type: DefineType): string => {
   switch (type) {
@@ -66,6 +67,8 @@ const define = (type: DefineType): string => {
       return 'User roles cannot be set blank!'
     case 'login_session_expired':
       return 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!'
+    case 'invalidate_form':
+      return 'Invalidate form!'
     default:
       return 'Data load failed!'
   }

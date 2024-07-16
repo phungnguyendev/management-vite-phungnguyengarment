@@ -23,7 +23,7 @@ import dayjs, { dateFormatter } from '~/utils/date-formatter'
 import { cn, extractHexCode } from '~/utils/helpers'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
-  isEditing: boolean
+  isEditing?: boolean
   dataIndex?: string
   value?: any
   setLoading?: (enable: boolean) => void
@@ -159,10 +159,10 @@ function EditableStateCell({
             mode='multiple'
             virtual={false}
             defaultValue={defaultValue ?? selectProps?.defaultValue}
-            // value={value ?? selectProps?.value ?? ''}
+            value={value ?? selectProps?.value}
             disabled={disabled}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
-            className='w-full'
+            className={cn('w-full', restProps.className)}
           />
         )
       case 'colorSelector':
