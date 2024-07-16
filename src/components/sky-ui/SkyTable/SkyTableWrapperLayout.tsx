@@ -4,11 +4,11 @@ import { SwitchProps } from 'antd/lib'
 import { ArrowDownWideNarrow, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { isValidNumber } from '~/utils/helpers'
-import DropDownFilterModal, { DropDownFilterModalProps } from '../DropDownFilterModal'
+import DropDownFilter, { DropDownFilterProps } from '../DropDownFilter'
 import ExportToExcel, { ExportToExcelProps } from '../ExportToExcel'
 import SearchBar from '../SearchBar'
 
-interface FilterProps extends DropDownFilterModalProps {
+interface FilterProps extends DropDownFilterProps {
   count?: number
 }
 
@@ -57,12 +57,7 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
               {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
             </Flex>
             {filterProps && (
-              <DropDownFilterModal
-                open={open}
-                items={filterProps.items}
-                onClose={handleClose}
-                onApply={filterProps.onApply}
-              >
+              <DropDownFilter open={open} items={filterProps.items} onClose={handleClose} onApply={filterProps.onApply}>
                 <Button
                   className='flex items-center'
                   type='dashed'
@@ -75,7 +70,7 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
                 >
                   <span>Filter {isValidNumber(filterProps.count) && `(${filterProps.count})`}</span>
                 </Button>
-              </DropDownFilterModal>
+              </DropDownFilter>
             )}
             {addNewProps && (
               <Button {...addNewProps} className='flex items-center' type='primary' icon={<Plus size={20} />}>

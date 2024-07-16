@@ -2,27 +2,36 @@ import type { DropdownProps } from 'antd'
 import { App, Button, Dropdown, Flex, Form, List, Typography } from 'antd'
 import React from 'react'
 import define from '~/constants'
-import EditableFormCell from './SkyTable/EditableFormCell'
 import { EditableStateCellProps } from './SkyTable/EditableStateCell'
 
-export interface ItemDataType extends EditableStateCellProps {
+export interface FilterItemDataType extends EditableStateCellProps {
   label: string
-  dataSource: {
-    key: React.Key
-    label?: React.ReactNode
-    value?: string | number | null
-  }[]
+  render: () => React.ReactNode
 }
 
-export interface DropDownFilterModalProps extends DropdownProps {
-  items: ItemDataType[]
+export interface DropDownFilterProps extends DropdownProps {
+  items: FilterItemDataType[]
   onApply?: (record: any) => void
   onClose?: () => void
 }
 
-const DropDownFilterModal: React.FC<DropDownFilterModalProps> = ({ ...props }) => {
+const DropDownFilter: React.FC<DropDownFilterProps> = ({ ...props }) => {
   const { message } = App.useApp()
   const [form] = Form.useForm()
+  // const divRef = useRef<HTMLDivElement>(null)
+
+  // const handleClickOutside = (event: MouseEvent) => {
+  //   if (divRef.current && !divRef.current.contains(event.target as Node)) {
+  //     props.onClose?.()
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   document.addEventListener('mousedown', handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener('mousedown', handleClickOutside)
+  //   }
+  // }, [])
 
   const handleApply = async () => {
     try {
@@ -44,7 +53,8 @@ const DropDownFilterModal: React.FC<DropDownFilterModalProps> = ({ ...props }) =
             <>
               <Form form={form}>
                 <Flex
-                  gap={20}
+                  // ref={divRef}
+                  gap={10}
                   vertical
                   className='h-fit w-[300px] rounded-md border-[1px] border-solid bg-white p-5 shadow-xl'
                 >
@@ -52,25 +62,18 @@ const DropDownFilterModal: React.FC<DropDownFilterModalProps> = ({ ...props }) =
                     className='w-full'
                     itemLayout='vertical'
                     split={false}
+                    grid={{
+                      column: 1
+                    }}
                     dataSource={props.items}
                     renderItem={(item, index) => {
                       return (
                         <List.Item key={index}>
-                          <Flex vertical gap={10}>
+                          <Flex vertical>
                             <Typography.Text type='secondary' className='select-none'>
                               {item.label}
                             </Typography.Text>
-                            <EditableFormCell
-                              {...item}
-                              isEditing
-                              placeholder={item.placeholder ?? `Select ${item.label.toLowerCase()}`}
-                              onValueChange={(val: number) => {
-                                console.log(val)
-                              }}
-                              selectProps={{
-                                options: item.dataSource
-                              }}
-                            />
+                            {item.render()}
                           </Flex>
                         </List.Item>
                       )
@@ -96,4 +99,4 @@ const DropDownFilterModal: React.FC<DropDownFilterModalProps> = ({ ...props }) =
   )
 }
 
-export default DropDownFilterModal
+export default DropDownFilter

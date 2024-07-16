@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
+import { FilterItemDataType } from '~/components/sky-ui/DropDownFilter'
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
@@ -458,6 +460,57 @@ const SampleSewingPage = () => {
     }
   }
 
+  const filterItems: FilterItemDataType[] = [
+    {
+      label: 'Colors',
+      dataIndex: 'colors',
+      inputType: 'multipleSelect',
+      render: () => {
+        return (
+          <EditableFormCell
+            isEditing
+            dataIndex='colors'
+            inputType='colorSelector'
+            placeholder='Select color'
+            selectProps={{
+              options: viewModel.state.colors.map((item, index) => {
+                return {
+                  key: `${item.hexColor}-${index}`,
+                  label: `${item.name}`,
+                  value: item.id
+                }
+              })
+            }}
+          />
+        )
+      }
+    },
+    {
+      label: 'Groups',
+      dataIndex: 'groups',
+      inputType: 'select',
+      render: () => {
+        return (
+          <EditableFormCell
+            isEditing
+            dataIndex='groups'
+            inputType='select'
+            placeholder='Select group'
+            selectProps={{
+              options: viewModel.state.groups.map((item, index) => {
+                return {
+                  key: `${index}`,
+                  label: `${item.name}`,
+                  value: item.id
+                }
+              })
+            }}
+          />
+        )
+      }
+    }
+  ]
+
   return (
     <>
       <BaseLayout title='Tổ cắt'>
@@ -474,32 +527,7 @@ const SampleSewingPage = () => {
             onChange: viewModel.action.handleSwitchDeleteChange
           }}
           filterProps={{
-            items: [
-              {
-                label: 'Colors',
-                dataIndex: 'colors',
-                inputType: 'multipleSelect',
-                dataSource: viewModel.state.colors.map((item, index) => {
-                  return {
-                    key: `${index}`,
-                    label: `${item.name}`,
-                    value: item.id
-                  }
-                })
-              },
-              {
-                label: 'Groups',
-                dataIndex: 'groups',
-                inputType: 'select',
-                dataSource: viewModel.state.groups.map((item, index) => {
-                  return {
-                    key: `${index}`,
-                    label: `${item.name}`,
-                    value: item.id
-                  }
-                })
-              }
-            ],
+            items: filterItems,
             onApply: (data) => {
               console.log(data)
             },
