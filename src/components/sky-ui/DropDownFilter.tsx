@@ -2,9 +2,8 @@ import type { DropdownProps } from 'antd'
 import { App, Button, Dropdown, Flex, Form, List, Typography } from 'antd'
 import React from 'react'
 import define from '~/constants'
-import { EditableStateCellProps } from './SkyTable/EditableStateCell'
 
-export interface FilterItemDataType extends EditableStateCellProps {
+export interface FilterItemDataType {
   label: string
   render: () => React.ReactNode
 }

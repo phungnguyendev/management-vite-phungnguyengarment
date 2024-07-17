@@ -11,6 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, CuttingGroup, Group, Product, ProductColor, ProductGroup } from '~/typing'
+import { dateFormatter } from '~/utils/date-formatter'
 import {
   booleanComparator,
   dateComparator,
@@ -303,6 +304,10 @@ export default function useCuttingGroupViewModel() {
         : true
   }
 
+  const handleFiltered = (data: any) => {
+    console.log({ ...data, dateTimeCut: dateFormatter(data.dateTimeCut, 'dateTime') })
+  }
+
   return {
     state: {
       colors,
@@ -329,7 +334,8 @@ export default function useCuttingGroupViewModel() {
       handleDelete,
       handleDeleteForever,
       isDisableRecord,
-      handleRestore
+      handleRestore,
+      handleFiltered
     },
     table
   }

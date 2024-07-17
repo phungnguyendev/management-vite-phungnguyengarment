@@ -463,14 +463,12 @@ const SampleSewingPage = () => {
   const filterItems: FilterItemDataType[] = [
     {
       label: 'Colors',
-      dataIndex: 'colors',
-      inputType: 'multipleSelect',
       render: () => {
         return (
           <EditableFormCell
             isEditing
-            dataIndex='colors'
-            inputType='colorSelector'
+            dataIndex='colorIDs'
+            inputType='multipleSelect'
             placeholder='Select color'
             selectProps={{
               options: viewModel.state.colors.map((item, index) => {
@@ -487,14 +485,12 @@ const SampleSewingPage = () => {
     },
     {
       label: 'Groups',
-      dataIndex: 'groups',
-      inputType: 'select',
       render: () => {
         return (
           <EditableFormCell
             isEditing
-            dataIndex='groups'
-            inputType='select'
+            dataIndex='groupIDs'
+            inputType='multipleSelect'
             placeholder='Select group'
             selectProps={{
               options: viewModel.state.groups.map((item, index) => {
@@ -505,6 +501,19 @@ const SampleSewingPage = () => {
                 }
               })
             }}
+          />
+        )
+      }
+    },
+    {
+      label: 'Ngày giờ cắt',
+      render: () => {
+        return (
+          <EditableFormCell
+            isEditing
+            dataIndex='dateTimeCut'
+            inputType='dateTimePicker'
+            placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
           />
         )
       }
@@ -528,9 +537,7 @@ const SampleSewingPage = () => {
           }}
           filterProps={{
             items: filterItems,
-            onApply: (data) => {
-              console.log(data)
-            },
+            onApply: viewModel.action.handleFiltered,
             onClose: () => {}
           }}
         >

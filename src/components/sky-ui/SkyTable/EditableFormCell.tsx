@@ -1,5 +1,6 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import { memo } from 'react'
 import { cn, extractHexCode } from '~/utils/helpers'
 import { EditableStateCellProps } from './EditableStateCell'
@@ -163,6 +164,21 @@ function EditableFormCell({
             onChange={(_val, dateString) => onValueChange?.(dateString)}
             disabled={disabled}
             format={'DD/MM/YYYY'}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'dateTimePicker':
+        return (
+          <DatePicker
+            name={dataIndex}
+            title={title}
+            placeholder={placeholder}
+            value={value}
+            required={required}
+            onChange={(_val, dateString) => onValueChange?.(dateString)}
+            disabled={disabled}
+            showTime={{ defaultOpenValue: dayjs('00:00:00', 'HH:mm:ss') }}
+            format='DD/MM/YYYY - HH:mm A'
             className={cn('w-full', restProps.className)}
           />
         )
