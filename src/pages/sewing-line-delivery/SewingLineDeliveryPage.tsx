@@ -25,6 +25,8 @@ import {
   isAcceptRole,
   isExpiredDate,
   isValidArray,
+  isValidDate,
+  numberValidatorCalc,
   numberValidatorChange,
   numberValidatorDisplay,
   textValidatorDisplay,
@@ -32,6 +34,7 @@ import {
 } from '~/utils/helpers'
 import { ProductTableDataType } from '../product/type'
 import SewingLineDeliveryExpandableList from './components/SewingLineDeliveryExpandableList'
+import SewingLineDeliveryExpiresError from './components/SewingLineDeliveryExpiresError'
 import useSewingLineDeliveryViewModel from './hooks/useSewingLineDeliveryViewModel'
 import { SewingLineDeliveryTableDataType } from './type'
 
@@ -50,7 +53,7 @@ const SewingLineDeliveryPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>
-          {viewModel.action.isCheckImported(record) && <SkyTableCheckedIcon />}
+          {viewModel.action.isCheckSuccess(record) && <SkyTableCheckedIcon />}
         </Space>
       )
     },
@@ -116,17 +119,24 @@ const SewingLineDeliveryPage = () => {
           {isValidArray(record.sewingLineDeliveries) && (
             <Space wrap>
               {record.sewingLineDeliveries
-                .sort((a, b) => a.sewingLineID! - b.sewingLineID!)
+                .sort((a, b) => numberValidatorCalc(a.sewingLineID) - numberValidatorCalc(b.sewingLineID))
                 .map((item, index) => {
+                  const isError = isExpiredDate(record.dateOutputFCR, item.expiredDate)
+                    ? numberValidatorCalc(item.quantitySewed) >= numberValidatorCalc(record.quantityPO)
+                      ? false
+                      : true
+                    : false
+
                   return (
                     <SkyTableRowHighLightItem
                       key={index}
                       status={item.sewingLine?.status}
-                      type={isExpiredDate(record.dateOutputFCR, item.expiredDate) ? 'danger' : 'secondary'}
+                      type={isError ? 'danger' : 'secondary'}
                     >
-                      {isExpiredDate(record.dateOutputFCR, item.expiredDate)
-                        ? `${item.sewingLine?.name} (Bể)`
-                        : item.sewingLine?.name}
+                      {isError ? `${item.sewingLine?.name} (Bể)` : item.sewingLine?.name}{' '}
+                      {isValidDate(record.dateOutputFCR) && isValidDate(item.expiredDate) && (
+                        <SewingLineDeliveryExpiresError date1={record.dateOutputFCR} date2={item.expiredDate} />
+                      )}
                     </SkyTableRowHighLightItem>
                   )
                 })}

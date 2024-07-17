@@ -11,7 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Group, Product, ProductColor, ProductGroup, SewingLine, SewingLineDelivery } from '~/typing'
-import { isValidArray, sumArray } from '~/utils/helpers'
+import { isValidArray, numberValidatorCalc, sumArray } from '~/utils/helpers'
 import { SewingLineDeliveryTableDataType } from '../type'
 
 export default function useSewingLineDeliveryViewModel() {
@@ -257,13 +257,13 @@ export default function useSewingLineDeliveryViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
-  const isCheckImported = (record: SewingLineDeliveryTableDataType): boolean => {
+  const isCheckSuccess = (record: SewingLineDeliveryTableDataType): boolean => {
     return isValidArray(record.sewingLineDeliveries)
       ? sumArray(
           record.sewingLineDeliveries.map((item) => {
-            return item.quantitySewed ?? 0
+            return numberValidatorCalc(item.quantitySewed)
           })
-        ) === record.quantityPO
+        ) >= numberValidatorCalc(record.quantityPO)
       : false
   }
 
@@ -296,7 +296,7 @@ export default function useSewingLineDeliveryViewModel() {
       handleDelete,
       handleDeleteForever,
       handleRestore,
-      isCheckImported
+      isCheckSuccess
     },
     table
   }

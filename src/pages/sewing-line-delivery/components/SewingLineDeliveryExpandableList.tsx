@@ -86,21 +86,17 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
             })
           }}
         >
-          <SkyTableTypography status={record.status}>
-            {numberValidatorDisplay(record?.quantitySewed)}
-          </SkyTableTypography>
+          <SkyTableTypography>{numberValidatorDisplay(record?.quantitySewed)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
     amountQuantity: (record: SewingLineDelivery) => {
       return (
-        <EditableStateCell isEditing={false} dataIndex='amountQuantity' title='SL còn lại' inputType='number' required>
-          <SkyTableTypography status={record.status}>
-            {numberValidatorDisplay(
-              numberValidatorCalc(record?.quantityOriginal) - numberValidatorCalc(record?.quantitySewed)
-            )}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableTypography>
+          {numberValidatorDisplay(
+            numberValidatorCalc(record.quantityOriginal) - numberValidatorCalc(record.quantitySewed)
+          )}
+        </SkyTableTypography>
       )
     },
     expiredDate: (record: SewingLineDelivery) => {
@@ -137,6 +133,15 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
     setActiveKey([])
   }
 
+  const isError = (record: SewingLineDelivery): boolean => {
+    const error = isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
+      ? numberValidatorCalc(record.quantitySewed) >= numberValidatorCalc(parentRecord.quantityPO)
+        ? false
+        : true
+      : false
+    return error
+  }
+
   return (
     <>
       <Collapse
@@ -162,12 +167,10 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                         <SkyTableRowHighLightItem
                           key={index}
                           className='w-fit'
-                          type={isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate) ? 'danger' : undefined}
+                          type={isError(record) ? 'danger' : undefined}
                           status={record.sewingLine?.status}
                         >
-                          {isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
-                            ? `${record.sewingLine?.name} (Bể)`
-                            : record.sewingLine?.name}
+                          {isError(record) ? `${record.sewingLine?.name} (Bể)` : record.sewingLine?.name}
                         </SkyTableRowHighLightItem>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'

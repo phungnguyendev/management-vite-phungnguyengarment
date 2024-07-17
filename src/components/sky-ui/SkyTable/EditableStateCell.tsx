@@ -289,7 +289,7 @@ function EditableStateCell({
     }
   })()
 
-  return <>{isEditing ? (editableRender ? editableRender : inputNode) : restProps.children}</>
+  return <>{isEditing ? editableRender ? editableRender : inputNode : <>{restProps.children}</>}</>
 }
 
 export default memo(EditableStateCell)
