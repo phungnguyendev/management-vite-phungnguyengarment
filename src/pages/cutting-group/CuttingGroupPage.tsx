@@ -5,8 +5,6 @@ import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
-import { FilterItemDataType } from '~/components/sky-ui/DropDownFilter'
-import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
@@ -22,7 +20,6 @@ import { dateFormatter } from '~/utils/date-formatter'
 import {
   booleanValidatorInit,
   breakpoint,
-  dateTimeValidatorDisplay,
   dateValidatorChange,
   dateValidatorDisplay,
   dateValidatorInit,
@@ -116,7 +113,7 @@ const SampleSewingPage = () => {
             })
           }
         >
-          <SkyTableTypography>{dateTimeValidatorDisplay(record.cuttingGroup?.dateTimeCut)}</SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.cuttingGroup?.dateTimeCut)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
@@ -340,7 +337,7 @@ const SampleSewingPage = () => {
     {
       title: 'Số lượng PO',
       dataIndex: 'quantityPO',
-      width: '10%',
+      width: '7%',
       responsive: ['md'],
       render: (_value: any, record: CuttingGroupTableDataType) => {
         return columns.quantityPO(record)
@@ -364,44 +361,53 @@ const SampleSewingPage = () => {
       onFilter: (value, record) => handleObjectFilterText(value, record.productGroup, record.productGroup?.groupID)
     },
     {
-      title: 'SL thực cắt',
-      dataIndex: 'quantityRealCut',
-      width: '10%',
-      responsive: ['lg'],
-      render: (_value: any, record: CuttingGroupTableDataType) => {
-        return columns.quantityRealCut(record)
-      }
-    },
-    {
-      title: 'SL cắt còn lại',
-      dataIndex: 'remainingAmount',
-      width: '7%',
-      responsive: ['lg'],
-      render: (_value: any, record: CuttingGroupTableDataType) => {
-        return columns.remainingAmount(record)
-      }
-    },
-    {
-      title: 'Ngày giờ cắt',
-      dataIndex: 'dateTimeCut',
-      width: '15%',
-      responsive: ['xl'],
-      render: (_value: any, record: CuttingGroupTableDataType) => {
-        return columns.dateTimeCut(record)
-      },
-      filters: uniqueArray(
-        viewModel.table.dataSource.map((item) => {
-          return dateFormatter(item.cuttingGroup?.dateTimeCut, 'dateTime')
-        })
-      ).map((item) => {
-        return {
-          text: item,
-          value: item
+      title: 'Cắt',
+      children: [
+        {
+          title: 'SL thực cắt',
+          dataIndex: 'quantityRealCut',
+          width: '7%',
+          responsive: ['lg'],
+          render: (_value: any, record: CuttingGroupTableDataType) => {
+            return columns.quantityRealCut(record)
+          }
+        },
+        {
+          title: 'SL cắt còn lại',
+          dataIndex: 'remainingAmount',
+          width: '7%',
+          responsive: ['lg'],
+          render: (_value: any, record: CuttingGroupTableDataType) => {
+            return columns.remainingAmount(record)
+          }
+        },
+        {
+          title: 'Ngày giờ cắt',
+          dataIndex: 'dateTimeCut',
+          width: '15%',
+          responsive: ['xl'],
+          render: (_value: any, record: CuttingGroupTableDataType) => {
+            return columns.dateTimeCut(record)
+          },
+          filters: uniqueArray(
+            viewModel.table.dataSource.map((item) => {
+              return dateFormatter(item.cuttingGroup?.dateTimeCut, 'dateTime')
+            })
+          ).map((item) => {
+            return {
+              text: item,
+              value: item
+            }
+          }),
+          filterSearch: true,
+          onFilter: (value, record) =>
+            handleObjectFilterText(
+              value,
+              record.cuttingGroup,
+              dateFormatter(record.cuttingGroup?.dateTimeCut, 'dateTime')
+            )
         }
-      }),
-      filterSearch: true,
-      onFilter: (value, record) =>
-        handleObjectFilterText(value, record.cuttingGroup, dateFormatter(record.cuttingGroup?.dateTimeCut, 'dateTime'))
+      ]
     },
     {
       title: 'In thêu',
@@ -443,7 +449,7 @@ const SampleSewingPage = () => {
         {
           title: 'In thêu?',
           dataIndex: 'syncStatus',
-          width: '10%',
+          width: '7%',
           render: (_value: any, record: CuttingGroupTableDataType) => {
             return columns.embroidered.syncStatus(record)
           }
@@ -460,65 +466,65 @@ const SampleSewingPage = () => {
     }
   }
 
-  const filterItems: FilterItemDataType[] = [
-    {
-      label: 'Colors',
-      render: () => {
-        return (
-          <EditableFormCell
-            isEditing
-            dataIndex='colorIDs'
-            inputType='multipleSelect'
-            placeholder='Select color'
-            selectProps={{
-              options: viewModel.state.colors.map((item, index) => {
-                return {
-                  key: `${item.hexColor}-${index}`,
-                  label: `${item.name}`,
-                  value: item.id
-                }
-              })
-            }}
-          />
-        )
-      }
-    },
-    {
-      label: 'Groups',
-      render: () => {
-        return (
-          <EditableFormCell
-            isEditing
-            dataIndex='groupIDs'
-            inputType='multipleSelect'
-            placeholder='Select group'
-            selectProps={{
-              options: viewModel.state.groups.map((item, index) => {
-                return {
-                  key: `${index}`,
-                  label: `${item.name}`,
-                  value: item.id
-                }
-              })
-            }}
-          />
-        )
-      }
-    },
-    {
-      label: 'Ngày giờ cắt',
-      render: () => {
-        return (
-          <EditableFormCell
-            isEditing
-            dataIndex='dateTimeCut'
-            inputType='dateTimePicker'
-            placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
-          />
-        )
-      }
-    }
-  ]
+  // const filterItems: FilterItemDataType[] = [
+  //   {
+  //     label: 'Colors',
+  //     render: () => {
+  //       return (
+  //         <EditableFormCell
+  //           isEditing
+  //           dataIndex='colorIDs'
+  //           inputType='multipleSelect'
+  //           placeholder='Select color'
+  //           selectProps={{
+  //             options: viewModel.state.colors.map((item, index) => {
+  //               return {
+  //                 key: `${item.hexColor}-${index}`,
+  //                 label: `${item.name}`,
+  //                 value: item.id
+  //               }
+  //             })
+  //           }}
+  //         />
+  //       )
+  //     }
+  //   },
+  //   {
+  //     label: 'Groups',
+  //     render: () => {
+  //       return (
+  //         <EditableFormCell
+  //           isEditing
+  //           dataIndex='groupIDs'
+  //           inputType='multipleSelect'
+  //           placeholder='Select group'
+  //           selectProps={{
+  //             options: viewModel.state.groups.map((item, index) => {
+  //               return {
+  //                 key: `${index}`,
+  //                 label: `${item.name}`,
+  //                 value: item.id
+  //               }
+  //             })
+  //           }}
+  //         />
+  //       )
+  //     }
+  //   },
+  //   {
+  //     label: 'Ngày giờ cắt',
+  //     render: () => {
+  //       return (
+  //         <EditableFormCell
+  //           isEditing
+  //           dataIndex='dateTimeCut'
+  //           inputType='dateTimePicker'
+  //           placeholder={`Ví dụ: ${dateFormatter(Date.now())}`}
+  //         />
+  //       )
+  //     }
+  //   }
+  // ]
 
   return (
     <>
@@ -535,11 +541,11 @@ const SampleSewingPage = () => {
           deleteProps={{
             onChange: viewModel.action.handleSwitchDeleteChange
           }}
-          filterProps={{
-            items: filterItems,
-            onApply: viewModel.action.handleFiltered,
-            onClose: () => {}
-          }}
+          // filterProps={{
+          //   items: filterItems,
+          //   onApply: viewModel.action.handleFiltered,
+          //   onClose: () => {}
+          // }}
         >
           <SkyTable
             bordered
