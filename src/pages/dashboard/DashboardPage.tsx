@@ -82,7 +82,7 @@ const DashboardPage = () => {
           <Flex vertical>
             <ProgressBar total={numberValidatorChange(record.quantityPO)} count={sumQuantitySewed} />
             <SkyTableTypography className='text-xs font-medium'>
-              {numberValidatorDisplay(record.quantityPO)} / {numberValidatorDisplay(sumQuantitySewed)}
+              {numberValidatorDisplay(sumQuantitySewed)} / {numberValidatorDisplay(record.quantityPO)}
             </SkyTableTypography>
           </Flex>
         </>
@@ -96,7 +96,7 @@ const DashboardPage = () => {
           <Flex vertical>
             <ProgressBar total={numberValidatorChange(record.quantityPO)} count={sumIroned} />
             <SkyTableTypography className='text-xs font-medium'>
-              {numberValidatorDisplay(record.quantityPO)} / {numberValidatorDisplay(sumIroned)}
+              {numberValidatorDisplay(sumIroned)} / {numberValidatorDisplay(record.quantityPO)}
             </SkyTableTypography>
           </Flex>
         </>
@@ -112,7 +112,7 @@ const DashboardPage = () => {
           <Flex vertical>
             <ProgressBar total={numberValidatorChange(record.quantityPO)} count={sumChecked} />
             <SkyTableTypography className='text-xs font-medium'>
-              {numberValidatorDisplay(record.quantityPO)} / {numberValidatorDisplay(sumChecked)}
+              {numberValidatorDisplay(sumChecked)} / {numberValidatorDisplay(record.quantityPO)}
             </SkyTableTypography>
           </Flex>
         </>
@@ -128,7 +128,7 @@ const DashboardPage = () => {
           <Flex vertical>
             <ProgressBar total={numberValidatorChange(record.quantityPO)} count={sumPackaged} />
             <SkyTableTypography className='text-xs font-medium'>
-              {numberValidatorDisplay(record.quantityPO)} / {numberValidatorDisplay(sumPackaged)}
+              {numberValidatorDisplay(sumPackaged)} / {numberValidatorDisplay(record.quantityPO)}
             </SkyTableTypography>
           </Flex>
         </>

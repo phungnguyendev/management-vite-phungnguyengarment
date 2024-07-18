@@ -4,7 +4,7 @@ import ProductAPI from '~/api/services/ProductAPI'
 import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import useAPIService from '~/hooks/useAPIService'
 import { Completion, Product, SewingLineDelivery } from '~/typing'
-import { isValidNumber, isValidObject, sumArray } from '~/utils/helpers'
+import { isExpiredDate, numberValidatorCalc, sumArray } from '~/utils/helpers'
 
 export default function useStatisticViewModel() {
   const productService = useAPIService<Product>(ProductAPI)
@@ -55,32 +55,52 @@ export default function useStatisticViewModel() {
     return products.length
   }
 
+  // Mã đã hoàn thành (May 100%, Ủi 100%, Kiểm 100%, Đóng gói 100%)
+  // Sum = May, Ủi, Kiểm, Đóng gói >= quantityPO
   const sumProductCompleted = (): number => {
-    const listCompletion = completions.filter((item) => {
-      const quantityPO =
-        isValidObject(item.product) && isValidNumber(item.product.quantityPO) ? item.product.quantityPO : 0
-      return (
-        item.quantityIroned === quantityPO &&
-        item.quantityCheckPassed === quantityPO &&
-        item.quantityPackaged === quantityPO &&
+    return products.filter((product) => {
+      const quantityPO = numberValidatorCalc(product.quantityPO)
+      // Danh sách may được
+      const isQuantitySewedSuccess =
         sumArray(
           sewingLineDeliveries
-            .filter((self) => self.productID === item.productID)
-            .map((self) => {
-              return self.quantitySewed ?? 0
+            .filter((item) => item.productID === product.id)
+            .map((item) => {
+              return item.quantitySewed ?? 0
             })
-        ) === quantityPO
-      )
-    })
-    return listCompletion.length
+        ) >= quantityPO
+      const isCompletionSuccess = completions
+        .filter((item) => item.productID === product.id)
+        .some(
+          (item) =>
+            numberValidatorCalc(item.quantityIroned) >= quantityPO &&
+            numberValidatorCalc(item.quantityCheckPassed) >= quantityPO &&
+            numberValidatorCalc(item.quantityPackaged) >= quantityPO
+        )
+      return isQuantitySewedSuccess && isCompletionSuccess
+    }).length
   }
 
   const sumProductProgressing = (): number => {
-    return products.length
+    return products.filter((product) => {
+      const isQuantitySewedSuccess =
+        sumArray(
+          sewingLineDeliveries
+            .filter((item) => item.productID === product.id)
+            .map((item) => {
+              return item.quantitySewed ?? 0
+            })
+        ) < numberValidatorCalc(product.quantityPO)
+
+      return isQuantitySewedSuccess
+    }).length
   }
 
   const sumProductError = (): number => {
-    return products.length
+    return products.filter((product) => {
+      const sewingLines = sewingLineDeliveries.filter((item) => item.productID === product.id)
+      return sewingLines.some((item) => isExpiredDate(product.dateOutputFCR, item.expiredDate))
+    }).length
   }
 
   return {
