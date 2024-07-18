@@ -11,7 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Completion, Group, Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
-import { isValidNumber, isValidObject } from '~/utils/helpers'
+import { isValidNumber, isValidObject, numberValidatorCalc, sumArray } from '~/utils/helpers'
 import { DashboardTableDataType } from '../type'
 
 export default function useDashboardViewModel() {
@@ -209,6 +209,28 @@ export default function useDashboardViewModel() {
     return products.length
   }
 
+  const isCheckSuccess = (record: DashboardTableDataType): boolean => {
+    const quantityPO = numberValidatorCalc(record.quantityPO)
+    // Danh sách may được
+    const isQuantitySewedSuccess =
+      sumArray(
+        sewingLineDeliveries
+          .filter((item) => item.productID === record.id)
+          .map((item) => {
+            return item.quantitySewed ?? 0
+          })
+      ) >= quantityPO
+    const isCompletionSuccess = completions
+      .filter((item) => item.productID === record.id)
+      .some(
+        (item) =>
+          numberValidatorCalc(item.quantityIroned) >= quantityPO &&
+          numberValidatorCalc(item.quantityCheckPassed) >= quantityPO &&
+          numberValidatorCalc(item.quantityPackaged) >= quantityPO
+      )
+    return isQuantitySewedSuccess && isCompletionSuccess
+  }
+
   return {
     state: {
       sumProductAll,
@@ -233,7 +255,8 @@ export default function useDashboardViewModel() {
       handleSearch,
       handlePageChange,
       handleSwitchSortChange,
-      handleSwitchDeleteChange
+      handleSwitchDeleteChange,
+      isCheckSuccess
     },
     table
   }

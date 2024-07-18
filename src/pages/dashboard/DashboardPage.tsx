@@ -1,4 +1,4 @@
-import { Flex } from 'antd'
+import { Flex, Space } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { BarChartBig, CheckCheck, CircleAlert } from 'lucide-react'
 import { SewingIcon } from '~/assets/icons'
@@ -7,6 +7,7 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProgressBar from '~/components/sky-ui/ProgressBar'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
@@ -39,11 +40,14 @@ const DashboardPage = () => {
   const statisticViewModel = useStatisticViewModel()
 
   const columns = {
-    title: (record: DashboardTableDataType) => {
+    productCode: (record: DashboardTableDataType) => {
       return (
-        <SkyTableTypography strong status={record.status}>
-          {textValidatorDisplay(record.productCode)}
-        </SkyTableTypography>
+        <Space direction='horizontal' wrap>
+          <SkyTableTypography strong status={record.status}>
+            {textValidatorDisplay(record.productCode)}{' '}
+          </SkyTableTypography>
+          {viewModel.action.isCheckSuccess(record) && <SkyTableCheckedIcon />}
+        </Space>
       )
     },
     quantityPO: (record: DashboardTableDataType) => {
@@ -199,7 +203,7 @@ const DashboardPage = () => {
       dataIndex: 'productCode',
       width: '10%',
       render: (_value: any, record: DashboardTableDataType) => {
-        return columns.title(record)
+        return columns.productCode(record)
       },
       filters: uniqueArray(
         viewModel.table.dataSource.map((item) => {
