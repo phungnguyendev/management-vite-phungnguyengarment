@@ -8,10 +8,10 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
-import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableIcon from '~/components/sky-ui/SkyTable/SkyTableIcon'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
@@ -53,7 +53,7 @@ const GarmentAccessoryPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}
           </SkyTableTypography>
-          {viewModel.action.isChecked(record) && <SkyTableCheckedIcon />}
+          {viewModel.action.isShowStatusIcon(record) && <SkyTableIcon type='success' />}
         </Space>
       )
     },

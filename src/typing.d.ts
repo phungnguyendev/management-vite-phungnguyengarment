@@ -13,6 +13,8 @@ export type StatusType = 'not_activated' | 'activated' | 'fixing' | 'completed' 
 
 export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
+export type TableStatusType = 'normal' | 'success' | 'progress' | 'warning' | 'danger'
+
 export type SortDirection = 'asc' | 'desc'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'

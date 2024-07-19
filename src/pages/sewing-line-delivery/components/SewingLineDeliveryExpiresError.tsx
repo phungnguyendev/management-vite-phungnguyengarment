@@ -1,26 +1,33 @@
 import React from 'react'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { expiredDate } from '~/utils/helpers'
+import { diffDate, expiriesDateType } from '~/utils/helpers'
 
 interface Props {
-  date1?: string | undefined | null
-  date2?: string | undefined | null
+  wrapperBefore?: string
+  wrapperAfter?: string
+  dateOutputFCR?: string | undefined | null
+  dateToCheck?: string | undefined | null
 }
 
-const SewingLineDeliveryExpiresError: React.FC<Props> = ({ date1, date2 }) => {
-  const expiresDateNumber = expiredDate(date1, date2) ?? 0
+const SewingLineDeliveryExpiresError: React.FC<Props> = ({
+  dateOutputFCR,
+  dateToCheck,
+  wrapperBefore,
+  wrapperAfter
+}) => {
+  const expiresDateNumber = diffDate(dateOutputFCR, dateToCheck) ?? 0
 
   const content = (): string => {
     if (expiresDateNumber >= 0) {
-      return `(Còn ${expiresDateNumber} ngày)`
+      return `${wrapperBefore ?? '('}Còn ${expiresDateNumber} ngày${wrapperAfter ?? ')'}`
     } else {
-      return `(Quá ${expiresDateNumber * -1} ngày)`
+      return `${wrapperBefore ?? '('}Quá ${expiresDateNumber * -1} ngày${wrapperAfter ?? ')'}`
     }
   }
 
   return (
     <>
-      <SkyTableTypography type={expiresDateNumber >= 5 ? 'success' : 'danger'}>{content()}</SkyTableTypography>
+      <SkyTableTypography type={expiriesDateType(dateOutputFCR, dateToCheck)}>{content()}</SkyTableTypography>
     </>
   )
 }

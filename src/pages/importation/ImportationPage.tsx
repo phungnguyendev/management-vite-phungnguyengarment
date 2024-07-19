@@ -6,10 +6,10 @@ import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
-import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableIcon from '~/components/sky-ui/SkyTable/SkyTableIcon'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
@@ -43,7 +43,7 @@ const ImportationPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>
-          {viewModel.action.isCheckImported(record) && <SkyTableCheckedIcon />}
+          {viewModel.action.isShowStatusIcon(record) && <SkyTableIcon type={viewModel.action.statusIconType(record)} />}
         </Space>
       )
     },

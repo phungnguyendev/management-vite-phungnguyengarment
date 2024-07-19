@@ -9,8 +9,8 @@ import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Group, Importation, Product, ProductColor, ProductGroup } from '~/typing'
-import { dateComparator, isValidArray, numberComparator } from '~/utils/helpers'
+import { Color, Group, Importation, Product, ProductColor, ProductGroup, TableStatusType } from '~/typing'
+import { dateComparator, isValidArray, numberComparator, numberValidatorCalc, sumArray } from '~/utils/helpers'
 import { ImportationExpandableAddNewProps, ImportationExpandableTableDataType, ImportationTableDataType } from '../type'
 
 export default function useImportationViewModel() {
@@ -354,6 +354,37 @@ export default function useImportationViewModel() {
     return isValidArray(record.expandableImportationTableDataTypes)
   }
 
+  /**
+   * Hàm kiểm tra xem có nên show icon status hay không
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const isShowStatusIcon = (record: ImportationTableDataType): boolean => {
+    return isValidArray(record.expandableImportationTableDataTypes)
+      ? sumArray(
+          record.expandableImportationTableDataTypes.map((item) => {
+            return numberValidatorCalc(item.quantity)
+          })
+        ) > 0
+      : false
+  }
+
+  /**
+   * Hàm kiểm tra trạng thái của icon
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const statusIconType = (record: ImportationTableDataType): TableStatusType => {
+    const sum = isValidArray(record.expandableImportationTableDataTypes)
+      ? sumArray(
+          record.expandableImportationTableDataTypes.map((item) => {
+            return numberValidatorCalc(item.quantity)
+          })
+        )
+      : 0
+    return sum > 0 ? 'success' : 'normal'
+  }
+
   return {
     state: {
       productColors,
@@ -373,7 +404,6 @@ export default function useImportationViewModel() {
     service: {
       productService,
       productColorService,
-      // printablePlaceService,
       productGroupService,
       importationService
     },
@@ -390,7 +420,9 @@ export default function useImportationViewModel() {
       handlePageExpandedChange,
       handleDelete,
       handleDeleteForever,
-      handleRestore
+      handleRestore,
+      isShowStatusIcon,
+      statusIconType
     },
     table
   }

@@ -1,6 +1,8 @@
 import { App as AntApp } from 'antd'
+import { BaseType } from 'antd/es/typography/Base'
 import { useCallback, useEffect, useState } from 'react'
 import ColorAPI from '~/api/services/ColorAPI'
+import CompletionAPI from '~/api/services/CompletionAPI'
 import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
@@ -10,8 +12,18 @@ import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Group, Product, ProductColor, ProductGroup, SewingLine, SewingLineDelivery } from '~/typing'
-import { isValidArray, numberValidatorCalc, sumArray } from '~/utils/helpers'
+import {
+  Color,
+  Completion,
+  Group,
+  Product,
+  ProductColor,
+  ProductGroup,
+  SewingLine,
+  SewingLineDelivery,
+  TableStatusType
+} from '~/typing'
+import { expiriesDateType, isValidArray, numberValidatorCalc, sumArray } from '~/utils/helpers'
 import { SewingLineDeliveryTableDataType } from '../type'
 
 export default function useSewingLineDeliveryViewModel() {
@@ -24,6 +36,7 @@ export default function useSewingLineDeliveryViewModel() {
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
   const productGroupService = useAPIService<ProductGroup>(ProductGroupAPI)
   const sewingLineService = useAPIService<SewingLine>(SewingLineAPI)
+  const completionService = useAPIService<Completion>(CompletionAPI)
   const sewingLineDeliveryService = useAPIService<SewingLineDelivery>(SewingLineDeliveryAPI)
   const colorService = useAPIService<Color>(ColorAPI)
   const groupService = useAPIService<Group>(GroupAPI)
@@ -39,6 +52,7 @@ export default function useSewingLineDeliveryViewModel() {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([])
   const [sewingLineDeliveries, setSewingLineDeliveries] = useState<SewingLineDelivery[]>([])
   const [sewingLines, setSewingLines] = useState<SewingLine[]>([])
+  const [completions, setCompletions] = useState<Completion[]>([])
   const [colors, setColors] = useState<Color[]>([])
   const [groups, setGroups] = useState<Group[]>([])
 
@@ -112,6 +126,13 @@ export default function useSewingLineDeliveryViewModel() {
       if (!sewingLineResult.success) throw new Error(define('dataLoad_failed'))
       const newSewingLines = sewingLineResult.data as SewingLine[]
       setSewingLines(newSewingLines)
+
+      const completionsResult = await completionService.getItems(
+        { paginator: { page: 1, pageSize: -1 } },
+        table.setLoading
+      )
+      const newCompletions = completionsResult.data as Completion[]
+      setCompletions(newCompletions)
 
       await colorService.getItemsSync({ paginator: { page: 1, pageSize: -1 } }, table.setLoading, (result) => {
         if (!result.success) throw new Error(define('dataLoad_failed'))
@@ -257,14 +278,58 @@ export default function useSewingLineDeliveryViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
-  const isCheckSuccess = (record: SewingLineDeliveryTableDataType): boolean => {
+  /**
+   * Hàm kiểm tra xem có nên show icon status hay không
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const isShowStatusIcon = (record: SewingLineDeliveryTableDataType): boolean => {
     return isValidArray(record.sewingLineDeliveries)
       ? sumArray(
           record.sewingLineDeliveries.map((item) => {
             return numberValidatorCalc(item.quantitySewed)
           })
-        ) >= numberValidatorCalc(record.quantityPO)
+        ) > 0
       : false
+  }
+
+  /**
+   * Hàm kiểm tra trạng thái của icon
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const statusIconType = (record: SewingLineDeliveryTableDataType): TableStatusType => {
+    const po = numberValidatorCalc(record.quantityPO)
+    if (isValidArray(record.sewingLineDeliveries)) {
+      const totalQuantitySewed = sumArray(
+        record.sewingLineDeliveries.map((item) => {
+          return numberValidatorCalc(item.quantitySewed)
+        })
+      )
+      const checkExpiry = (type: BaseType) =>
+        isValidArray(record.sewingLineDeliveries)
+          ? record.sewingLineDeliveries.some(
+              (item) => expiriesDateType(record.dateOutputFCR, item.expiredDate) === type
+            )
+          : false
+
+      if (checkExpiry('danger')) {
+        return totalQuantitySewed < po ? 'danger' : 'success'
+      }
+
+      if (checkExpiry('warning')) {
+        return totalQuantitySewed < po ? 'progress' : totalQuantitySewed === 0 ? 'warning' : 'success'
+      }
+
+      if (checkExpiry('secondary')) {
+        return totalQuantitySewed < po ? 'progress' : totalQuantitySewed === 0 ? 'normal' : 'success'
+      }
+
+      if (checkExpiry('success')) {
+        return totalQuantitySewed < po ? 'progress' : totalQuantitySewed === 0 ? 'progress' : 'success'
+      }
+    }
+    return 'progress'
   }
 
   return {
@@ -273,6 +338,7 @@ export default function useSewingLineDeliveryViewModel() {
       groups,
       sewingLines,
       sewingLineDeliveries,
+      completions,
       showDeleted,
       setShowDeleted,
       searchText,
@@ -296,7 +362,8 @@ export default function useSewingLineDeliveryViewModel() {
       handleDelete,
       handleDeleteForever,
       handleRestore,
-      isCheckSuccess
+      isShowStatusIcon,
+      statusIconType
     },
     table
   }

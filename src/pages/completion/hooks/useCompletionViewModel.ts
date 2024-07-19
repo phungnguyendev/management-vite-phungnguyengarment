@@ -6,16 +6,18 @@ import GroupAPI from '~/api/services/GroupAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
+import useStatistic from '~/components/hooks/useStatistic'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Completion, Group, Product, ProductColor, ProductGroup } from '~/typing'
+import { Color, Completion, Group, Product, ProductColor, ProductGroup, TableStatusType } from '~/typing'
 import { dateComparator, isValidObject, numberComparator } from '~/utils/helpers'
 import { CompletionNewRecordProps, CompletionTableDataType } from '../type'
 
 export default function useCompletionViewModel() {
   const { message } = AntApp.useApp()
   const table = useTable<CompletionTableDataType>([])
+  const statistic = useStatistic()
 
   // Services
   const productService = useAPIService<Product>(ProductAPI)
@@ -252,6 +254,34 @@ export default function useCompletionViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
+  /**
+   * Hàm kiểm tra xem có nên show icon status hay không
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const isShowStatusIcon = (record: CompletionTableDataType): boolean => {
+    return isValidObject(record.completion)
+      ? statistic.ironPassed(record.quantityPO, record.completion.quantityIroned) ||
+          statistic.ironPassed(record.quantityPO, record.completion.quantityCheckPassed) ||
+          statistic.ironPassed(record.quantityPO, record.completion.quantityPackaged)
+      : false
+  }
+
+  /**
+   * Hàm kiểm tra trạng thái của icon
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const statusIconType = (record: CompletionTableDataType): TableStatusType => {
+    return isValidObject(record.completion)
+      ? statistic.ironPassed(record.quantityPO, record.completion.quantityIroned) &&
+        statistic.ironPassed(record.quantityPO, record.completion.quantityCheckPassed) &&
+        statistic.ironPassed(record.quantityPO, record.completion.quantityPackaged)
+        ? 'success'
+        : 'warning'
+      : 'normal'
+  }
+
   return {
     state: {
       colors,
@@ -281,7 +311,9 @@ export default function useCompletionViewModel() {
       handlePageChange,
       handleDelete,
       handleDeleteForever,
-      handleRestore
+      handleRestore,
+      isShowStatusIcon,
+      statusIconType
     },
     table
   }

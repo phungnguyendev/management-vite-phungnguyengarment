@@ -11,7 +11,7 @@ import { dateFormatter } from '~/utils/date-formatter'
 import {
   dateValidatorDisplay,
   dateValidatorInit,
-  isExpiredDate,
+  expiriesDateType,
   isValidArray,
   isValidDate,
   numberValidatorCalc,
@@ -121,7 +121,10 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
           <SkyTableTypography>
             {dateValidatorDisplay(record?.expiredDate)}{' '}
             {isValidDate(parentRecord.dateOutputFCR) && isValidDate(record.expiredDate) && (
-              <SewingLineDeliveryExpiresError date1={parentRecord.dateOutputFCR} date2={record.expiredDate} />
+              <SewingLineDeliveryExpiresError
+                dateOutputFCR={parentRecord.dateOutputFCR}
+                dateToCheck={record.expiredDate}
+              />
             )}
           </SkyTableTypography>
         </EditableStateCell>
@@ -131,15 +134,6 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
 
   const handleButtonHide = () => {
     setActiveKey([])
-  }
-
-  const isError = (record: SewingLineDelivery): boolean => {
-    const error = isExpiredDate(parentRecord.dateOutputFCR, record.expiredDate)
-      ? numberValidatorCalc(record.quantitySewed) >= numberValidatorCalc(parentRecord.quantityPO)
-        ? false
-        : true
-      : false
-    return error
   }
 
   return (
@@ -166,11 +160,23 @@ const SewingLineDeliveryExpandableList: React.FC<Props> = ({ parentRecord, newRe
                       <Flex vertical gap={20} align='center' className='w-full'>
                         <SkyTableRowHighLightItem
                           key={index}
-                          className='w-fit'
-                          type={isError(record) ? 'danger' : undefined}
                           status={record.sewingLine?.status}
+                          type={
+                            expiriesDateType(parentRecord.dateOutputFCR, record.expiredDate) === 'danger'
+                              ? 'danger'
+                              : 'secondary'
+                          }
+                          className='w-fit'
                         >
-                          {isError(record) ? `${record.sewingLine?.name} (Bể)` : record.sewingLine?.name}
+                          {expiriesDateType(parentRecord.dateOutputFCR, record.expiredDate) === 'danger'
+                            ? `${record.sewingLine?.name} (Bể)`
+                            : `${record.sewingLine?.name}`}{' '}
+                          {isValidDate(parentRecord.dateOutputFCR) && isValidDate(record.expiredDate) && (
+                            <SewingLineDeliveryExpiresError
+                              dateOutputFCR={parentRecord.dateOutputFCR}
+                              dateToCheck={record.expiredDate}
+                            />
+                          )}
                         </SkyTableRowHighLightItem>
                         <SkyTableExpandableItemRow
                           className='w-[100px] md:w-[250px]'

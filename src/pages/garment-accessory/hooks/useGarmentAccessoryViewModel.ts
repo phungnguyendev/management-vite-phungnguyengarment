@@ -25,6 +25,7 @@ import {
   booleanComparator,
   dateComparator,
   isValidArray,
+  isValidBoolean,
   isValidNumber,
   isValidObject,
   numberComparator,
@@ -375,16 +376,25 @@ export default function useGarmentAccessoryViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
-  const isChecked = (record: GarmentAccessoryTableDataType): boolean | undefined => {
-    return record.expandableGarmentAccessory?.syncStatus
-  }
-
   const isDisabledRecord = (record: GarmentAccessoryTableDataType): boolean => {
     return table.isEditing(record.key)
       ? newRecord.syncStatus ?? false
       : isValidObject(record.expandableGarmentAccessory) && isValidNumber(record.expandableGarmentAccessory?.id)
         ? record.expandableGarmentAccessory.syncStatus ?? false
         : false
+  }
+
+  /**
+   * Hàm kiểm tra xem có nên show icon status hay không
+   * @param record SewingLineDeliveryTableDataType
+   * @returns boolean
+   */
+  const isShowStatusIcon = (record: GarmentAccessoryTableDataType): boolean => {
+    return (
+      isValidObject(record.expandableGarmentAccessory) &&
+      isValidBoolean(record.expandableGarmentAccessory.syncStatus) &&
+      record.expandableGarmentAccessory.syncStatus
+    )
   }
 
   return {
@@ -420,7 +430,7 @@ export default function useGarmentAccessoryViewModel() {
       handleDeleteForever,
       handleRestore,
       isDisabledRecord,
-      isChecked
+      isShowStatusIcon
     },
     table
   }

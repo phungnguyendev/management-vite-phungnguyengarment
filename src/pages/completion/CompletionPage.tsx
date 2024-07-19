@@ -1,7 +1,6 @@
 import { Flex, Space } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
-import { Check } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
@@ -12,6 +11,8 @@ import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableIcon from '~/components/sky-ui/SkyTable/SkyTableIcon'
+import SkyTableRemainingAmount from '~/components/sky-ui/SkyTable/SkyTableRemainingAmount'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { RootState } from '~/store/store'
@@ -48,24 +49,15 @@ const FinishPage = () => {
 
   const columns = {
     productCode: (record: CompletionTableDataType) => {
-      const ironedSuccess =
-        numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion?.quantityIroned) <= 0
-      const checkPassSuccess =
-        numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion?.quantityCheckPassed) <= 0
-      const packageSuccess =
-        numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion?.quantityPackaged) <= 0
-      const success = ironedSuccess && checkPassSuccess && packageSuccess
       return (
-        <EditableStateCell isEditing={false} dataIndex='productCode' title='Mã hàng' inputType='text' required>
-          <Space size={2} direction='horizontal'>
-            <SkyTableTypography strong status={record.status}>
-              {textValidatorDisplay(record.productCode)}
-              {success && (
-                <Check size={16} color='#ffffff' className='relative top-[2px] mx-1 rounded-full bg-success p-[2px]' />
-              )}
-            </SkyTableTypography>
-          </Space>
-        </EditableStateCell>
+        <Space size={2} direction='horizontal' wrap>
+          <SkyTableTypography strong status={record.status}>
+            {textValidatorDisplay(record.productCode)}{' '}
+            {viewModel.action.isShowStatusIcon(record) && (
+              <SkyTableIcon type={viewModel.action.statusIconType(record)} />
+            )}
+          </SkyTableTypography>
+        </Space>
       )
     },
     quantityPO: (record: CompletionTableDataType) => {
@@ -122,18 +114,7 @@ const FinishPage = () => {
             ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityIroned)
             : numberValidatorCalc(record.quantityPO)
 
-        return (
-          <EditableStateCell
-            dataIndex='remainingAmount'
-            title='Còn lại'
-            isEditing={viewModel.table.isEditing(record.key)}
-            editableRender={<SkyTableTypography>{amount}</SkyTableTypography>}
-            defaultValue={amount}
-            inputType='number'
-          >
-            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+        return <SkyTableRemainingAmount totalAmount={amount} />
       }
     },
     checkPass: {
@@ -163,18 +144,7 @@ const FinishPage = () => {
           isValidObject(record.completion) && isValidNumber(record.completion.quantityCheckPassed)
             ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityCheckPassed)
             : numberValidatorCalc(record.quantityPO)
-        return (
-          <EditableStateCell
-            dataIndex='remainingAmount'
-            title='Còn lại'
-            isEditing={viewModel.table.isEditing(record.key)}
-            editableRender={<SkyTableTypography>{amount}</SkyTableTypography>}
-            defaultValue={amount}
-            inputType='number'
-          >
-            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+        return <SkyTableRemainingAmount totalAmount={amount} />
       }
     },
     packaged: {
@@ -206,18 +176,7 @@ const FinishPage = () => {
           isValidObject(record.completion) && isValidNumber(record.completion.quantityPackaged)
             ? numberValidatorCalc(record.quantityPO) - numberValidatorCalc(record.completion.quantityPackaged)
             : numberValidatorCalc(record.quantityPO)
-        return (
-          <EditableStateCell
-            dataIndex='remainingAmount'
-            title='Còn lại'
-            isEditing={viewModel.table.isEditing(record.key)}
-            editableRender={<SkyTableTypography status={record.status}>{amount}</SkyTableTypography>}
-            defaultValue={amount}
-            inputType='number'
-          >
-            <SkyTableTypography>{numberValidatorDisplay(amount)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+        return <SkyTableRemainingAmount totalAmount={amount} />
       }
     },
     exportedDate: (record: CompletionTableDataType) => {

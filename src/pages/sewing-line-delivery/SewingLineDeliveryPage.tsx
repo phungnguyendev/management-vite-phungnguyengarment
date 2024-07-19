@@ -7,10 +7,10 @@ import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
-import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableIcon from '~/components/sky-ui/SkyTable/SkyTableIcon'
 import SkyTableRowHighLightItem from '~/components/sky-ui/SkyTable/SkyTableRowHighLightItem'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
@@ -20,10 +20,10 @@ import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
   dateValidatorDisplay,
+  expiriesDateType,
   handleFilterText,
   handleObjectFilterText,
   isAcceptRole,
-  isExpiredDate,
   isValidArray,
   isValidDate,
   numberValidatorCalc,
@@ -53,7 +53,7 @@ const SewingLineDeliveryPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>
-          {viewModel.action.isCheckSuccess(record) && <SkyTableCheckedIcon />}
+          {viewModel.action.isShowStatusIcon(record) && <SkyTableIcon type={viewModel.action.statusIconType(record)} />}
         </Space>
       )
     },
@@ -121,21 +121,22 @@ const SewingLineDeliveryPage = () => {
               {record.sewingLineDeliveries
                 .sort((a, b) => numberValidatorCalc(a.sewingLineID) - numberValidatorCalc(b.sewingLineID))
                 .map((item, index) => {
-                  const isError = isExpiredDate(record.dateOutputFCR, item.expiredDate)
-                    ? numberValidatorCalc(item.quantitySewed) >= numberValidatorCalc(record.quantityPO)
-                      ? false
-                      : true
-                    : false
-
                   return (
                     <SkyTableRowHighLightItem
                       key={index}
                       status={item.sewingLine?.status}
-                      type={isError ? 'danger' : 'secondary'}
+                      type={
+                        expiriesDateType(record.dateOutputFCR, item.expiredDate) === 'danger' ? 'danger' : 'secondary'
+                      }
                     >
-                      {isError ? `${item.sewingLine?.name} (Bể)` : item.sewingLine?.name}{' '}
+                      {expiriesDateType(record.dateOutputFCR, item.expiredDate) === 'danger'
+                        ? `${item.sewingLine?.name} (Bể)`
+                        : `${item.sewingLine?.name}`}{' '}
                       {isValidDate(record.dateOutputFCR) && isValidDate(item.expiredDate) && (
-                        <SewingLineDeliveryExpiresError date1={record.dateOutputFCR} date2={item.expiredDate} />
+                        <SewingLineDeliveryExpiresError
+                          dateOutputFCR={record.dateOutputFCR}
+                          dateToCheck={item.expiredDate}
+                        />
                       )}
                     </SkyTableRowHighLightItem>
                   )

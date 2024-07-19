@@ -1,4 +1,5 @@
 import { Color } from 'antd/es/color-picker'
+import { BaseType } from 'antd/es/typography/Base'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -210,28 +211,88 @@ export const extractHexCode = (hexCodeWithID: string): string => {
   return username
 }
 
-export const isExpiredDate = (date1?: string | undefined | null, date2?: string | undefined | null): boolean => {
-  if (!isValidDate(date1) || !isValidDate(date2)) return false
-  // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
-  return dayjs(date1).diff(date2, 'days') < 5
-}
-
-export const expiredDate = (
-  date1?: string | undefined | null,
-  date2?: string | undefined | null
+/**
+ * Kiểm tra date1 (gốc) và date2 có cách nhau 5 ngày hay không
+ * Return true if >= 5 otherwise return false
+ * @param dateOriginal Ngày gốc
+ * @param dateCheck Ngày cần kiểm tra
+ * @returns number
+ */
+export const diffDate = (
+  dateOriginal?: string | undefined | null,
+  dateCheck?: string | undefined | null
 ): number | undefined => {
-  if (!isValidDate(date1) || !isValidDate(date2)) return undefined
+  if (!isValidDate(dateOriginal) || !isValidDate(dateCheck)) return undefined
   // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
-  return dayjs(date1).diff(date2, 'days')
+  return dayjs(dateOriginal).diff(dateCheck, 'days')
 }
 
-// Tính phần trăm
+/**
+ * Kiểm tra date1 (gốc) và date2 có cách nhau 5 ngày hay không
+ * Return true if >= 5 otherwise return false
+ * @param dateOriginal : Ngày gốc
+ * @param dateCheck : Ngày cần kiểm tra
+ * @returns boolean
+ */
+export const isExpiredDate = (
+  dateOriginal?: string | undefined | null,
+  dateCheck?: string | undefined | null
+): boolean => {
+  if (!isValidDate(dateOriginal) || !isValidDate(dateCheck)) return false
+  const day = dayjs(dateOriginal).diff(dateCheck, 'days')
+  return day < 5
+}
+
+/**
+ * Hàm kiểm tra ngày dateOriginal và ngày dateCheck xem ngày dateOriginal so với dateCheck cách nhau bao nhiêu ngày
+ * Return về con số đó và kiểm tra tiếp:
+ * number < 0 : Số ngày dateCheck đã đi qua ngày dateOriginal
+ * number > 0 : Còn số ngày còn lại đến ngày dateOriginal
+ * number === : Ngày dateCheck đang là ngày dateOriginal
+ * @param dateOriginal Ngày gốc
+ * @param dateCheck Ngày cần kiểm tra
+ * @returns 'normal' | 'success' | 'warning' | 'danger' (BaseType)
+ */
+export const expiriesDateType = (
+  dateOriginal?: string | undefined | null,
+  dateCheck?: string | undefined | null
+): BaseType => {
+  if (!isValidDate(dateOriginal) || !isValidDate(dateCheck)) return 'secondary'
+  // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
+  const day = dayjs(dateOriginal).diff(dateCheck, 'days')
+  // day >= 5 : ngày dự kiến > 5 (Success)
+  // day === 0 : ngày dự kiến === ngày xuất (Danger)
+  // day < 0 : ngày dự kiến > ngày xuất (Danger)
+  // day < 5 : ngày dự kiến cận ngày xuất (Warning)
+  return day >= 5 ? 'success' : day === 0 ? 'danger' : day < 0 ? 'danger' : day < 5 ? 'warning' : 'secondary'
+}
+
+/**
+ * Kiểm tra date1 (gốc) đến nay
+ * Return true if >= 5 otherwise return false
+ */
+export const dateFromNow = (date?: string | undefined | null): number | undefined => {
+  if (!isValidDate(date)) return undefined
+  // Kiểm tra xem date1 và date2 cách nhau ít hơn 5 ngày không
+  return dayjs(date).diff(Date.now(), 'days')
+}
+
+/**
+ * Hàm tính phần trăm
+ * @param totalCount Tổng số
+ * @param count Số cần tính
+ * @return number: số phần trăm
+ */
 export const percentage = (totalCount: number, count: number): number => {
   const percent = (count / totalCount) * 100
   return parseFloat(percent.toFixed(0))
 }
 
-// Tính tổng các phần tử bên trong mảng
+/**
+ * Hàm tính tổng các phần tử bên trong mảng
+ * @param counts: Tổng số
+ * @return number: Tổng số các phần tử con đã cộng lại
+ */
 export const sumCounts = (counts: number[]): number => {
   return counts.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 }

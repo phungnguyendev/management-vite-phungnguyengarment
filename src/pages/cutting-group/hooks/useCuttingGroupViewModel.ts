@@ -252,7 +252,7 @@ export default function useCuttingGroupViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
-  const isChecked = (record: CuttingGroupTableDataType): boolean => {
+  const isShowStatusIcon = (record: CuttingGroupTableDataType): boolean => {
     if (isValidObject(record.cuttingGroup)) {
       if (isValidBoolean(record.cuttingGroup.syncStatus) && record.cuttingGroup.syncStatus) {
         // Kiểm tra sl in thêu về
@@ -324,7 +324,7 @@ export default function useCuttingGroupViewModel() {
       cuttingGroupService
     },
     action: {
-      isChecked,
+      isShowStatusIcon,
       loadData,
       handleUpdate,
       handleSwitchDeleteChange,

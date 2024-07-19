@@ -3,16 +3,18 @@ import type { ColumnsType } from 'antd/es/table'
 import { BarChartBig, CheckCheck, CircleAlert } from 'lucide-react'
 import { SewingIcon } from '~/assets/icons'
 import useDevice from '~/components/hooks/useDevice'
+import useStatistic from '~/components/hooks/useStatistic'
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
 import ProgressBar from '~/components/sky-ui/ProgressBar'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableCheckedIcon from '~/components/sky-ui/SkyTable/SkyTableCheckedIcon'
 import SkyTableColorPicker from '~/components/sky-ui/SkyTable/SkyTableColorPicker'
 import SkyTableExpandableItemRow from '~/components/sky-ui/SkyTable/SkyTableExpandableItemRow'
 import SkyTableExpandableLayout from '~/components/sky-ui/SkyTable/SkyTableExpandableLayout'
+import SkyTableIcon from '~/components/sky-ui/SkyTable/SkyTableIcon'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
+import { Product } from '~/typing'
 import { dateFormatter } from '~/utils/date-formatter'
 import {
   breakpoint,
@@ -30,14 +32,13 @@ import {
 import StatisticCard from './components/StatisticCard'
 import StatisticWrapper from './components/StatisticWapper'
 import useDashboardViewModel from './hooks/useDashboardViewModel'
-import useStatisticViewModel from './hooks/useStatisticViewModel'
 import { DashboardTableDataType } from './type'
 
 const DashboardPage = () => {
   useTitle('Dashboard | Phung Nguyen')
   const { width } = useDevice()
   const viewModel = useDashboardViewModel()
-  const statisticViewModel = useStatisticViewModel()
+  const statistic = useStatistic()
 
   const columns = {
     productCode: (record: DashboardTableDataType) => {
@@ -46,7 +47,19 @@ const DashboardPage = () => {
           <SkyTableTypography strong status={record.status}>
             {textValidatorDisplay(record.productCode)}{' '}
           </SkyTableTypography>
-          {viewModel.action.isCheckSuccess(record) && <SkyTableCheckedIcon />}
+          {statistic.isShowStatusIcon(
+            record.id!,
+            viewModel.state.sewingLineDeliveries,
+            viewModel.state.completions
+          ) && (
+            <SkyTableIcon
+              type={statistic.statusIconType(
+                { ...record } as Product,
+                viewModel.state.sewingLineDeliveries,
+                viewModel.state.completions
+              )}
+            />
+          )}
         </Space>
       )
     },
@@ -290,25 +303,37 @@ const DashboardPage = () => {
         <StatisticWrapper>
           <StatisticCard
             title='Tổng mã sản phẩm'
-            value={statisticViewModel.sumProductAll()}
+            value={viewModel.state.products.length}
             type='base'
             icon={<BarChartBig size={32} />}
           />
           <StatisticCard
             title='Mã đã hoàn thành'
-            value={statisticViewModel.sumProductCompleted()}
+            value={statistic.amountProductCompleted(
+              viewModel.state.products,
+              viewModel.state.sewingLineDeliveries,
+              viewModel.state.completions
+            )}
             type='success'
             icon={<CheckCheck size={32} />}
           />
           <StatisticCard
             title='Mã đang may'
-            value={statisticViewModel.sumProductProgressing()}
+            value={statistic.amountProductProgressing(
+              viewModel.state.products,
+              viewModel.state.sewingLineDeliveries,
+              viewModel.state.completions
+            )}
             type='warning'
             icon={<img src={SewingIcon} className='h-[32px] w-[32px] object-contain' />}
           />
           <StatisticCard
             title='Mã bị bể'
-            value={statisticViewModel.sumProductError()}
+            value={statistic.amountProductDangerous(
+              viewModel.state.products,
+              viewModel.state.sewingLineDeliveries,
+              viewModel.state.completions
+            )}
             type='danger'
             icon={<CircleAlert size={32} />}
           />
