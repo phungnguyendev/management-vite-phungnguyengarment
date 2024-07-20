@@ -11,7 +11,7 @@ import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
 import { Color, Completion, Group, Product, ProductColor, ProductGroup, TableStatusType } from '~/typing'
-import { dateComparator, isValidObject, numberComparator } from '~/utils/helpers'
+import { dateComparator, isValidObject, numberComparator, numberValidatorCalc } from '~/utils/helpers'
 import { CompletionNewRecordProps, CompletionTableDataType } from '../type'
 
 export default function useCompletionViewModel() {
@@ -260,10 +260,11 @@ export default function useCompletionViewModel() {
    * @returns boolean
    */
   const isShowStatusIcon = (record: CompletionTableDataType): boolean => {
+    const po = numberValidatorCalc(record.quantityPO)
     return isValidObject(record.completion)
-      ? statistic.ironPassed(record.quantityPO, record.completion.quantityIroned) ||
-          statistic.ironPassed(record.quantityPO, record.completion.quantityCheckPassed) ||
-          statistic.ironPassed(record.quantityPO, record.completion.quantityPackaged)
+      ? statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityIroned)) ||
+          statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityCheckPassed)) ||
+          statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityPackaged))
       : false
   }
 
@@ -273,10 +274,11 @@ export default function useCompletionViewModel() {
    * @returns boolean
    */
   const statusIconType = (record: CompletionTableDataType): TableStatusType => {
+    const po = numberValidatorCalc(record.quantityPO)
     return isValidObject(record.completion)
-      ? statistic.ironPassed(record.quantityPO, record.completion.quantityIroned) &&
-        statistic.ironPassed(record.quantityPO, record.completion.quantityCheckPassed) &&
-        statistic.ironPassed(record.quantityPO, record.completion.quantityPackaged)
+      ? statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityIroned)) &&
+        statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityCheckPassed)) &&
+        statistic.ironPassed(po, numberValidatorCalc(record.completion.quantityPackaged))
         ? 'success'
         : 'warning'
       : 'normal'
