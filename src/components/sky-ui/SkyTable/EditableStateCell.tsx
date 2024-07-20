@@ -10,6 +10,8 @@ import {
   InputNumber,
   InputNumberProps,
   Select,
+  Switch,
+  SwitchProps,
   Table,
   Typography
 } from 'antd'
@@ -35,6 +37,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   inputNumberProps?: InputNumberProps
   textAreaProps?: TextAreaProps
   inputProps?: InputProps
+  switchProps?: SwitchProps
   datePickerProps?: DatePickerProps
   inputType?: InputType
   required?: boolean
@@ -62,6 +65,7 @@ function EditableStateCell({
   inputNumberProps,
   textAreaProps,
   selectProps,
+  switchProps,
   inputProps,
   defaultValue,
   onValueChange,
@@ -89,6 +93,8 @@ function EditableStateCell({
             className={cn('w-full', restProps.className)}
           />
         )
+      case 'switch':
+        return <Switch {...switchProps} />
       case 'checkbox':
         return (
           <Checkbox

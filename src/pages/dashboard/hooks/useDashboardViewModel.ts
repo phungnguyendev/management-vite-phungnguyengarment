@@ -205,7 +205,7 @@ export default function useDashboardViewModel() {
     return products.length
   }
 
-  const sumProductCompleted = (): number => {
+  const productsCompleted = (): DashboardTableDataType[] => {
     return table.dataSource.filter((record) => {
       const po = numberValidatorCalc(record.quantityPO)
       return (
@@ -214,10 +214,10 @@ export default function useDashboardViewModel() {
         statistic.checkPassed(po, statistic.sumQuantityCheckPassed(record.id!, completions)) &&
         statistic.packagePassed(po, statistic.sumQuantityPackaged(record.id!, completions))
       )
-    }).length
+    })
   }
 
-  const sumProductProgressing = (): number => {
+  const productsProgressing = (): DashboardTableDataType[] => {
     return table.dataSource.filter((record) => {
       const po = numberValidatorCalc(record.quantityPO)
       const totalQuantitySewed = statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)
@@ -238,10 +238,10 @@ export default function useDashboardViewModel() {
         (checkExpiry(record, 'warning') || checkExpiry(record, 'success')) &&
         (hasSmallerQuantityPO || hasLargerOrEqualQuantityPO)
       )
-    }).length
+    })
   }
 
-  const sumProductError = (): number => {
+  const productsError = (): DashboardTableDataType[] => {
     return table.dataSource.filter((record) => {
       const po = numberValidatorCalc(record.quantityPO)
       const hasAllLargerOrEqualQuantityPO =
@@ -250,7 +250,7 @@ export default function useDashboardViewModel() {
         statistic.checkPassed(po, statistic.sumQuantityCheckPassed(record.id!, completions)) &&
         statistic.packagePassed(po, statistic.sumQuantityPackaged(record.id!, completions))
       return checkExpiry(record, 'danger') && !hasAllLargerOrEqualQuantityPO
-    }).length
+    })
   }
 
   /**
@@ -349,9 +349,9 @@ export default function useDashboardViewModel() {
       isShowStatusIcon,
       statusIconType,
       sumProductAll,
-      sumProductCompleted,
-      sumProductProgressing,
-      sumProductError
+      productsCompleted,
+      productsProgressing,
+      productsError
     },
     table,
     statistic

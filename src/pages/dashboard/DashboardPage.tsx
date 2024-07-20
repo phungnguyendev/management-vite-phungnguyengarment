@@ -282,6 +282,39 @@ const DashboardPage = () => {
     }
   ]
 
+  // const filterItems: FilterItemDataType[] = [
+  //   {
+  //     label: 'Mã đã hoàn thành',
+  //     render: () => {
+  //       return (
+  //         <>
+  //           <EditableFormCell defaultValue={false} isEditing dataIndex='success' inputType='switch' />
+  //         </>
+  //       )
+  //     }
+  //   },
+  //   {
+  //     label: 'Mã đang may',
+  //     render: () => {
+  //       return (
+  //         <>
+  //           <EditableFormCell defaultValue={false} isEditing dataIndex='progress' inputType='switch' />
+  //         </>
+  //       )
+  //     }
+  //   },
+  //   {
+  //     label: 'Mã bị bể',
+  //     render: () => {
+  //       return (
+  //         <>
+  //           <EditableFormCell defaultValue={false} isEditing dataIndex='danger' inputType='switch' />
+  //         </>
+  //       )
+  //     }
+  //   }
+  // ]
+
   return (
     <>
       <BaseLayout title='Dashboard'>
@@ -294,19 +327,19 @@ const DashboardPage = () => {
           />
           <StatisticCard
             title='Mã đã hoàn thành'
-            value={viewModel.action.sumProductCompleted()}
+            value={viewModel.action.productsCompleted().length}
             type='success'
             icon={<CheckCheck size={32} />}
           />
           <StatisticCard
             title='Mã đang may'
-            value={viewModel.action.sumProductProgressing()}
+            value={viewModel.action.productsProgressing().length}
             type='warning'
             icon={<img src={SewingIcon} className='h-[32px] w-[32px] object-contain' />}
           />
           <StatisticCard
             title='Mã bị bể'
-            value={viewModel.action.sumProductError()}
+            value={viewModel.action.productsError().length}
             type='danger'
             icon={<CircleAlert size={32} />}
           />

@@ -1,5 +1,17 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
-import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
+import {
+  Checkbox,
+  ColorPicker,
+  DatePicker,
+  Flex,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Switch,
+  Table,
+  Typography
+} from 'antd'
 import dayjs from 'dayjs'
 import { memo } from 'react'
 import { cn, extractHexCode } from '~/utils/helpers'
@@ -24,6 +36,7 @@ function EditableFormCell({
   inputNumberProps,
   textAreaProps,
   inputProps,
+  switchProps,
   selectProps,
   defaultValue,
   onValueChange,
@@ -85,6 +98,8 @@ function EditableFormCell({
             className={cn('w-full', restProps.className)}
           />
         )
+      case 'switch':
+        return <Switch {...switchProps} />
       case 'checkbox':
         return (
           <Checkbox

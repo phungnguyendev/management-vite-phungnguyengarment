@@ -32,6 +32,7 @@ export type InputType =
   | 'multipleSelect'
   | 'password'
   | 'email'
+  | 'switch'
 
 export type StepRound = {
   name: string
