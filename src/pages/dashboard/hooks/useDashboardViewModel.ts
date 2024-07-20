@@ -1,4 +1,5 @@
 import { App as AntApp } from 'antd'
+import { BaseType } from 'antd/es/typography/Base'
 import { useCallback, useEffect, useState } from 'react'
 import ColorAPI from '~/api/services/ColorAPI'
 import CompletionAPI from '~/api/services/CompletionAPI'
@@ -7,16 +8,27 @@ import ProductAPI from '~/api/services/ProductAPI'
 import ProductColorAPI from '~/api/services/ProductColorAPI'
 import ProductGroupAPI from '~/api/services/ProductGroupAPI'
 import SewingLineDeliveryAPI from '~/api/services/SewingLineDeliveryAPI'
+import useStatistic from '~/components/hooks/useStatistic'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants'
 import useAPIService from '~/hooks/useAPIService'
-import { Color, Completion, Group, Product, ProductColor, ProductGroup, SewingLineDelivery } from '~/typing'
-import { isValidNumber, isValidObject } from '~/utils/helpers'
+import {
+  Color,
+  Completion,
+  Group,
+  Product,
+  ProductColor,
+  ProductGroup,
+  SewingLineDelivery,
+  TableStatusType
+} from '~/typing'
+import { expiriesDateType, isValidArray, numberValidatorCalc } from '~/utils/helpers'
 import { DashboardTableDataType } from '../type'
 
 export default function useDashboardViewModel() {
   const { message } = AntApp.useApp()
   const table = useTable<DashboardTableDataType>([])
+  const statistic = useStatistic()
 
   const productService = useAPIService<Product>(ProductAPI)
   const productColorService = useAPIService<ProductColor>(ProductColorAPI)
@@ -184,37 +196,134 @@ export default function useDashboardViewModel() {
     loadData({ isDeleted: showDeleted, searchTerm: value })
   }
 
+  const checkExpiry = (record: DashboardTableDataType, type: BaseType) =>
+    isValidArray(record.sewingLineDeliveries)
+      ? record.sewingLineDeliveries.some((item) => expiriesDateType(record.dateOutputFCR, item.expiredDate) === type)
+      : false
+
   const sumProductAll = (): number => {
     return products.length
   }
 
   const sumProductCompleted = (): number => {
-    const listCompletion = completions.filter((item) => {
-      const quantityPO =
-        isValidObject(item.product) && isValidNumber(item.product.quantityPO) ? item.product.quantityPO : 0
+    return table.dataSource.filter((record) => {
+      const po = numberValidatorCalc(record.quantityPO)
       return (
-        item.quantityIroned === quantityPO &&
-        item.quantityCheckPassed === quantityPO &&
-        item.quantityPackaged === quantityPO
+        statistic.sewPassed(po, statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)) &&
+        statistic.ironPassed(po, statistic.sumQuantityIroned(record.id!, completions)) &&
+        statistic.checkPassed(po, statistic.sumQuantityCheckPassed(record.id!, completions)) &&
+        statistic.packagePassed(po, statistic.sumQuantityPackaged(record.id!, completions))
       )
-    })
-    return listCompletion.length
+    }).length
   }
 
   const sumProductProgressing = (): number => {
-    return products.length
+    return table.dataSource.filter((record) => {
+      const po = numberValidatorCalc(record.quantityPO)
+      const totalQuantitySewed = statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)
+      const totalQuantityIroned = statistic.sumQuantityIroned(record.id!, completions)
+      const totalQuantityCheckPassed = statistic.sumQuantityCheckPassed(record.id!, completions)
+      const totalQuantityPackaged = statistic.sumQuantityPackaged(record.id!, completions)
+      const hasSmallerQuantityPO =
+        statistic.isValidQuantity(po, totalQuantitySewed) ||
+        statistic.isValidQuantity(po, totalQuantityIroned) ||
+        statistic.isValidQuantity(po, totalQuantityCheckPassed) ||
+        statistic.isValidQuantity(po, totalQuantityPackaged)
+      const hasLargerOrEqualQuantityPO =
+        totalQuantitySewed >= po ||
+        totalQuantityIroned >= po ||
+        totalQuantityCheckPassed >= po ||
+        totalQuantityPackaged >= po
+      return (
+        (checkExpiry(record, 'warning') || checkExpiry(record, 'success')) &&
+        (hasSmallerQuantityPO || hasLargerOrEqualQuantityPO)
+      )
+    }).length
   }
 
   const sumProductError = (): number => {
-    return products.length
+    return table.dataSource.filter((record) => {
+      const po = numberValidatorCalc(record.quantityPO)
+      const hasAllLargerOrEqualQuantityPO =
+        statistic.sewPassed(po, statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)) &&
+        statistic.ironPassed(po, statistic.sumQuantityIroned(record.id!, completions)) &&
+        statistic.checkPassed(po, statistic.sumQuantityCheckPassed(record.id!, completions)) &&
+        statistic.packagePassed(po, statistic.sumQuantityPackaged(record.id!, completions))
+      return checkExpiry(record, 'danger') && !hasAllLargerOrEqualQuantityPO
+    }).length
+  }
+
+  /**
+   * Hàm dùng để kiểm tra xem có nên hiển thị IconStatus hay không
+   */
+  const isShowStatusIcon = (record: DashboardTableDataType): boolean => {
+    const po = numberValidatorCalc(record.quantityPO)
+    // Show status icon khi có 1 trong các yếu tố sau: May, Ủi, Kiếm, Đóng gói
+    const totalQuantitySewed = statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)
+    const totalQuantityIroned = statistic.sumQuantityIroned(record.id!, completions)
+    const totalQuantityCheckPassed = statistic.sumQuantityCheckPassed(record.id!, completions)
+    const totalQuantityPackaged = statistic.sumQuantityPackaged(record.id!, completions)
+
+    return (
+      statistic.isValidQuantity(po, totalQuantitySewed) ||
+      statistic.isValidQuantity(po, totalQuantityIroned) ||
+      statistic.isValidQuantity(po, totalQuantityCheckPassed) ||
+      statistic.isValidQuantity(po, totalQuantityPackaged) ||
+      totalQuantitySewed >= po ||
+      totalQuantityIroned >= po ||
+      totalQuantityCheckPassed >= po ||
+      totalQuantityPackaged >= po
+    )
+  }
+
+  /**
+   * Hàm dùng để kiểm tra xem nên hiển thị loại icon nào
+   */
+  const statusIconType = (record: DashboardTableDataType): TableStatusType => {
+    const po = numberValidatorCalc(record.quantityPO)
+    if (po <= 0) return 'normal'
+    const totalQuantitySewed = statistic.sumQuantitySewed(record.id!, sewingLineDeliveries)
+    const totalQuantityIroned = statistic.sumQuantityIroned(record.id!, completions)
+    const totalQuantityCheckPassed = statistic.sumQuantityCheckPassed(record.id!, completions)
+    const totalQuantityPackaged = statistic.sumQuantityPackaged(record.id!, completions)
+
+    const hasSmallerQuantityPO =
+      statistic.isValidQuantity(po, totalQuantitySewed) ||
+      statistic.isValidQuantity(po, totalQuantityIroned) ||
+      statistic.isValidQuantity(po, totalQuantityCheckPassed) ||
+      statistic.isValidQuantity(po, totalQuantityPackaged)
+    const hasLargerOrEqualQuantityPO =
+      totalQuantitySewed >= po ||
+      totalQuantityIroned >= po ||
+      totalQuantityCheckPassed >= po ||
+      totalQuantityPackaged >= po
+    const hasAllLargerOrEqualQuantityPO =
+      statistic.sewPassed(po, totalQuantitySewed) &&
+      statistic.ironPassed(po, totalQuantityIroned) &&
+      statistic.checkPassed(po, totalQuantityCheckPassed) &&
+      statistic.packagePassed(po, totalQuantityPackaged)
+
+    if (checkExpiry(record, 'danger')) {
+      return hasAllLargerOrEqualQuantityPO ? 'success' : 'danger'
+    }
+
+    if (checkExpiry(record, 'warning')) {
+      return hasAllLargerOrEqualQuantityPO
+        ? 'success'
+        : hasSmallerQuantityPO || hasLargerOrEqualQuantityPO
+          ? 'progress'
+          : 'warning'
+    }
+
+    if (checkExpiry(record, 'success')) {
+      return hasAllLargerOrEqualQuantityPO ? 'success' : 'progress'
+    }
+
+    return 'progress'
   }
 
   return {
     state: {
-      sumProductAll,
-      sumProductCompleted,
-      sumProductProgressing,
-      sumProductError,
       products,
       colors,
       groups,
@@ -236,8 +345,15 @@ export default function useDashboardViewModel() {
       handleSearch,
       handlePageChange,
       handleSwitchSortChange,
-      handleSwitchDeleteChange
+      handleSwitchDeleteChange,
+      isShowStatusIcon,
+      statusIconType,
+      sumProductAll,
+      sumProductCompleted,
+      sumProductProgressing,
+      sumProductError
     },
-    table
+    table,
+    statistic
   }
 }

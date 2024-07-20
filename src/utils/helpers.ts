@@ -296,3 +296,12 @@ export const percentage = (totalCount: number, count: number): number => {
 export const sumCounts = (counts: number[]): number => {
   return counts.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 }
+
+export function getRandomNumberInRange(start: number, end: number): number {
+  return Math.floor(Math.random() * (end - start + 1)) + start
+}
+
+export function pickRandomFromArray(array: number[]): number {
+  const randomIndex = Math.floor(Math.random() * array.length)
+  return array[randomIndex]
+}

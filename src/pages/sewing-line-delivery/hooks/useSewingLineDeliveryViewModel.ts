@@ -329,7 +329,7 @@ export default function useSewingLineDeliveryViewModel() {
         return totalQuantitySewed < po ? 'progress' : totalQuantitySewed === 0 ? 'progress' : 'success'
       }
     }
-    return 'progress'
+    return 'normal'
   }
 
   return {
