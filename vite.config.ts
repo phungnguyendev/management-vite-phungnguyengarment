@@ -13,6 +13,6 @@ export default defineConfig({
   },
   server: { host: true },
   preview: {
-    port: Number(process.env.PORT)
+    port: Number(process.env.VITE_PORT_BUILDER)
   }
 })
