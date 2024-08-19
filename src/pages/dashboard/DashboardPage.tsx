@@ -1,6 +1,8 @@
-import { Flex, Space } from 'antd'
+import { Button, Flex, Space } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { BarChartBig, CheckCheck, CircleAlert } from 'lucide-react'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
+import { BarChartBig, CheckCheck, CircleAlert, Download } from 'lucide-react'
 import { SewingIcon } from '~/assets/icons'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
@@ -315,6 +317,28 @@ const DashboardPage = () => {
   //   }
   // ]
 
+  const exportToExcel = async (data: DashboardTableDataType[]) => {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Products')
+
+    // Định dạng các cột
+    worksheet.columns = [
+      {
+        header: 'Mã sản phẩm',
+        key: 'productCode',
+        width: 30,
+        font: { bold: true, size: 24 },
+        fill: { type: 'pattern', pattern: 'darkGray', bgColor: { argb: 'FFCCFFCC' } }
+      },
+      { header: 'Số lượng PO', key: 'quantityPO', width: 30 }
+    ]
+
+    data.forEach((item) => worksheet.addRow(item))
+    // Xuất file Excel
+    const buffer = await workbook.xlsx.writeBuffer()
+    saveAs(new Blob([buffer]), 'Products.xlsx')
+  }
+
   return (
     <>
       <BaseLayout title='Dashboard'>
@@ -359,6 +383,19 @@ const DashboardPage = () => {
             // Show delete list Switch Button
             onChange: viewModel.action.handleSwitchDeleteChange
           }}
+          moreFrames={
+            <Flex justify='end' className='w-full'>
+              <Button
+                type='dashed'
+                icon={<Download size={20} />}
+                onClick={() => {
+                  exportToExcel(viewModel.table.dataSource)
+                }}
+              >
+                Export to excel
+              </Button>
+            </Flex>
+          }
         >
           <SkyTable
             loading={viewModel.table.loading}

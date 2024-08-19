@@ -5,7 +5,6 @@ import { ArrowDownWideNarrow, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { isValidNumber } from '~/utils/helpers'
 import DropDownFilter, { DropDownFilterProps } from '../DropDownFilter'
-import ExportToExcel, { ExportToExcelProps } from '../ExportToExcel'
 import SearchBar from '../SearchBar'
 
 interface FilterProps extends DropDownFilterProps {
@@ -20,7 +19,7 @@ interface BaseLayoutProps extends React.HTMLAttributes<HTMLElement> {
   deleteProps?: SwitchProps
   addNewProps?: ButtonProps
   filterProps?: FilterProps
-  exportAsExcelProps?: ExportToExcelProps
+  moreFrames?: React.ReactNode
 }
 
 const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
@@ -31,7 +30,7 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
   filterProps,
   children,
   loading,
-  exportAsExcelProps,
+  moreFrames,
   ...props
 }) => {
   const [open, setOpen] = useState<boolean>(false)
@@ -49,12 +48,23 @@ const SkyTableWrapperLayout: React.FC<BaseLayoutProps> = ({
           <Flex gap={20} justify='space-between' align='center' className='w-full'>
             <Flex gap={10} align='center' className='w-full'>
               {sortProps && (
-                <Switch {...sortProps} checkedChildren='Sorted' unCheckedChildren='Sort' defaultChecked={false} />
+                <Switch
+                  {...sortProps}
+                  checkedChildren='Sorted'
+                  unCheckedChildren='Sort'
+                  defaultChecked={false}
+                  className='flex-shrink-0'
+                />
               )}
               {deleteProps && (
-                <Switch {...deleteProps} checkedChildren='Deleted list' unCheckedChildren='Deleted list' />
+                <Switch
+                  {...deleteProps}
+                  checkedChildren='Deleted list'
+                  unCheckedChildren='Deleted list'
+                  className='flex-shrink-0'
+                />
               )}
-              {exportAsExcelProps && <ExportToExcel {...exportAsExcelProps} />}
+              {moreFrames}
             </Flex>
             {filterProps && (
               <DropDownFilter open={open} items={filterProps.items} onClose={handleClose} onApply={filterProps.onApply}>

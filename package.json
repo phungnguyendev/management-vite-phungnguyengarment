@@ -29,6 +29,8 @@
     "class-variance-authority": "^0.7.0",
     "dayjs": "^1.11.11",
     "dotenv": "16.3.1",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",
@@ -43,6 +45,7 @@
     "zustand": "^4.4.6"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
