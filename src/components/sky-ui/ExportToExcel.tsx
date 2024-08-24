@@ -1,32 +1,40 @@
 import { Button } from 'antd'
-import React from 'react'
-import { ExportAsExcel as ExportAsExcelTool } from 'react-export-table'
-import { dateFormatter } from '~/utils/date-formatter'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
+import { Download } from 'lucide-react'
+import { SkyTableRequiredDataType } from './SkyTable/SkyTable'
 
-export interface ExportToExcelProps {
-  dataSource: Array<any>
-  headers: string[]
-  name?: string
-  minColumnWidth?: number
-  fileName?: string
+export interface ExportToExcelProps<T extends SkyTableRequiredDataType> {
+  dataSource: Array<T>
+  columns: Partial<ExcelJS.Column>[]
+  worksheetTitle: string
+  fileName: string
 }
 
-const ExportToExcel: React.FC<ExportToExcelProps> = ({ dataSource, headers, name, minColumnWidth, fileName }) => {
+const ExportToExcel = <T extends SkyTableRequiredDataType>({
+  dataSource,
+  columns,
+  worksheetTitle,
+  fileName
+}: ExportToExcelProps<T>) => {
+  const handleExportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook()
+    const currentWorkSheet = workbook.addWorksheet(worksheetTitle)
+
+    // Định dạng các cột
+    currentWorkSheet.columns = columns
+
+    dataSource.forEach((item) => currentWorkSheet.addRow(item))
+    // Xuất file Excel
+    const buffer = await workbook.xlsx.writeBuffer()
+    saveAs(new Blob([buffer]), fileName + '.xlsx')
+  }
+
   return (
     <>
-      <ExportAsExcelTool
-        data={dataSource}
-        headers={headers}
-        name={name ?? ''}
-        fileName={`${fileName}_${dateFormatter(Date.now(), 'dateTime')}`}
-        minColumnWidth={minColumnWidth ?? 10}
-      >
-        {(childrenProps) => (
-          <Button {...childrenProps} type='dashed'>
-            Export to excel
-          </Button>
-        )}
-      </ExportAsExcelTool>
+      <Button icon={<Download size={20} />} onClick={handleExportToExcel}>
+        Export to excel
+      </Button>
     </>
   )
 }

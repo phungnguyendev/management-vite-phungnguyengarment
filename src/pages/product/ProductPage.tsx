@@ -1,6 +1,11 @@
-import { Flex, Space } from 'antd'
+import { MoreOutlined } from '@ant-design/icons'
+import type { MenuProps } from 'antd'
+import { Button, Dropdown, Flex, Space } from 'antd'
 import type { ColumnsType, ColumnType } from 'antd/es/table'
 import { Dayjs } from 'dayjs'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
+import { Download } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import useDevice from '~/components/hooks/useDevice'
 import useTitle from '~/components/hooks/useTitle'
@@ -37,7 +42,6 @@ import {
 import ModalAddNewProduct from './components/ModalAddNewProduct'
 import useProductViewModel from './hooks/useProductViewModel'
 import { ProductTableDataType } from './type'
-
 const PERMISSION_ACCESS_ROLE: UserRoleType[] = ['admin', 'product_manager']
 
 const ProductPage = () => {
@@ -411,6 +415,98 @@ const ProductPage = () => {
     }
   }
 
+  const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Products')
+
+    const headerStyle: ExcelJS.Style = {
+      font: {
+        name: 'Times New Roman',
+        family: 4,
+        size: 12,
+        bold: true
+      },
+      fill: {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'ffa4ffa4' }
+      },
+      numFmt: '%1.000',
+      alignment: { wrapText: true, horizontal: 'center', vertical: 'middle' },
+      protection: {
+        locked: false
+      },
+      border: {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      }
+    }
+    // Định dạng các cột
+    worksheet.columns = [
+      {
+        header: 'STT',
+        key: 'orderNumber',
+        width: 10
+      },
+      {
+        header: 'MÃ HÀNG',
+        key: 'productCode',
+        width: 30
+      },
+      { header: 'Màu', key: 'productColor', width: 30 },
+      { header: 'SỐ LƯỢNG PO', key: 'quantityPO', width: 30 },
+      { header: 'NHÓM', key: 'productGroup', width: 30 },
+      { header: 'NƠI IN', key: 'printablePlace', width: 30 },
+      { header: 'NGÀY NHẬP NPL', key: 'dateInputNPL', width: 30 },
+      { header: 'NGÀY XUẤT FCR', key: 'dateOutputFCR', width: 30 }
+    ]
+
+    worksheet.getCell('A1').style = headerStyle
+    worksheet.getCell('B1').style = headerStyle
+    worksheet.getCell('C1').style = headerStyle
+    worksheet.getCell('D1').style = headerStyle
+    worksheet.getCell('E1').style = headerStyle
+    worksheet.getCell('F1').style = headerStyle
+    worksheet.getCell('G1').style = headerStyle
+    worksheet.getCell('H1').style = headerStyle
+
+    viewModel.table.dataSource.forEach((item, index) =>
+      worksheet.addRow({
+        orderNumber: index,
+        productCode: item.productCode,
+        productColor: item.productColor?.color?.name,
+        quantityPO: item.quantityPO,
+        productGroup: item.productGroup?.group?.name,
+        printablePlace: isValidArray(item.printablePlaces)
+          ? item.printablePlaces
+              ?.map((self) => {
+                return self.print?.name
+              })
+              .join(', ')
+          : '',
+        dateInputNPL: dateFormatter(item.dateInputNPL, 'dateOnly'),
+        dateOutputFCR: dateFormatter(item.dateOutputFCR, 'dateOnly')
+      })
+    )
+    // Xuất file Excel
+    const buffer = await workbook.xlsx.writeBuffer()
+    saveAs(new Blob([buffer]), 'DS_SANPHAM.xlsx')
+  }
+
+  const dropdownItems: MenuProps['items'] = [
+    {
+      key: '1',
+      label: (
+        <Flex justify='start' align='center' gap={10} onClick={exportToExcel}>
+          <Download size={20} />
+          <span>Export to excel</span>
+        </Flex>
+      )
+    }
+  ]
+
   return (
     <>
       <BaseLayout title='Danh sách sản phẩm'>
@@ -437,11 +533,13 @@ const ProductPage = () => {
                 }
               : undefined
           }
-          // filterProps={{
-          //   buttonProps: {
-          //     count: 3
-          //   }
-          // }}
+          moreFrames={
+            <Flex justify='end' className='w-full'>
+              <Dropdown menu={{ items: dropdownItems }} placement='bottomRight' trigger={['click']}>
+                <Button icon={<MoreOutlined />} />
+              </Dropdown>
+            </Flex>
+          }
         >
           <SkyTable
             loading={viewModel.table.loading}
