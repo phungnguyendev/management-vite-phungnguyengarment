@@ -1,7 +1,7 @@
 import { CaretDownOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { App as AntApp, Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
-import { Bell, Menu } from 'lucide-react'
+import { Bell, CircleUser, Menu } from 'lucide-react'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -32,14 +32,19 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
 
   const items: MenuProps['items'] = [
     {
-      label: <a onClick={() => setOpenProfile(true)}>View your profile</a>,
+      label: (
+        <a className='group flex items-center gap-2' onClick={() => setOpenProfile(true)}>
+          <CircleUser size={18} className='text-muted transition-colors duration-300 group-hover:text-primary' />
+          My profile
+        </a>
+      ),
       key: '0'
     },
     {
       type: 'divider'
     },
     {
-      label: 'Log out',
+      label: <Button className='w-full'>Logout</Button>,
       key: '3',
       onClick: () => handleLogout()
     }
@@ -79,7 +84,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
             </Badge>
           </Flex>
           <Flex vertical>
-            <Dropdown menu={{ items }}>
+            <Dropdown menu={{ items }} trigger={['click']}>
               <Flex align='center' justify='center' gap={8} className='h-full'>
                 <Flex className='h-full'>
                   <Button type='link' className='' onClick={(e) => e.preventDefault()}>
